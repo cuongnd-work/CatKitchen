@@ -1,0 +1,3 @@
+[submodule "assets/plugins/playable-foundation"]
+	path = assets/plugins/playable-foundation
+	url = git@github.com:dyCuong03/playable-foundation.git
