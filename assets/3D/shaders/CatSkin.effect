@@ -1,0 +1,74 @@
+// CatSkin.effect
+CCEffect %{
+  techniques:
+    - name: default
+      passes:
+        - vert: legacy/main-functions/general-vs:vert
+          frag: cat-skin-fs:frag
+          blendState:
+            targets:
+              - blend: true
+                blendSrc: src_alpha
+                blendDst: one_minus_src_alpha
+          rasterizerState:
+            cullMode: none
+          properties:
+            SkinColor:      { value: [1.0, 0.9, 0.7, 1.0], editor: { type: color } }
+            NoiseColor:     { value: [1.0, 0.7, 0.3, 1.0], editor: { type: color } }
+            NoiseScaleX:    { value: 1.0 }
+            NoiseScaleY:    { value: 1.0 }
+            NoiseOffsetX:   { value: 0.0 }
+            NoiseOffsetY:   { value: 0.0 }
+            NoiseToggle:    { value: 0.0 }
+            TextureToggle:  { value: 0.0 }
+            SymetryToggle:  { value: 0.0 }
+            Texture2D:      { value: white, editor: { type: texture } }
+}%
+
+CCProgram cat-skin-fs %{
+  precision highp float;
+  #include <legacy/output>
+
+  in vec2 v_uv;
+
+  uniform sampler2D Texture2D;
+
+  layout(set = 2, binding = 0) uniform Material {
+    vec4 SkinColor;
+    vec4 NoiseColor;
+    float NoiseScaleX;
+    float NoiseScaleY;
+    float NoiseOffsetX;
+    float NoiseOffsetY;
+    float NoiseToggle;
+    float TextureToggle;
+    float SymetryToggle;
+  };
+
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  vec2 applySymmetry(vec2 uv) {
+    if (SymetryToggle > 0.5) {
+      uv.x = 1.0 - uv.x;
+    }
+    return uv;
+  }
+
+  vec4 frag() {
+    vec2 uv = applySymmetry(v_uv);
+    vec4 color = SkinColor;
+
+    if (NoiseToggle > 0.5) {
+      float n = rand(uv * vec2(NoiseScaleX, NoiseScaleY) + vec2(NoiseOffsetX, NoiseOffsetY));
+      color = mix(color, NoiseColor, n);
+    }
+
+    if (TextureToggle > 0.5) {
+      color *= texture(Texture2D, uv);
+    }
+
+    return CCFragOutput(color);
+  }
+}%
