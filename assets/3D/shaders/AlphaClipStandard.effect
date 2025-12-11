@@ -1,0 +1,37 @@
+CCEffect %{
+  techniques:
+    - name: default
+      passes:
+        - vert: legacy/main-functions/general-vs:vert
+          frag: alpha-clip-fs:frag
+          rasterizerState:
+            cullMode: none
+          properties:
+            albedoMap: { value: white }
+            albedoColor: { value: [1.0, 1.0, 1.0, 1.0], editor: { type: color } }
+            alphaThreshold: { value: 0.5 }
+}%
+
+CCProgram alpha-clip-fs %{
+  precision highp float;
+  #include <legacy/output>
+
+  in vec2 v_uv;
+
+  uniform sampler2D albedoMap;
+
+  layout(set = 2, binding = 0) uniform Material {
+    vec4 albedoColor;
+    float alphaThreshold;
+  };
+
+  vec4 frag() {
+    vec4 albedo = texture(albedoMap, v_uv) * albedoColor;
+
+    if (albedo.a < alphaThreshold) {
+      discard;
+    }
+
+    return CCFragOutput(albedo);
+  }
+}%
