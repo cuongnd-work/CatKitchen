@@ -176,6 +176,46 @@
       ],
       "subMetas": {}
     },
+    "48b02": {
+      "importer": "gltf-embeded-image",
+      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@48b02",
+      "displayName": "",
+      "id": "48b02",
+      "name": "base_color_texture.image",
+      "userData": {
+        "gltfIndex": 0,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": true,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".json",
+        ".png"
+      ],
+      "subMetas": {}
+    },
+    "b1345": {
+      "importer": "gltf-embeded-image",
+      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@b1345",
+      "displayName": "",
+      "id": "b1345",
+      "name": "base_color_texture1.image",
+      "userData": {
+        "gltfIndex": 3,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": true,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".json",
+        ".png"
+      ],
+      "subMetas": {}
+    },
     "4d8de": {
       "importer": "gltf-mesh",
       "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@4d8de",
@@ -3031,26 +3071,6 @@
       ],
       "subMetas": {}
     },
-    "48b02": {
-      "importer": "gltf-embeded-image",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@48b02",
-      "displayName": "",
-      "id": "48b02",
-      "name": "base_color_texture.image",
-      "userData": {
-        "gltfIndex": 0,
-        "fixAlphaTransparencyArtifacts": true,
-        "hasAlpha": true,
-        "type": "texture"
-      },
-      "ver": "1.0.3",
-      "imported": true,
-      "files": [
-        ".json",
-        ".png"
-      ],
-      "subMetas": {}
-    },
     "43c71": {
       "importer": "gltf-embeded-image",
       "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@43c71",
@@ -3079,26 +3099,6 @@
       "name": "pasted__file1.image",
       "userData": {
         "gltfIndex": 2,
-        "fixAlphaTransparencyArtifacts": true,
-        "hasAlpha": true,
-        "type": "texture"
-      },
-      "ver": "1.0.3",
-      "imported": true,
-      "files": [
-        ".json",
-        ".png"
-      ],
-      "subMetas": {}
-    },
-    "b1345": {
-      "importer": "gltf-embeded-image",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@b1345",
-      "displayName": "",
-      "id": "b1345",
-      "name": "base_color_texture1.image",
-      "userData": {
-        "gltfIndex": 3,
         "fixAlphaTransparencyArtifacts": true,
         "hasAlpha": true,
         "type": "texture"
@@ -3144,8 +3144,8 @@
         "magfilter": "linear",
         "mipfilter": "none",
         "anisotropy": 0,
-        "isUuid": true,
-        "imageUuidOrDatabaseUri": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@48b02"
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/StreetFood.png"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -3213,8 +3213,8 @@
         "magfilter": "linear",
         "mipfilter": "none",
         "anisotropy": 0,
-        "isUuid": true,
-        "imageUuidOrDatabaseUri": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@b1345"
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/StreetFood.png"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -3491,7 +3491,7 @@
     "imageMetas": [
       {
         "name": "base_color_texture",
-        "uri": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@48b02"
+        "uri": "db://assets/3D/textures/StreetFood.png"
       },
       {
         "name": "file1",
@@ -3503,7 +3503,7 @@
       },
       {
         "name": "base_color_texture1",
-        "uri": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@b1345"
+        "uri": "db://assets/3D/textures/StreetFood.png"
       },
       {
         "name": "base_color_texture2",
