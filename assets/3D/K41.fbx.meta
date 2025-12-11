@@ -1,0 +1,191 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "abfe034e-1520-4f0f-8386-d60ceb3c0828",
+  "files": [],
+  "subMetas": {
+    "51464": {
+      "importer": "gltf-material",
+      "uuid": "abfe034e-1520-4f0f-8386-d60ceb3c0828@51464",
+      "displayName": "",
+      "id": "51464",
+      "name": "streetFood.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "7b9da": {
+      "importer": "gltf-mesh",
+      "uuid": "abfe034e-1520-4f0f-8386-d60ceb3c0828@7b9da",
+      "displayName": "",
+      "id": "7b9da",
+      "name": "Cube.026.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 1144
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "ef396": {
+      "importer": "gltf-embeded-image",
+      "uuid": "abfe034e-1520-4f0f-8386-d60ceb3c0828@ef396",
+      "displayName": "",
+      "id": "ef396",
+      "name": "base_color_texture-1.image",
+      "userData": {
+        "gltfIndex": 1,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": true,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".json",
+        ".png"
+      ],
+      "subMetas": {}
+    },
+    "0a1ef": {
+      "importer": "texture",
+      "uuid": "abfe034e-1520-4f0f-8386-d60ceb3c0828@0a1ef",
+      "displayName": "",
+      "id": "0a1ef",
+      "name": "base_color_texture-0.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/StreetFood.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "05da8": {
+      "importer": "texture",
+      "uuid": "abfe034e-1520-4f0f-8386-d60ceb3c0828@05da8",
+      "displayName": "",
+      "id": "05da8",
+      "name": "base_color_texture-1.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "abfe034e-1520-4f0f-8386-d60ceb3c0828@ef396"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "ce83f": {
+      "importer": "gltf-material",
+      "uuid": "abfe034e-1520-4f0f-8386-d60ceb3c0828@ce83f",
+      "displayName": "",
+      "id": "ce83f",
+      "name": "KichenGradiant.material",
+      "userData": {
+        "gltfIndex": 1
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "c31ef": {
+      "importer": "gltf-scene",
+      "uuid": "abfe034e-1520-4f0f-8386-d60ceb3c0828@c31ef",
+      "displayName": "",
+      "id": "c31ef",
+      "name": "K41.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/3D/textures/StreetFood.png"
+      },
+      {
+        "name": "base_color_texture",
+        "uri": "abfe034e-1520-4f0f-8386-d60ceb3c0828@ef396"
+      }
+    ],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "abfe034e-1520-4f0f-8386-d60ceb3c0828@7b9da"
+      ],
+      "skeletons": [],
+      "textures": [
+        "abfe034e-1520-4f0f-8386-d60ceb3c0828@0a1ef",
+        "abfe034e-1520-4f0f-8386-d60ceb3c0828@05da8"
+      ],
+      "materials": [
+        "abfe034e-1520-4f0f-8386-d60ceb3c0828@51464",
+        "abfe034e-1520-4f0f-8386-d60ceb3c0828@ce83f"
+      ],
+      "scenes": [
+        "abfe034e-1520-4f0f-8386-d60ceb3c0828@c31ef"
+      ]
+    }
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "5319d29c-b25c-43c1-b431-9679910483a6",
+  "files": [],
+  "subMetas": {
+    "51464": {
+      "importer": "gltf-material",
+      "uuid": "5319d29c-b25c-43c1-b431-9679910483a6@51464",
+      "displayName": "",
+      "id": "51464",
+      "name": "streetFood.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "cc6e1": {
+      "importer": "gltf-mesh",
+      "uuid": "5319d29c-b25c-43c1-b431-9679910483a6@cc6e1",
+      "displayName": "",
+      "id": "cc6e1",
+      "name": "TableChop.001_Kichent-Gradiant_0.001.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 363
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "7d6ab": {
+      "importer": "texture",
+      "uuid": "5319d29c-b25c-43c1-b431-9679910483a6@7d6ab",
+      "displayName": "",
+      "id": "7d6ab",
+      "name": "base_color_texture.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/StreetFood.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "8a6fc": {
+      "importer": "gltf-scene",
+      "uuid": "5319d29c-b25c-43c1-b431-9679910483a6@8a6fc",
+      "displayName": "",
+      "id": "8a6fc",
+      "name": "K13.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/3D/textures/StreetFood.png"
+      }
+    ],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "5319d29c-b25c-43c1-b431-9679910483a6@cc6e1"
+      ],
+      "skeletons": [],
+      "textures": [
+        "5319d29c-b25c-43c1-b431-9679910483a6@7d6ab"
+      ],
+      "materials": [
+        "5319d29c-b25c-43c1-b431-9679910483a6@51464"
+      ],
+      "scenes": [
+        "5319d29c-b25c-43c1-b431-9679910483a6@8a6fc"
+      ]
+    }
+  }
+}
