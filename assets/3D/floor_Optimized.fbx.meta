@@ -1,0 +1,249 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d",
+  "files": [],
+  "subMetas": {
+    "a62fe": {
+      "importer": "gltf-mesh",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@a62fe",
+      "displayName": "",
+      "id": "a62fe",
+      "name": "Scene.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 206
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "a6b3b": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@a6b3b",
+      "displayName": "",
+      "id": "a6b3b",
+      "name": "Soda.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "9f3dc": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@9f3dc",
+      "displayName": "",
+      "id": "9f3dc",
+      "name": "TreeBark0011.material",
+      "userData": {
+        "gltfIndex": 1
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "0db64": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@0db64",
+      "displayName": "",
+      "id": "0db64",
+      "name": "Grass_0011.material",
+      "userData": {
+        "gltfIndex": 2
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "7e94b": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@7e94b",
+      "displayName": "",
+      "id": "7e94b",
+      "name": "Pavement.material",
+      "userData": {
+        "gltfIndex": 3
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "148b8": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@148b8",
+      "displayName": "",
+      "id": "148b8",
+      "name": "PavementBoder_8.material",
+      "userData": {
+        "gltfIndex": 4
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "4bac9": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@4bac9",
+      "displayName": "",
+      "id": "4bac9",
+      "name": "PavementBoder_1.material",
+      "userData": {
+        "gltfIndex": 5
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "5882a": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@5882a",
+      "displayName": "",
+      "id": "5882a",
+      "name": "PavementBoder.material",
+      "userData": {
+        "gltfIndex": 6
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "eee81": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@eee81",
+      "displayName": "",
+      "id": "eee81",
+      "name": "D_Grey.material",
+      "userData": {
+        "gltfIndex": 7
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "3fd23": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@3fd23",
+      "displayName": "",
+      "id": "3fd23",
+      "name": "SideWalkDark_Variant_1.material",
+      "userData": {
+        "gltfIndex": 8
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "f6cf2": {
+      "importer": "gltf-material",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@f6cf2",
+      "displayName": "",
+      "id": "f6cf2",
+      "name": "PavementBoder_4.material",
+      "userData": {
+        "gltfIndex": 9
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "04a3f": {
+      "importer": "gltf-scene",
+      "uuid": "6610d78b-f371-449c-9ce6-55f1a7e84d6d@04a3f",
+      "displayName": "",
+      "id": "04a3f",
+      "name": "floor_Optimized.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@a62fe"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@a6b3b",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@9f3dc",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@0db64",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@7e94b",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@148b8",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@4bac9",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@5882a",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@eee81",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@3fd23",
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@f6cf2"
+      ],
+      "scenes": [
+        "6610d78b-f371-449c-9ce6-55f1a7e84d6d@04a3f"
+      ]
+    }
+  }
+}
