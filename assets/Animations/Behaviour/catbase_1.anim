@@ -22,7 +22,28 @@
       }
     ],
     "_exoticAnimation": null,
-    "_events": [],
+    "_events": [
+      {
+        "frame": 0,
+        "func": "",
+        "params": []
+      },
+      {
+        "frame": 0,
+        "func": "doWalk",
+        "params": []
+      },
+      {
+        "frame": 1.0666666666666667,
+        "func": "",
+        "params": []
+      },
+      {
+        "frame": 1.0666666666666667,
+        "func": "doIdle",
+        "params": []
+      }
+    ],
     "_embeddedPlayers": [],
     "_additiveSettings": {
       "__id__": 23

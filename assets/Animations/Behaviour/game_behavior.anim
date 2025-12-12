@@ -6,12 +6,12 @@
     "__editorExtras__": {
       "embeddedPlayerGroups": [
         {
-          "key": "1765532085951",
+          "key": "1765532816591",
           "name": "animation-clip",
           "type": "animation-clip"
         },
         {
-          "key": "1765532816591",
+          "key": "1765534416312",
           "name": "animation-clip",
           "type": "animation-clip"
         }
@@ -105,7 +105,9 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": null
+        "__editorExtras__": {
+          "broken": null
+        }
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -117,7 +119,9 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": null
+        "__editorExtras__": {
+          "broken": null
+        }
       }
     ],
     "preExtrapolation": 1,
@@ -146,7 +150,9 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": null
+        "__editorExtras__": {
+          "broken": null
+        }
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -158,7 +164,9 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": null
+        "__editorExtras__": {
+          "broken": null
+        }
       }
     ],
     "preExtrapolation": 1,
@@ -187,7 +195,9 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": null
+        "__editorExtras__": {
+          "broken": null
+        }
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -199,7 +209,9 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": null
+        "__editorExtras__": {
+          "broken": null
+        }
       }
     ],
     "preExtrapolation": 1,
@@ -221,10 +233,10 @@
   {
     "__type__": "cc.animation.EmbeddedPlayer",
     "__editorExtras__": {
-      "group": "1765532085951"
+      "group": "1765534416312"
     },
     "begin": 0,
-    "end": 3.2666666666666666,
+    "end": 3.5166666666666666,
     "reconciledSpeed": false,
     "playable": {
       "__id__": 13
@@ -232,9 +244,9 @@
   },
   {
     "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
-    "path": "/Level",
+    "path": "/Level/Cat/Cat1",
     "clip": {
-      "__uuid__": "62b55804-40e0-429a-936f-c15d51e73558",
+      "__uuid__": "cf2a6226-0579-453b-b024-49cc78edc609",
       "__expectedType__": "cc.AnimationClip"
     }
   },
@@ -243,8 +255,8 @@
     "__editorExtras__": {
       "group": "1765532816591"
     },
-    "begin": 3.2666666666666666,
-    "end": 4.833333333333333,
+    "begin": 5.05,
+    "end": 6.616666666666666,
     "reconciledSpeed": true,
     "playable": {
       "__id__": 15

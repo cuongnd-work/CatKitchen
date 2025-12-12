@@ -2,12 +2,12 @@
   "ver": "2.0.4",
   "importer": "animation-clip",
   "imported": true,
-  "uuid": "62b55804-40e0-429a-936f-c15d51e73558",
+  "uuid": "cf2a6226-0579-453b-b024-49cc78edc609",
   "files": [
     ".bin"
   ],
   "subMetas": {},
   "userData": {
-    "name": "state1"
+    "name": "cat1_state_1"
   }
 }

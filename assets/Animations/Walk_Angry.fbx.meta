@@ -12,7 +12,7 @@
       "uuid": "70b0858d-5c28-4316-b4ba-d3826f5d3120@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Wark_Angry.animation",
+      "name": "Warlk_Angry.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
@@ -59,7 +59,7 @@
         "fps": 30,
         "splits": [
           {
-            "name": "Wark_Angry",
+            "name": "Warlk_Angry",
             "from": 0,
             "to": 0.5333333611488342,
             "wrapMode": 2,

@@ -28,7 +28,7 @@
       "uuid": "63a8a028-b212-4c67-914a-14e987a7a5f8@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Idle.animation",
+      "name": "Dung.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
@@ -63,7 +63,7 @@
         "fps": 30,
         "splits": [
           {
-            "name": "Idle",
+            "name": "Dung",
             "from": 0,
             "to": 3.200000047683716,
             "wrapMode": 2,

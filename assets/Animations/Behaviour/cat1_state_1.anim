@@ -1,16 +1,10 @@
 [
   {
     "__type__": "cc.AnimationClip",
-    "_name": "state1",
+    "_name": "cat1_state_1",
     "_objFlags": 0,
     "__editorExtras__": {
-      "embeddedPlayerGroups": [
-        {
-          "key": "1765531562080",
-          "name": "animation-clip",
-          "type": "animation-clip"
-        }
-      ]
+      "embeddedPlayerGroups": []
     },
     "_native": "",
     "sample": 60,
@@ -28,7 +22,28 @@
       }
     ],
     "_exoticAnimation": null,
-    "_events": [],
+    "_events": [
+      {
+        "frame": 0,
+        "func": "",
+        "params": []
+      },
+      {
+        "frame": 0,
+        "func": "doWalk",
+        "params": []
+      },
+      {
+        "frame": 3.2666666666666666,
+        "func": "",
+        "params": []
+      },
+      {
+        "frame": 3.2666666666666666,
+        "func": "doIdle",
+        "params": []
+      }
+    ],
     "_embeddedPlayers": [],
     "_additiveSettings": {
       "__id__": 23
@@ -71,7 +86,7 @@
   },
   {
     "__type__": "cc.animation.HierarchyPath",
-    "path": "Cat/Cat1"
+    "path": "Cat1"
   },
   {
     "__type__": "cc.animation.Channel",
@@ -98,7 +113,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -112,7 +127,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -126,7 +141,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       }
     ],
@@ -158,7 +173,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -172,7 +187,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -186,7 +201,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       }
     ],
@@ -218,7 +233,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -232,7 +247,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -246,7 +261,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       }
     ],
@@ -302,7 +317,7 @@
   },
   {
     "__type__": "cc.animation.HierarchyPath",
-    "path": "Cat/Cat1"
+    "path": "Cat1"
   },
   {
     "__type__": "cc.animation.Channel",
@@ -330,7 +345,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -344,7 +359,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -358,7 +373,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -372,7 +387,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       }
     ],
@@ -405,7 +420,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -419,7 +434,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -433,7 +448,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -447,7 +462,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       }
     ],
@@ -480,7 +495,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -494,7 +509,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -508,7 +523,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       },
       {
@@ -522,7 +537,7 @@
         "leftTangentWeight": 1,
         "easingMethod": 0,
         "__editorExtras__": {
-          "broken": null
+          "tangentMode": 0
         }
       }
     ],
