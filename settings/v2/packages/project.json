@@ -6,5 +6,11 @@
       "height": 1280,
       "fitHeight": true
     }
-  }
+  },
+  "layer": [
+    {
+      "name": "CAT",
+      "value": 1
+    }
+  ]
 }
