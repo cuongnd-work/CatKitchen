@@ -2522,15 +2522,19 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "playOnLoad": false,
+    "playOnLoad": true,
     "_clips": [
       {
-        "__uuid__": "628c7e52-21c3-4447-b63f-e9daf459e190@73b7f",
+        "__uuid__": "bfe22c6c-37b3-4df3-8c35-7e940a4f1ef5@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      },
+      {
+        "__uuid__": "70b0858d-5c28-4316-b4ba-d3826f5d3120@73b7f",
         "__expectedType__": "cc.AnimationClip"
       }
     ],
     "_defaultClip": {
-      "__uuid__": "628c7e52-21c3-4447-b63f-e9daf459e190@73b7f",
+      "__uuid__": "bfe22c6c-37b3-4df3-8c35-7e940a4f1ef5@73b7f",
       "__expectedType__": "cc.AnimationClip"
     },
     "_id": "4anyPUnrFMIasXmwCacXsj"
