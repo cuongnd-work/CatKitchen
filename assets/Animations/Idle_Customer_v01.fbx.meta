@@ -2,17 +2,17 @@
   "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
-  "uuid": "bfe22c6c-37b3-4df3-8c35-7e940a4f1ef5",
+  "uuid": "63a8a028-b212-4c67-914a-14e987a7a5f8",
   "files": [
     "__original-animation-0.bin"
   ],
   "subMetas": {
-    "40384": {
+    "71119": {
       "importer": "gltf-scene",
-      "uuid": "bfe22c6c-37b3-4df3-8c35-7e940a4f1ef5@40384",
+      "uuid": "63a8a028-b212-4c67-914a-14e987a7a5f8@71119",
       "displayName": "",
-      "id": "40384",
-      "name": "Doing.prefab",
+      "id": "71119",
+      "name": "Idle_Customer_v01.prefab",
       "userData": {
         "gltfIndex": 0
       },
@@ -25,7 +25,7 @@
     },
     "73b7f": {
       "importer": "gltf-animation",
-      "uuid": "bfe22c6c-37b3-4df3-8c35-7e940a4f1ef5@73b7f",
+      "uuid": "63a8a028-b212-4c67-914a-14e987a7a5f8@73b7f",
       "displayName": "",
       "id": "73b7f",
       "name": "Take 001.animation",
@@ -35,7 +35,7 @@
         "sample": 30,
         "span": {
           "from": 0,
-          "to": 1.0666667222976685
+          "to": 3.200000047683716
         },
         "events": []
       },
@@ -55,13 +55,13 @@
     "animationImportSettings": [
       {
         "name": "Take 001",
-        "duration": 1.0666667222976685,
+        "duration": 3.200000047683716,
         "fps": 30,
         "splits": [
           {
             "name": "Take 001",
             "from": 0,
-            "to": 1.0666667222976685,
+            "to": 3.200000047683716,
             "wrapMode": 2,
             "previousId": "73b7f"
           }
@@ -92,7 +92,7 @@
       "textures": [],
       "materials": [],
       "scenes": [
-        "bfe22c6c-37b3-4df3-8c35-7e940a4f1ef5@40384"
+        "63a8a028-b212-4c67-914a-14e987a7a5f8@71119"
       ]
     }
   }
