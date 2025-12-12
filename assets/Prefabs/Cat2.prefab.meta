@@ -2,12 +2,12 @@
   "ver": "1.1.50",
   "importer": "prefab",
   "imported": true,
-  "uuid": "a96083ca-df1d-4bd3-85a8-d7e07c59b379",
+  "uuid": "d5df0a03-fb44-46c1-8d1c-16924ea80774",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "Rig_Cat_03"
+    "syncNodeName": "Cat2"
   }
 }
