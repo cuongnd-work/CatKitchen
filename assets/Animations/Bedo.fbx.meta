@@ -12,7 +12,7 @@
       "uuid": "2ac29112-4b38-4dc1-a32b-e50527e87a9c@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Take 001.animation",
+      "name": "Bedo.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
@@ -21,7 +21,10 @@
           "from": 0,
           "to": 0.5333333611488342
         },
-        "events": []
+        "events": [],
+        "additive": {
+          "enabled": false
+        }
       },
       "ver": "1.0.18",
       "imported": true,
@@ -59,11 +62,14 @@
         "fps": 30,
         "splits": [
           {
-            "name": "Take 001",
+            "name": "Bedo",
             "from": 0,
             "to": 0.5333333611488342,
             "wrapMode": 2,
-            "previousId": "73b7f"
+            "previousId": "73b7f",
+            "additive": {
+              "enabled": false
+            }
           }
         ]
       }
@@ -94,6 +100,7 @@
       "scenes": [
         "2ac29112-4b38-4dc1-a32b-e50527e87a9c@eb34a"
       ]
-    }
+    },
+    "mountAllAnimationsOnPrefab": true
   }
 }

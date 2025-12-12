@@ -12,7 +12,7 @@
       "uuid": "b83f0508-19bf-4a56-a787-bd7885f29a19@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Take 001.animation",
+      "name": "Wark.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
@@ -59,7 +59,7 @@
         "fps": 30,
         "splits": [
           {
-            "name": "Take 001",
+            "name": "Wark",
             "from": 0,
             "to": 0.6666666865348816,
             "wrapMode": 2,

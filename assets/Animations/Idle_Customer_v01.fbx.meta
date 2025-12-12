@@ -28,7 +28,7 @@
       "uuid": "63a8a028-b212-4c67-914a-14e987a7a5f8@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Take 001.animation",
+      "name": "Idle.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
@@ -37,7 +37,11 @@
           "from": 0,
           "to": 3.200000047683716
         },
-        "events": []
+        "events": [],
+        "additive": {
+          "enabled": false,
+          "refClip": ""
+        }
       },
       "ver": "1.0.18",
       "imported": true,
@@ -59,11 +63,15 @@
         "fps": 30,
         "splits": [
           {
-            "name": "Take 001",
+            "name": "Idle",
             "from": 0,
             "to": 3.200000047683716,
             "wrapMode": 2,
-            "previousId": "73b7f"
+            "previousId": "73b7f",
+            "additive": {
+              "enabled": false,
+              "refClip": ""
+            }
           }
         ]
       }
