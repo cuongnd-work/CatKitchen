@@ -15,21 +15,24 @@ CCEffect %{
           properties:
             SkinColor:      { value: [1.0, 0.9, 0.7, 1.0], editor: { type: color } }
             NoiseColor:     { value: [1.0, 0.7, 0.3, 1.0], editor: { type: color } }
-            NoiseScaleX:    { value: 1.0 }
-            NoiseScaleY:    { value: 1.0 }
+            NoiseScaleX:    { value: 8.0 }
+            NoiseScaleY:    { value: 1.8 }
             NoiseOffsetX:   { value: 0.0 }
             NoiseOffsetY:   { value: 0.0 }
-            NoiseToggle:    { value: 0.0 }
+            NoiseToggle:    { value: 1.0 }
             TextureToggle:  { value: 0.0 }
             SymetryToggle:  { value: 0.0 }
             Texture2D:      { value: white, editor: { type: texture } }
 }%
 
+
 CCProgram cat-skin-fs %{
   precision highp float;
+
   #include <legacy/output>
 
   in vec2 v_uv;
+  in vec3 v_normal;
 
   uniform sampler2D Texture2D;
 
@@ -45,30 +48,55 @@ CCProgram cat-skin-fs %{
     float SymetryToggle;
   };
 
-  float rand(vec2 co) {
-    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  //------------------------------------------------------
+  // Long fur-like stripes noise (không phải noise chấm)
+  //------------------------------------------------------
+  float stripeNoise(vec2 uv) {
+    uv.x = uv.x * NoiseScaleX + NoiseOffsetX;
+    uv.y = uv.y * NoiseScaleY + NoiseOffsetY;
+
+    float line = sin(uv.x * 12.0) * 0.4 + sin(uv.y * 3.0) * 0.6;
+
+    return smoothstep(0.3, 0.7, line);
   }
 
   vec2 applySymmetry(vec2 uv) {
-    if (SymetryToggle > 0.5) {
-      uv.x = 1.0 - uv.x;
-    }
+    if (SymetryToggle > 0.5) uv.x = 1.0 - uv.x;
     return uv;
+  }
+
+  //------------------------------------------------------
+  // Toon lighting (RẤT SÁNG – KHÔNG BÓNG)
+  //------------------------------------------------------
+  float toonLight(vec3 normal) {
+    vec3 L = normalize(vec3(0.4, 0.5, 1.0));
+    float NdotL = max(dot(normal, L), 0.0);
+    return step(0.5, NdotL);   // 2 tone: sáng / tối
   }
 
   vec4 frag() {
     vec2 uv = applySymmetry(v_uv);
-    vec4 color = SkinColor;
+    vec4 base = SkinColor;
 
+    // Fur stripe noise (viền lông dài giống Unity)
     if (NoiseToggle > 0.5) {
-      float n = rand(uv * vec2(NoiseScaleX, NoiseScaleY) + vec2(NoiseOffsetX, NoiseOffsetY));
-      color = mix(color, NoiseColor, n);
+      float n = stripeNoise(uv);
+      base.rgb = mix(base.rgb, NoiseColor.rgb, n);
     }
 
+    // Texture layer
     if (TextureToggle > 0.5) {
-      color *= texture(Texture2D, uv);
+      base *= texture(Texture2D, uv);
     }
 
-    return CCFragOutput(color);
+    // Toon light
+    float lightStep = toonLight(normalize(v_normal));
+
+    // Làm sáng toàn bộ – không làm tối đi
+    float lightBoost = mix(0.85, 1.15, lightStep);
+
+    base.rgb *= lightBoost;
+
+    return CCFragOutput(base);
   }
 }%

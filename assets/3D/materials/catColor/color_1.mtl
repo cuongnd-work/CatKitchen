@@ -27,20 +27,22 @@
     {
       "SkinColor": {
         "__type__": "cc.Color",
-        "r": 240,
-        "g": 204,
-        "b": 133,
+        "r": 255,
+        "g": 240,
+        "b": 215,
         "a": 255
       },
       "NoiseColor": {
         "__type__": "cc.Color",
-        "r": 180,
-        "g": 141,
-        "b": 90,
-        "a": 0
+        "r": 255,
+        "g": 233,
+        "b": 206,
+        "a": 255
       },
-      "NoiseScaleX": 0,
-      "NoiseScaleY": 0
+      "NoiseScaleX": 1,
+      "NoiseScaleY": 0,
+      "NoiseOffsetX": 7.2,
+      "NoiseOffsetY": -2.3
     }
   ]
 }
