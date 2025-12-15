@@ -28,6 +28,9 @@
       },
       {
         "__id__": 38
+      },
+      {
+        "__id__": 43
       }
     ],
     "_exoticAnimation": null,
@@ -75,6 +78,18 @@
         "params": []
       },
       {
+        "frame": 5.583333333333333,
+        "func": "",
+        "params": []
+      },
+      {
+        "frame": 5.583333333333333,
+        "func": "updateLable",
+        "params": [
+          1
+        ]
+      },
+      {
         "frame": 5.666666666666667,
         "func": "",
         "params": []
@@ -87,7 +102,7 @@
     ],
     "_embeddedPlayers": [],
     "_additiveSettings": {
-      "__id__": 43
+      "__id__": 48
     },
     "_auxiliaryCurveEntries": []
   },
@@ -141,7 +156,7 @@
       0,
       2.5,
       3.5,
-      5.666666507720947
+      5.666666666666667
     ],
     "_values": [
       {
@@ -216,7 +231,7 @@
       0,
       2.5,
       3.5,
-      5.666666507720947
+      5.666666666666667
     ],
     "_values": [
       {
@@ -291,7 +306,7 @@
       0,
       2.5,
       3.5,
-      5.666666507720947
+      5.666666666666667
     ],
     "_values": [
       {
@@ -415,9 +430,9 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      0.18333333730697632,
+      0.18333333333333332,
       3.5,
-      3.633333444595337
+      3.6333333333333333
     ],
     "_values": [
       {
@@ -490,9 +505,9 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      0.18333333730697632,
+      0.18333333333333332,
       3.5,
-      3.633333444595337
+      3.6333333333333333
     ],
     "_values": [
       {
@@ -565,9 +580,9 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      0.18333333730697632,
+      0.18333333333333332,
       3.5,
-      3.633333444595337
+      3.6333333333333333
     ],
     "_values": [
       {
@@ -814,6 +829,49 @@
       false,
       true,
       false
+    ]
+  },
+  {
+    "__type__": "cc.animation.ObjectTrack",
+    "_binding": {
+      "__type__": "cc.animation.TrackBinding",
+      "path": {
+        "__id__": 44
+      },
+      "proxy": null
+    },
+    "_channel": {
+      "__id__": 46
+    }
+  },
+  {
+    "__type__": "cc.animation.TrackPath",
+    "_paths": [
+      {
+        "__id__": 45
+      },
+      "active"
+    ]
+  },
+  {
+    "__type__": "cc.animation.HierarchyPath",
+    "path": "Coin"
+  },
+  {
+    "__type__": "cc.animation.Channel",
+    "_curve": {
+      "__id__": 47
+    }
+  },
+  {
+    "__type__": "cc.ObjectCurve",
+    "_times": [
+      0,
+      5.816666666666666
+    ],
+    "_values": [
+      false,
+      true
     ]
   },
   {

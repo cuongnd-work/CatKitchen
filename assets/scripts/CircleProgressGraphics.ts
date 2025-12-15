@@ -1,4 +1,4 @@
-import {_decorator, Component, Graphics, tween, Tween, Node} from 'cc';
+import {_decorator, Component, Graphics, Label, Node, tween, Tween} from 'cc';
 
 const {ccclass, property} = _decorator;
 
@@ -11,8 +11,29 @@ export class CircleProgressGraphics extends Component {
     @property(Node)
     public mode: Node | null = null;
 
-    private _tween: Tween<{v: number}> | null = null;
-    private _obj = { v: 0 };
+    private _tween: Tween<{ v: number }> | null = null;
+    private _obj = {v: 0};
+
+    @property(Label)
+    private lable1: Label = null;
+
+    @property(Label)
+    private lable2: Label = null;
+
+    private isEarn: boolean = false;
+
+    public updateLable(index: number): void {
+        if (index == 1) {
+            if (this.isEarn) {
+                this.lable1.string = "";
+                return;
+            }
+            this.lable1.string = "1";
+            this.isEarn = true;
+        } else if (index == 2) {
+            this.lable2.string = "";
+        }
+    }
 
     public startProgress(timeP: number, onComplete?: () => void) {
         if (!this.mode || !this.gfx) return;
@@ -29,7 +50,7 @@ export class CircleProgressGraphics extends Component {
 
         // ===== TWEEN MỚI =====
         this._tween = tween(this._obj)
-            .to(timeP, { v: 1 }, {
+            .to(timeP, {v: 1}, {
                 onUpdate: () => this.setProgress(this._obj.v)
             })
             .call(() => {
