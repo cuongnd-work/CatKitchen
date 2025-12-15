@@ -32,25 +32,25 @@
             "_value": true
           },
           "sorting-2d": {
-            "_value": false
+            "_value": true
           },
           "rich-text": {
-            "_value": false
+            "_value": true
           },
           "mask": {
-            "_value": false
+            "_value": true
           },
           "graphics": {
             "_value": true
           },
           "ui-skew": {
-            "_value": false
+            "_value": true
           },
           "affine-transform": {
-            "_value": false
+            "_value": true
           },
           "ui": {
-            "_value": false
+            "_value": true
           },
           "particle": {
             "_value": false
@@ -97,7 +97,7 @@
             "_value": false
           },
           "intersection-2d": {
-            "_value": false
+            "_value": true
           },
           "primitive": {
             "_value": false
@@ -142,13 +142,13 @@
             "_value": false
           },
           "tiled-map": {
-            "_value": false
+            "_value": true
           },
           "vendor-google": {
             "_value": false
           },
           "spine": {
-            "_value": false,
+            "_value": true,
             "_option": "spine-3.8"
           },
           "spine-3.8": {
@@ -164,7 +164,7 @@
             }
           },
           "dragon-bones": {
-            "_value": false
+            "_value": true
           },
           "marionette": {
             "_value": false
@@ -189,21 +189,33 @@
             "_value": false
           }
         },
-        "flags": {},
+        "flags": {
+          "LOAD_SPINE_MANUALLY": false
+        },
         "name": "Build Playable Config",
         "includeModules": [
           "2d",
           "3d",
+          "affine-transform",
           "animation",
           "audio",
           "base",
           "custom-pipeline",
+          "dragon-bones",
           "gfx-webgl",
           "graphics",
+          "intersection-2d",
+          "mask",
           "particle-2d",
           "physics-2d-box2d",
+          "rich-text",
           "skeletal-animation",
-          "tween"
+          "sorting-2d",
+          "spine-3.8",
+          "tiled-map",
+          "tween",
+          "ui",
+          "ui-skew"
         ],
         "noDeprecatedFeatures": {
           "value": false,
