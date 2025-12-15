@@ -11,6 +11,9 @@ export class ClickPlayAnimation extends Component {
     @property(AnimationClip)
     public clip: AnimationClip | null = null;
 
+    @property(Node)
+    private nodeUpdate : Node = null!;
+
     onEnable() {
         this.node.on(Node.EventType.TOUCH_END, this.onClick, this);
     }
@@ -27,6 +30,16 @@ export class ClickPlayAnimation extends Component {
 
         if (!this.anim || !this.clip) {
             console.warn('Animation or Clip not assigned');
+            return;
+        }
+
+        if(this.nodeUpdate){
+            this.nodeUpdate.active = true;
+
+            setTimeout(() => {
+                this.anim.play(this.clip.name);
+            }, 500);
+
             return;
         }
 
