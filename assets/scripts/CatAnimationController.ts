@@ -14,10 +14,6 @@ export class CatAnimationController extends Component {
         this.animation.play("Warlk");
     }
 
-    public doWalk_Angry(){
-        this.animation.play("Warlk_Angry");
-    }
-
     public doBedo(){
         this.animation.play("Bedo");
     }
