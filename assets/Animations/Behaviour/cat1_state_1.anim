@@ -22,6 +22,9 @@
       },
       {
         "__id__": 23
+      },
+      {
+        "__id__": 28
       }
     ],
     "_exoticAnimation": null,
@@ -49,7 +52,7 @@
     ],
     "_embeddedPlayers": [],
     "_additiveSettings": {
-      "__id__": 28
+      "__id__": 33
     },
     "_auxiliaryCurveEntries": []
   },
@@ -600,6 +603,47 @@
     ],
     "_values": [
       false,
+      true
+    ]
+  },
+  {
+    "__type__": "cc.animation.ObjectTrack",
+    "_binding": {
+      "__type__": "cc.animation.TrackBinding",
+      "path": {
+        "__id__": 29
+      },
+      "proxy": null
+    },
+    "_channel": {
+      "__id__": 31
+    }
+  },
+  {
+    "__type__": "cc.animation.TrackPath",
+    "_paths": [
+      {
+        "__id__": 30
+      },
+      "active"
+    ]
+  },
+  {
+    "__type__": "cc.animation.HierarchyPath",
+    "path": "Cat1/Geo_grp"
+  },
+  {
+    "__type__": "cc.animation.Channel",
+    "_curve": {
+      "__id__": 32
+    }
+  },
+  {
+    "__type__": "cc.ObjectCurve",
+    "_times": [
+      0
+    ],
+    "_values": [
       true
     ]
   },

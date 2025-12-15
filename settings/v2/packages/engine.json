@@ -41,7 +41,7 @@
             "_value": false
           },
           "graphics": {
-            "_value": false
+            "_value": true
           },
           "ui-skew": {
             "_value": false
@@ -199,6 +199,7 @@
           "base",
           "custom-pipeline",
           "gfx-webgl",
+          "graphics",
           "particle-2d",
           "physics-2d-box2d",
           "skeletal-animation",

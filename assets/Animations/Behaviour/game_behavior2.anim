@@ -107,7 +107,7 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      22.833333333333332
+      22.83333396911621
     ],
     "_values": [
       {
@@ -152,7 +152,7 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      22.833333333333332
+      22.83333396911621
     ],
     "_values": [
       {
@@ -197,7 +197,7 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      22.833333333333332
+      22.83333396911621
     ],
     "_values": [
       {
@@ -372,10 +372,10 @@
   {
     "__type__": "cc.animation.EmbeddedPlayer",
     "__editorExtras__": {
-      "group": "1765768448417"
+      "group": "1765770134083"
     },
-    "begin": 12.016666666666667,
-    "end": 14.916666666666666,
+    "begin": 12.783333333333333,
+    "end": 22.133333333333333,
     "reconciledSpeed": false,
     "playable": {
       "__id__": 26
@@ -383,19 +383,19 @@
   },
   {
     "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
-    "path": "/Level/Cat/Cat1",
+    "path": "/Level/Cat/Cat2",
     "clip": {
-      "__uuid__": "d33591bc-ad6f-45fe-ad3b-82d82edc2c68",
+      "__uuid__": "cf2a6226-0579-453b-b024-49cc78edc609",
       "__expectedType__": "cc.AnimationClip"
     }
   },
   {
     "__type__": "cc.animation.EmbeddedPlayer",
     "__editorExtras__": {
-      "group": "1765770134083"
+      "group": "1765768448417"
     },
-    "begin": 12.783333333333333,
-    "end": 22.133333333333333,
+    "begin": 12.016666666666667,
+    "end": 19.9,
     "reconciledSpeed": false,
     "playable": {
       "__id__": 28
@@ -403,9 +403,9 @@
   },
   {
     "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
-    "path": "/Level/Cat/Cat2",
+    "path": "/Level/Cat/Cat1",
     "clip": {
-      "__uuid__": "cf2a6226-0579-453b-b024-49cc78edc609",
+      "__uuid__": "d33591bc-ad6f-45fe-ad3b-82d82edc2c68",
       "__expectedType__": "cc.AnimationClip"
     }
   },
