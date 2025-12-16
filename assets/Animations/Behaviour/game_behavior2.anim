@@ -332,53 +332,13 @@
   {
     "__type__": "cc.animation.EmbeddedPlayer",
     "__editorExtras__": {
-      "group": "1765767489322"
-    },
-    "begin": 0,
-    "end": 3.183333333333333,
-    "reconciledSpeed": false,
-    "playable": {
-      "__id__": 22
-    }
-  },
-  {
-    "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
-    "path": "/Level/Cat/CatBase",
-    "clip": {
-      "__uuid__": "f837b022-59ac-43e8-a48e-ad95bdc74050",
-      "__expectedType__": "cc.AnimationClip"
-    }
-  },
-  {
-    "__type__": "cc.animation.EmbeddedPlayer",
-    "__editorExtras__": {
-      "group": "1765767514417"
-    },
-    "begin": 3.15,
-    "end": 6.5,
-    "reconciledSpeed": false,
-    "playable": {
-      "__id__": 24
-    }
-  },
-  {
-    "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
-    "path": "/Level/Cat/CatBase",
-    "clip": {
-      "__uuid__": "f837b022-59ac-43e8-a48e-ad95bdc74050",
-      "__expectedType__": "cc.AnimationClip"
-    }
-  },
-  {
-    "__type__": "cc.animation.EmbeddedPlayer",
-    "__editorExtras__": {
       "group": "1765768448417"
     },
     "begin": 6.45,
     "end": 14.333333333333334,
     "reconciledSpeed": false,
     "playable": {
-      "__id__": 26
+      "__id__": 22
     }
   },
   {
@@ -398,7 +358,7 @@
     "end": 13.416666666666666,
     "reconciledSpeed": false,
     "playable": {
-      "__id__": 28
+      "__id__": 24
     }
   },
   {
@@ -406,6 +366,46 @@
     "path": "/Level/Cat/Cat2",
     "clip": {
       "__uuid__": "cf2a6226-0579-453b-b024-49cc78edc609",
+      "__expectedType__": "cc.AnimationClip"
+    }
+  },
+  {
+    "__type__": "cc.animation.EmbeddedPlayer",
+    "__editorExtras__": {
+      "group": "1765767489322"
+    },
+    "begin": 0,
+    "end": 3.45,
+    "reconciledSpeed": false,
+    "playable": {
+      "__id__": 26
+    }
+  },
+  {
+    "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
+    "path": "/Level/Cat/CatBase",
+    "clip": {
+      "__uuid__": "f837b022-59ac-43e8-a48e-ad95bdc74050",
+      "__expectedType__": "cc.AnimationClip"
+    }
+  },
+  {
+    "__type__": "cc.animation.EmbeddedPlayer",
+    "__editorExtras__": {
+      "group": "1765767514417"
+    },
+    "begin": 3.45,
+    "end": 7.316666666666666,
+    "reconciledSpeed": false,
+    "playable": {
+      "__id__": 28
+    }
+  },
+  {
+    "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
+    "path": "/Level/Cat/CatBase",
+    "clip": {
+      "__uuid__": "f837b022-59ac-43e8-a48e-ad95bdc74050",
       "__expectedType__": "cc.AnimationClip"
     }
   },

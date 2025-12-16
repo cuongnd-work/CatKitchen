@@ -44,23 +44,26 @@
       },
       {
         "__id__": 26
+      },
+      {
+        "__id__": 32
       }
     ],
     "_exoticAnimation": null,
     "_events": [],
     "_embeddedPlayers": [
       {
-        "__id__": 32
+        "__id__": 37
       },
       {
-        "__id__": 34
+        "__id__": 39
       },
       {
-        "__id__": 36
+        "__id__": 41
       }
     ],
     "_additiveSettings": {
-      "__id__": 38
+      "__id__": 43
     },
     "_auxiliaryCurveEntries": []
   },
@@ -447,24 +450,47 @@
     "postExtrapolation": 1
   },
   {
-    "__type__": "cc.animation.EmbeddedPlayer",
-    "__editorExtras__": {
-      "group": "1765767489322"
+    "__type__": "cc.animation.ObjectTrack",
+    "_binding": {
+      "__type__": "cc.animation.TrackBinding",
+      "path": {
+        "__id__": 33
+      },
+      "proxy": null
     },
-    "begin": 0,
-    "end": 3.316666666666667,
-    "reconciledSpeed": false,
-    "playable": {
-      "__id__": 33
+    "_channel": {
+      "__id__": 35
     }
   },
   {
-    "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
-    "path": "/Level/Cat/CatBase",
-    "clip": {
-      "__uuid__": "fce6844f-d10e-4c64-a987-52947274473d",
-      "__expectedType__": "cc.AnimationClip"
+    "__type__": "cc.animation.TrackPath",
+    "_paths": [
+      {
+        "__id__": 34
+      },
+      "active"
+    ]
+  },
+  {
+    "__type__": "cc.animation.HierarchyPath",
+    "path": "Level/UI/Comp 1_00000"
+  },
+  {
+    "__type__": "cc.animation.Channel",
+    "_curve": {
+      "__id__": 36
     }
+  },
+  {
+    "__type__": "cc.ObjectCurve",
+    "_times": [
+      0,
+      4.35
+    ],
+    "_values": [
+      false,
+      true
+    ]
   },
   {
     "__type__": "cc.animation.EmbeddedPlayer",
@@ -475,7 +501,7 @@
     "end": 12.916666666666666,
     "reconciledSpeed": false,
     "playable": {
-      "__id__": 35
+      "__id__": 38
     }
   },
   {
@@ -495,7 +521,7 @@
     "end": 12.633333333333333,
     "reconciledSpeed": false,
     "playable": {
-      "__id__": 37
+      "__id__": 40
     }
   },
   {
@@ -503,6 +529,26 @@
     "path": "/Level/Cat",
     "clip": {
       "__uuid__": "1768d5e6-7c53-4ac7-8a4a-f522e66a0363",
+      "__expectedType__": "cc.AnimationClip"
+    }
+  },
+  {
+    "__type__": "cc.animation.EmbeddedPlayer",
+    "__editorExtras__": {
+      "group": "1765767489322"
+    },
+    "begin": 0,
+    "end": 4.1,
+    "reconciledSpeed": false,
+    "playable": {
+      "__id__": 42
+    }
+  },
+  {
+    "__type__": "cc.animation.EmbeddedAnimationClipPlayable",
+    "path": "/Level/Cat/CatBase",
+    "clip": {
+      "__uuid__": "fce6844f-d10e-4c64-a987-52947274473d",
       "__expectedType__": "cc.AnimationClip"
     }
   },
