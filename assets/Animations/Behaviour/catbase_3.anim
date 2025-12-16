@@ -11,7 +11,7 @@
     "speed": 1,
     "wrapMode": 1,
     "enableTrsBlending": false,
-    "_duration": 5.666666666666667,
+    "_duration": 3.3,
     "_hash": 500763545,
     "_tracks": [
       {
@@ -52,56 +52,56 @@
         "params": []
       },
       {
-        "frame": 2.4833333333333334,
+        "frame": 0.8166666666666667,
         "func": "",
         "params": []
       },
       {
-        "frame": 2.4833333333333334,
+        "frame": 0.8166666666666667,
         "func": "startProgress",
         "params": [
-          1
+          0.7
         ]
       },
       {
-        "frame": 2.5,
+        "frame": 0.8166666666666667,
         "func": "",
         "params": []
       },
       {
-        "frame": 2.5,
+        "frame": 0.8166666666666667,
         "func": "doDoing",
         "params": []
       },
       {
-        "frame": 3.45,
+        "frame": 1.4833333333333334,
         "func": "",
         "params": []
       },
       {
-        "frame": 3.45,
+        "frame": 1.4833333333333334,
         "func": "doBedo",
         "params": []
       },
       {
-        "frame": 5.633333333333334,
+        "frame": 3.15,
         "func": "",
         "params": []
       },
       {
-        "frame": 5.633333333333334,
+        "frame": 3.15,
         "func": "updateLable",
         "params": [
           2
         ]
       },
       {
-        "frame": 5.666666666666667,
+        "frame": 3.1666666666666665,
         "func": "",
         "params": []
       },
       {
-        "frame": 5.666666666666667,
+        "frame": 3.1666666666666665,
         "func": "doIdle",
         "params": []
       }
@@ -160,9 +160,9 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      2.5,
-      3.5,
-      5.666666507720947
+      0.8333333134651184,
+      1.5,
+      3.183333396911621
     ],
     "_values": [
       {
@@ -189,9 +189,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -203,9 +201,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -217,9 +213,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -235,9 +229,9 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      2.5,
-      3.5,
-      5.666666507720947
+      0.8333333134651184,
+      1.5,
+      3.183333396911621
     ],
     "_values": [
       {
@@ -264,9 +258,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -278,9 +270,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -292,9 +282,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -310,9 +298,9 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      2.5,
-      3.5,
-      5.666666507720947
+      0.8333333134651184,
+      1.5,
+      3.183333396911621
     ],
     "_values": [
       {
@@ -339,9 +327,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -353,9 +339,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -367,9 +351,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -437,12 +419,12 @@
     "_times": [
       0,
       0.18333333730697632,
-      3.5,
-      3.633333444595337,
-      3.6500000953674316,
-      5.2833333015441895,
-      5.616666793823242,
-      5.666666507720947
+      1.5,
+      1.6333333253860474,
+      1.649999976158142,
+      2.799999952316284,
+      3.133333444595337,
+      3.183333396911621
     ],
     "_values": [
       {
@@ -483,9 +465,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -497,9 +477,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -511,9 +489,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -525,9 +501,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -539,9 +513,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -553,9 +525,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -572,12 +542,12 @@
     "_times": [
       0,
       0.18333333730697632,
-      3.5,
-      3.633333444595337,
-      3.6500000953674316,
-      5.2833333015441895,
-      5.616666793823242,
-      5.666666507720947
+      1.5,
+      1.6333333253860474,
+      1.649999976158142,
+      2.799999952316284,
+      3.133333444595337,
+      3.183333396911621
     ],
     "_values": [
       {
@@ -618,9 +588,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -632,9 +600,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -646,9 +612,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -660,9 +624,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -674,9 +636,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -688,9 +648,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -707,12 +665,12 @@
     "_times": [
       0,
       0.18333333730697632,
-      3.5,
-      3.633333444595337,
-      3.6500000953674316,
-      5.2833333015441895,
-      5.616666793823242,
-      5.666666507720947
+      1.5,
+      1.6333333253860474,
+      1.649999976158142,
+      2.799999952316284,
+      3.133333444595337,
+      3.183333396911621
     ],
     "_values": [
       {
@@ -753,9 +711,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -767,9 +723,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -781,9 +735,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -795,9 +747,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -809,9 +759,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       },
       {
         "__type__": "cc.RealKeyframeValue",
@@ -823,9 +771,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -963,8 +909,8 @@
     "__type__": "cc.ObjectCurve",
     "_times": [
       0,
-      2.5,
-      3.5
+      0.75,
+      1.75
     ],
     "_values": [
       false,
@@ -1049,8 +995,8 @@
     "__type__": "cc.ObjectCurve",
     "_times": [
       0,
-      3.466666666666667,
-      5.666666666666667
+      1.7166666666666666,
+      3.3
     ],
     "_values": [
       false,
@@ -1105,7 +1051,7 @@
   {
     "__type__": "cc.RealCurve",
     "_times": [
-      2.4833333492279053
+      0.7333333492279053
     ],
     "_values": [
       {
@@ -1118,9 +1064,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -1135,7 +1079,7 @@
   {
     "__type__": "cc.RealCurve",
     "_times": [
-      2.4833333492279053
+      0.7333333492279053
     ],
     "_values": [
       {
@@ -1148,9 +1092,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -1165,7 +1107,7 @@
   {
     "__type__": "cc.RealCurve",
     "_times": [
-      2.4833333492279053
+      0.7333333492279053
     ],
     "_values": [
       {
@@ -1178,9 +1120,7 @@
         "leftTangent": 0,
         "leftTangentWeight": 1,
         "easingMethod": 0,
-        "__editorExtras__": {
-          "broken": null
-        }
+        "__editorExtras__": null
       }
     ],
     "preExtrapolation": 1,
@@ -1235,7 +1175,7 @@
     "__type__": "cc.ObjectCurve",
     "_times": [
       0,
-      5.633333333333334
+      3.2666666666666666
     ],
     "_values": [
       false,

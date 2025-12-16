@@ -32,7 +32,7 @@
     "speed": 1,
     "wrapMode": 1,
     "enableTrsBlending": false,
-    "_duration": 22.833333333333332,
+    "_duration": 17.433333333333334,
     "_hash": 500763545,
     "_tracks": [
       {
@@ -107,7 +107,7 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      22.83333396911621
+      17.433332443237305
     ],
     "_values": [
       {
@@ -152,7 +152,7 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      22.83333396911621
+      17.433332443237305
     ],
     "_values": [
       {
@@ -197,7 +197,7 @@
     "__type__": "cc.RealCurve",
     "_times": [
       0,
-      22.83333396911621
+      17.433332443237305
     ],
     "_values": [
       {
@@ -322,7 +322,7 @@
     "__type__": "cc.ObjectCurve",
     "_times": [
       0,
-      16.433333333333334
+      7.833333333333333
     ],
     "_values": [
       false,
@@ -335,7 +335,7 @@
       "group": "1765767489322"
     },
     "begin": 0,
-    "end": 5.683333333333334,
+    "end": 3.183333333333333,
     "reconciledSpeed": false,
     "playable": {
       "__id__": 22
@@ -354,8 +354,8 @@
     "__editorExtras__": {
       "group": "1765767514417"
     },
-    "begin": 5.7,
-    "end": 12.016666666666667,
+    "begin": 3.15,
+    "end": 6.5,
     "reconciledSpeed": false,
     "playable": {
       "__id__": 24
@@ -374,8 +374,8 @@
     "__editorExtras__": {
       "group": "1765768448417"
     },
-    "begin": 12.016666666666667,
-    "end": 19.9,
+    "begin": 6.45,
+    "end": 14.333333333333334,
     "reconciledSpeed": false,
     "playable": {
       "__id__": 26
@@ -394,8 +394,8 @@
     "__editorExtras__": {
       "group": "1765770134083"
     },
-    "begin": 12.016666666666667,
-    "end": 21.366666666666667,
+    "begin": 4.066666666666666,
+    "end": 13.416666666666666,
     "reconciledSpeed": false,
     "playable": {
       "__id__": 28
