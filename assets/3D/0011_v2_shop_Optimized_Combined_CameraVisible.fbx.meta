@@ -1,0 +1,96 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "aee1af5c-6243-42af-987b-c0dbd19999e4",
+  "files": [],
+  "subMetas": {
+    "a62fe": {
+      "importer": "gltf-mesh",
+      "uuid": "aee1af5c-6243-42af-987b-c0dbd19999e4@a62fe",
+      "displayName": "",
+      "id": "a62fe",
+      "name": "Scene.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 1940
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "0bff9": {
+      "importer": "gltf-material",
+      "uuid": "aee1af5c-6243-42af-987b-c0dbd19999e4@0bff9",
+      "displayName": "",
+      "id": "0bff9",
+      "name": "Lit.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "f2798": {
+      "importer": "gltf-scene",
+      "uuid": "aee1af5c-6243-42af-987b-c0dbd19999e4@f2798",
+      "displayName": "",
+      "id": "f2798",
+      "name": "0011_v2_shop_Optimized_Combined_CameraVisible.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "aee1af5c-6243-42af-987b-c0dbd19999e4@a62fe"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "aee1af5c-6243-42af-987b-c0dbd19999e4@0bff9"
+      ],
+      "scenes": [
+        "aee1af5c-6243-42af-987b-c0dbd19999e4@f2798"
+      ]
+    }
+  }
+}
