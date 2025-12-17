@@ -546,6 +546,9 @@
     "text": {
       "__id__": 14
     },
+    "parentss": {
+      "__id__": 2
+    },
     "spriteFrames": [
       {
         "__uuid__": "aa0974cb-529b-4d1d-9b3d-e9410d5176c2@f9941",
