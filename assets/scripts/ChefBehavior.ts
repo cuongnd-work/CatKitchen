@@ -106,12 +106,15 @@ export class ChefBehavior extends Component {
     private move3D (dt: number) {
         const pos = this.node.worldPosition;
         this._currentTarget.getWorldPosition(this._targetPos);
-
-        // chỉ dùng để tính hướng, KHÔNG set trực tiếp
         this._targetPos.y = pos.y;
 
         Vec3.subtract(this._dir, this._targetPos, pos);
-        if (this._dir.length() <= this.stopDistance) {
+        const distance = this._dir.length();
+
+        const maxStep = this.currentSpeed * dt;
+
+        if (distance <= maxStep || distance <= this.stopDistance) {
+            this.setWorldPosKeepLocalY0(this._targetPos);
             this.onReachTarget();
             return;
         }
@@ -119,12 +122,12 @@ export class ChefBehavior extends Component {
         this._dir.normalize();
         this.rotateLocalToWorldDir(this._dir);
 
-        Vec3.multiplyScalar(this._move, this._dir, this.currentSpeed * dt);
+        Vec3.multiplyScalar(this._move, this._dir, maxStep);
         Vec3.add(this._move, pos, this._move);
 
-        // ⭐ SET WORLD POS NHƯNG GIỮ LOCAL Y = 0
         this.setWorldPosKeepLocalY0(this._move);
     }
+
 
     private _invParentMat = new Mat4();
     private _localPos = new Vec3();
