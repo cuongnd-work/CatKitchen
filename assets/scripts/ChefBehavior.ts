@@ -73,11 +73,16 @@ export class ChefBehavior extends Component {
         this._state = ChefState.Doing;
         this.animCtrl.doDoing();
 
-        // sau khi Doing xong → đi sang Node2 bằng Bedo
+        const doingTime = this.getDoingTime();
+
         this.scheduleOnce(() => {
             this._currentTarget = this.pointB;
             this.enterMoveWithBedo();
-        }, 1.0);
+        }, doingTime);
+    }
+
+    private getDoingTime (): number {
+        return Math.max(1.0, 1 / this.moveSpeed);
     }
 
     private enterMoveWithBedo () {
