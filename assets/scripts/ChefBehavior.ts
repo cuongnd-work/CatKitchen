@@ -110,7 +110,7 @@ export class ChefBehavior extends Component {
 
         setTimeout(() => {
             this.coin.active = false;
-        }, 500);
+        }, 1000);
     }
 
     /* ================= MOVE ================= */
