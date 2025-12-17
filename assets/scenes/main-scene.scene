@@ -195038,7 +195038,7 @@
     "node": {
       "__id__": 4633
     },
-    "_enabled": false,
+    "_enabled": true,
     "__prefab": null,
     "pointA": {
       "__id__": 4796
@@ -195048,7 +195048,7 @@
     },
     "moveSpeed": 5,
     "stopDistance": 0.1,
-    "rotationOffsetY": 180,
+    "rotationOffsetY": 0,
     "animCtrl": {
       "__id__": 4793
     },

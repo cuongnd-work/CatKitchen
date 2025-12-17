@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Vec3, Quat } from 'cc';
+import { _decorator, Component, Node, Vec3, Quat, Mat4 } from 'cc';
 import { CatAnimationController } from './CatAnimationController';
 
 const { ccclass, property } = _decorator;
@@ -96,43 +96,81 @@ export class ChefBehavior extends Component {
         const pos = this.node.worldPosition;
         this._currentTarget.getWorldPosition(this._targetPos);
 
-        this._targetPos.y = this._groundY;
+        // chỉ dùng để tính hướng, KHÔNG set trực tiếp
+        this._targetPos.y = pos.y;
 
         Vec3.subtract(this._dir, this._targetPos, pos);
-        const dist = this._dir.length();
-
-        if (dist <= this.stopDistance) {
+        if (this._dir.length() <= this.stopDistance) {
             this.onReachTarget();
             return;
         }
 
         this._dir.normalize();
-        this.rotateToDirection(this._dir);
+        this.rotateLocalToWorldDir(this._dir);
 
         Vec3.multiplyScalar(this._move, this._dir, this.moveSpeed * dt);
         Vec3.add(this._move, pos, this._move);
 
-        this._move.y = this._groundY;
-        this.node.setWorldPosition(this._move);
-        // this.node.setPosition(this.node.x, 0, this.node.z);
+        // ⭐ SET WORLD POS NHƯNG GIỮ LOCAL Y = 0
+        this.setWorldPosKeepLocalY0(this._move);
     }
+
+    private _invParentMat = new Mat4();
+    private _localPos = new Vec3();
+
+    private setWorldPosKeepLocalY0 (worldPos: Vec3) {
+        const parent = this.node.parent;
+        if (!parent) {
+            // không có parent → local = world
+            this.node.setPosition(worldPos.x, 0, worldPos.z);
+            return;
+        }
+
+        // inverse parent world matrix
+        Mat4.invert(this._invParentMat, parent.worldMatrix);
+
+        // world → local
+        Vec3.transformMat4(this._localPos, worldPos, this._invParentMat);
+
+        // ÉP LOCAL Y = 0
+        this._localPos.y = 0;
+
+        // set LOCAL position
+        this.node.setPosition(this._localPos);
+    }
+
 
     /* ================= ROTATE ================= */
 
-    private rotateToDirection (dir: Vec3) {
-        const lookPos = new Vec3(
-            this.node.worldPosition.x + dir.x,
-            this._groundY,
-            this.node.worldPosition.z + dir.z
+    private _invParentRot = new Quat();
+    private _localDir = new Vec3();
+    private _rotQuat = new Quat();
+
+    private rotateLocalToWorldDir (worldDir: Vec3) {
+        const parent = this.node.parent;
+
+        if (parent) {
+            // inverse parent WORLD rotation
+            Quat.invert(this._invParentRot, parent.worldRotation);
+
+            // world dir -> local dir
+            Vec3.transformQuat(this._localDir, worldDir, this._invParentRot);
+        } else {
+            this._localDir.set(worldDir);
+        }
+
+        // chỉ xoay quanh trục Y local
+        const angleY = Math.atan2(this._localDir.x, this._localDir.z) * 180 / Math.PI;
+
+        Quat.fromEuler(
+            this._rotQuat,
+            0,
+            angleY + this.rotationOffsetY,
+            0
         );
 
-        this.node.lookAt(lookPos);
-
-        if (this.rotationOffsetY !== 0) {
-            this.node.rotate(
-                Quat.fromEuler(new Quat(), 0, this.rotationOffsetY, 0)
-            );
-        }
+        // SET LOCAL ROTATION
+        this.node.setRotation(this._rotQuat);
     }
 
     /* ================= TARGET ================= */
