@@ -32,7 +32,7 @@
             "_value": true
           },
           "sorting-2d": {
-            "_value": true
+            "_value": false
           },
           "rich-text": {
             "_value": false
@@ -200,7 +200,6 @@
           "custom-pipeline",
           "gfx-webgl",
           "skeletal-animation",
-          "sorting-2d",
           "tween",
           "ui"
         ],
