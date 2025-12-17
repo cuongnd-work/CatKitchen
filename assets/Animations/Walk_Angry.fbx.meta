@@ -2,24 +2,24 @@
   "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
-  "uuid": "b83f0508-19bf-4a56-a787-bd7885f29a19",
+  "uuid": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a",
   "files": [
     "__original-animation-0.bin"
   ],
   "subMetas": {
     "73b7f": {
       "importer": "gltf-animation",
-      "uuid": "b83f0508-19bf-4a56-a787-bd7885f29a19@73b7f",
+      "uuid": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Warlk.animation",
+      "name": "Walk_Angry.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
         "sample": 30,
         "span": {
           "from": 0,
-          "to": 0.6666666865348816
+          "to": 0.5333333611488342
         },
         "events": []
       },
@@ -30,12 +30,12 @@
       ],
       "subMetas": {}
     },
-    "baa12": {
+    "e2d96": {
       "importer": "gltf-scene",
-      "uuid": "b83f0508-19bf-4a56-a787-bd7885f29a19@baa12",
+      "uuid": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@e2d96",
       "displayName": "",
-      "id": "baa12",
-      "name": "Walk_New.prefab",
+      "id": "e2d96",
+      "name": "Walk_Angry.prefab",
       "userData": {
         "gltfIndex": 0
       },
@@ -55,13 +55,13 @@
     "animationImportSettings": [
       {
         "name": "Take 001",
-        "duration": 0.6666666865348816,
+        "duration": 0.5333333611488342,
         "fps": 30,
         "splits": [
           {
-            "name": "Warlk",
+            "name": "Walk_Angry",
             "from": 0,
-            "to": 0.6666666865348816,
+            "to": 0.5333333611488342,
             "wrapMode": 2,
             "previousId": "73b7f"
           }
@@ -92,7 +92,7 @@
       "textures": [],
       "materials": [],
       "scenes": [
-        "b83f0508-19bf-4a56-a787-bd7885f29a19@baa12"
+        "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@e2d96"
       ]
     }
   }

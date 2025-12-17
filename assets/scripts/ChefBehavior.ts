@@ -79,8 +79,6 @@ export class ChefBehavior extends Component {
 
         const doingTime = this.getDoingTime();
 
-        console.log(doingTime);
-
         this.scheduleOnce(() => {
             this._currentTarget = this.pointB;
             this.enterMoveWithBedo();
