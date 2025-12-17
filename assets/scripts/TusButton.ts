@@ -1,5 +1,16 @@
-import { _decorator, Button, Component, Sprite, Node, Animation } from 'cc';
-import {zoom_button} from "db://assets/scripts/zoom_button";
+import {
+    _decorator,
+    Button,
+    Component,
+    Sprite,
+    Node,
+    Animation,
+    AudioSource,
+    AudioClip
+} from 'cc';
+import { zoom_button } from "db://assets/scripts/zoom_button";
+import { ChefBehavior } from "./ChefBehavior";
+
 const { ccclass, property } = _decorator;
 
 @ccclass('TusButton')
@@ -14,6 +25,9 @@ export class TusButton extends Component {
     @property(Node)
     public hand: Node = null!;
 
+    @property(ChefBehavior)
+    public chefBehavior: ChefBehavior = null!;
+
     @property(Node)
     public handTarget: Node = null!;
 
@@ -25,6 +39,14 @@ export class TusButton extends Component {
 
     @property(Animation)
     public animation: Animation = null!;
+
+    /* ================= SOUND ================= */
+
+    @property(AudioSource)
+    public audioSource: AudioSource = null!;
+
+    @property(AudioClip)
+    public clickSound: AudioClip = null!;
 
     @property({ tooltip: 'Số lần click cần thiết' })
     public countMax: number = 8;
@@ -47,24 +69,40 @@ export class TusButton extends Component {
     /* ================= CLICK ================= */
 
     public ButtonSpeedClicker (): void {
+        this.playClickSound();
+
         this._count++;
+
+        this.chefBehavior.currentSpeed += 2.5;
 
         if (this._count >= this.countMax) {
 
             this.hand.position = this.handTarget.position;
 
-            // zoom
             this.zoom_button1.stopZoomAndReset();
             this.zoom_button2.startZoom();
 
-            // sprite alpha
             this.setSpriteAlpha(this.zoom_button1.node, 100);
             this.setSpriteAlpha(this.zoom_button2.node, 255);
 
-            // button state
             this.setButtonInteractable(this.buttonSpeed, false);
             this.setButtonInteractable(this.buttonWorker, true);
         }
+    }
+
+    public ButtonWorkerClicker (): void {
+        this.playClickSound();
+
+        this.setButtonInteractable(this.buttonSpeed, false);
+        this.animation.play();
+    }
+
+    /* ================= SOUND ================= */
+
+    private playClickSound () {
+        if (!this.audioSource || !this.clickSound) return;
+
+        this.audioSource.playOneShot(this.clickSound, 1);
     }
 
     /* ================= UTILS ================= */
@@ -73,22 +111,13 @@ export class TusButton extends Component {
         const sprite = node.getComponentInChildren(Sprite);
         if (!sprite) return;
 
-        const c = sprite.color.clone(); // ⭐ BẮT BUỘC
+        const c = sprite.color.clone();
         c.a = alpha;
         sprite.color = c;
     }
-
-    public ButtonWorkerClicker (): void {
-        this.setButtonInteractable(this.buttonSpeed, false);
-
-        this.animation.play();
-    }
-
-    /* ================= UTILS ================= */
 
     private setButtonInteractable (btn: Button, enable: boolean) {
         if (!btn) return;
         btn.interactable = enable;
     }
-
 }

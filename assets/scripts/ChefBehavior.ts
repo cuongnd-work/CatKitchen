@@ -108,6 +108,7 @@ export class ChefBehavior extends Component {
 
         this.coin.active = true;
 
+        if(this.currentSpeed >= 10) return;
         setTimeout(() => {
             this.coin.active = false;
         }, 1000);
