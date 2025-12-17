@@ -11,6 +11,7 @@ import {
 import { zoom_button } from "db://assets/scripts/zoom_button";
 import { ChefBehavior } from "./ChefBehavior";
 import super_html_script from "db://assets/plugins/playable-foundation/super-html/super_html_script";
+import {CurrencyView} from "db://assets/scripts/CurrencyView";
 
 const { ccclass, property } = _decorator;
 
@@ -70,6 +71,8 @@ export class TusButton extends Component {
     /* ================= CLICK ================= */
 
     public ButtonSpeedClicker (): void {
+        if(!CurrencyView.instance.trySubtractCurrency(100)) return;
+
         this.playClickSound();
 
         this._count++;
