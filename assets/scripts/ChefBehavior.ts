@@ -36,6 +36,9 @@ export class ChefBehavior extends Component {
     @property
     rotationOffsetY: number = 180;
 
+    @property(Node)
+    hamburger: Node = null;
+
     /* ================= ANIM ================= */
 
     @property(CatAnimationController)
@@ -59,6 +62,7 @@ export class ChefBehavior extends Component {
         // BẮT ĐẦU TẠI NODE1
         this._currentTarget = this.pointA;
         this.enterDoing();
+        this.hamburger.active = false;
     }
 
     update (dt: number) {
@@ -72,7 +76,6 @@ export class ChefBehavior extends Component {
 
     /* ================= STATE ================= */
 
-
     private enterDoing () {
         this._state = ChefState.Doing;
         this.animCtrl.doDoing();
@@ -81,6 +84,7 @@ export class ChefBehavior extends Component {
 
         this.scheduleOnce(() => {
             this._currentTarget = this.pointB;
+            this.hamburger.active = true;
             this.enterMoveWithBedo();
         }, doingTime);
     }
@@ -97,6 +101,7 @@ export class ChefBehavior extends Component {
     private enterMoveWithWalk () {
         this._state = ChefState.MoveWithWalk;
         this.animCtrl.doWalk();
+        this.hamburger.active = false;
     }
 
     /* ================= MOVE ================= */
@@ -150,7 +155,6 @@ export class ChefBehavior extends Component {
         // set LOCAL position
         this.node.setPosition(this._localPos);
     }
-
 
     /* ================= ROTATE ================= */
 
