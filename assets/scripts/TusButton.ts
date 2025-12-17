@@ -10,6 +10,7 @@ import {
 } from 'cc';
 import { zoom_button } from "db://assets/scripts/zoom_button";
 import { ChefBehavior } from "./ChefBehavior";
+import super_html_script from "db://assets/plugins/playable-foundation/super-html/super_html_script";
 
 const { ccclass, property } = _decorator;
 
@@ -31,14 +32,14 @@ export class TusButton extends Component {
     @property(Node)
     public handTarget: Node = null!;
 
+    @property(Node)
+    public end: Node = null!;
+
     @property(zoom_button)
     public zoom_button1: zoom_button = null!;
 
     @property(zoom_button)
     public zoom_button2: zoom_button = null!;
-
-    @property(Animation)
-    public animation: Animation = null!;
 
     /* ================= SOUND ================= */
 
@@ -94,7 +95,11 @@ export class TusButton extends Component {
         this.playClickSound();
 
         this.setButtonInteractable(this.buttonSpeed, false);
-        this.animation.play();
+
+        super_html_script.on_click_game_end();
+        super_html_script.on_click_download();
+
+        this.end.active = true;
     }
 
     /* ================= SOUND ================= */
