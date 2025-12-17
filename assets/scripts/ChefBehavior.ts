@@ -23,7 +23,10 @@ export class ChefBehavior extends Component {
     /* ================= MOVE ================= */
 
     @property
-    moveSpeed: number = 1.5;
+    public speed: number = 5;
+
+    @property
+    public currentSpeed: number = 5;
 
     @property
     stopDistance: number = 0.2;
@@ -69,11 +72,14 @@ export class ChefBehavior extends Component {
 
     /* ================= STATE ================= */
 
+
     private enterDoing () {
         this._state = ChefState.Doing;
         this.animCtrl.doDoing();
 
         const doingTime = this.getDoingTime();
+
+        console.log(doingTime);
 
         this.scheduleOnce(() => {
             this._currentTarget = this.pointB;
@@ -82,7 +88,7 @@ export class ChefBehavior extends Component {
     }
 
     private getDoingTime (): number {
-        return Math.max(1.0, 1 / this.moveSpeed);
+        return 1 * this.speed / this.currentSpeed;
     }
 
     private enterMoveWithBedo () {
@@ -113,7 +119,7 @@ export class ChefBehavior extends Component {
         this._dir.normalize();
         this.rotateLocalToWorldDir(this._dir);
 
-        Vec3.multiplyScalar(this._move, this._dir, this.moveSpeed * dt);
+        Vec3.multiplyScalar(this._move, this._dir, this.currentSpeed * dt);
         Vec3.add(this._move, pos, this._move);
 
         // ⭐ SET WORLD POS NHƯNG GIỮ LOCAL Y = 0

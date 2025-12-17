@@ -195046,7 +195046,8 @@
     "pointB": {
       "__id__": 4798
     },
-    "moveSpeed": 5,
+    "speed": 5,
+    "currentSpeed": 5,
     "stopDistance": 0.1,
     "rotationOffsetY": 0,
     "animCtrl": {
