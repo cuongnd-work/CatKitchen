@@ -194367,8 +194367,8 @@
       "__expectedType__": "cc.Prefab"
     },
     "minCoins": 2,
-    "maxCoins": 8,
-    "throwHeight": 180,
+    "maxCoins": 4,
+    "throwHeight": 110,
     "throwDuration": 0.4,
     "_id": "6c50e9SyhAOYK8nU8z1yLF"
   },

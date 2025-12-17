@@ -1,4 +1,10 @@
-import { _decorator, Component, SkeletalAnimation, AnimationClip } from 'cc';
+import {
+    _decorator,
+    AnimationClip,
+    Component,
+    SkeletalAnimation
+} from 'cc';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('RandomSkeletalAnimationByClip')
@@ -13,19 +19,24 @@ export class RandomSkeletalAnimationByClip extends Component {
     @property
     randomSpeed: boolean = false;
 
-    private _lastIndex = -1;
-    private _playing = false;
+    // mỗi skeletal có lastIndex riêng
+    private _lastIndexMap = new Map<SkeletalAnimation, number>();
 
     start () {
         if (!this.skeletalAnims.length || !this.clips.length) return;
-        this.playRandom();
+
+        for (const anim of this.skeletalAnims) {
+            this.playRandomFor(anim);
+        }
     }
 
-    private playRandom () {
-        if (this._playing) return;
-        this._playing = true;
+    /* ================= CORE ================= */
 
-        const index = this.getRandomIndex();
+    private playRandomFor (anim: SkeletalAnimation) {
+        if (!anim) return;
+
+        const lastIndex = this._lastIndexMap.get(anim) ?? -1;
+        const index = this.getRandomIndex(lastIndex);
         const clip = this.clips[index];
 
         let speed = 1;
@@ -33,32 +44,30 @@ export class RandomSkeletalAnimationByClip extends Component {
             speed = 0.8 + Math.random() * 0.4;
         }
 
-        for (const anim of this.skeletalAnims) {
-            if (!anim) continue;
+        anim.addClip(clip);
+        anim.play(clip.name);
 
-            anim.addClip(clip);
-            anim.play(clip.name);
-
-            const state = anim.getState(clip.name);
-            if (state) {
-                state.speed = speed;
-            }
+        const state = anim.getState(clip.name);
+        if (state) {
+            state.speed = speed;
         }
 
         const realDuration = clip.duration / speed;
-        this._lastIndex = index;
+        this._lastIndexMap.set(anim, index);
 
+        // ⏱ schedule RIÊNG cho anim này
         this.scheduleOnce(() => {
-            this._playing = false;
-            this.playRandom();
+            this.playRandomFor(anim);
         }, realDuration);
     }
 
-    private getRandomIndex (): number {
+    /* ================= RANDOM ================= */
+
+    private getRandomIndex (lastIndex: number): number {
         if (this.clips.length <= 1) return 0;
 
-        let i = this._lastIndex;
-        while (i === this._lastIndex) {
+        let i = lastIndex;
+        while (i === lastIndex) {
             i = Math.floor(Math.random() * this.clips.length);
         }
         return i;
@@ -66,5 +75,6 @@ export class RandomSkeletalAnimationByClip extends Component {
 
     onDestroy () {
         this.unscheduleAllCallbacks();
+        this._lastIndexMap.clear();
     }
 }
