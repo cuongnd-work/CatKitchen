@@ -358,9 +358,9 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -0.051,
-      "y": -0.015,
-      "z": 0.063
+      "x": -0.062,
+      "y": 1.418,
+      "z": 0.388
     },
     "_lrot": {
       "__type__": "cc.Quat",
@@ -664,7 +664,7 @@
     "_layer": 1073741824,
     "_euler": {
       "__type__": "cc.Vec3",
-      "x": -10.399999999999997,
+      "x": -10.399999999999995,
       "y": 142.60000000000002,
       "z": 7.500000000000001
     },
@@ -188774,10 +188774,10 @@
         "__id__": 4633
       },
       {
-        "__id__": 4798
+        "__id__": 4796
       },
       {
-        "__id__": 4796
+        "__id__": 4798
       }
     ],
     "_active": true,
@@ -195038,7 +195038,7 @@
     "node": {
       "__id__": 4633
     },
-    "_enabled": true,
+    "_enabled": false,
     "__prefab": null,
     "pointA": {
       "__id__": 4796
@@ -195049,79 +195049,10 @@
     "moveSpeed": 5,
     "stopDistance": 0.1,
     "rotationOffsetY": 180,
-    "doingTime": 1,
-    "bedoTime": 0.6,
     "animCtrl": {
       "__id__": 4793
     },
     "_id": "97As+PTj9FhI/45reAhIa3"
-  },
-  {
-    "__type__": "cc.Node",
-    "_name": "2",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "_parent": {
-      "__id__": 4632
-    },
-    "_children": [],
-    "_active": true,
-    "_components": [
-      {
-        "__id__": 4797
-      }
-    ],
-    "_prefab": null,
-    "_lpos": {
-      "__type__": "cc.Vec3",
-      "x": 2.198,
-      "y": 0,
-      "z": 4.378
-    },
-    "_lrot": {
-      "__type__": "cc.Quat",
-      "x": -6.938893903907228e-18,
-      "y": -1.3877787807814457e-17,
-      "z": 6.938893903907228e-18,
-      "w": 1
-    },
-    "_lscale": {
-      "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1.0000000000000004
-    },
-    "_mobility": 0,
-    "_layer": 1073741824,
-    "_euler": {
-      "__type__": "cc.Vec3",
-      "x": -7.951386703658792e-16,
-      "y": -1.5902773407317584e-15,
-      "z": 7.951386703658792e-16
-    },
-    "_id": "b5nITJIr1LR5oghXL7Rhph"
-  },
-  {
-    "__type__": "cc.UITransform",
-    "_name": "",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "node": {
-      "__id__": 4796
-    },
-    "_enabled": true,
-    "__prefab": null,
-    "_contentSize": {
-      "__type__": "cc.Size",
-      "width": 100,
-      "height": 100
-    },
-    "_anchorPoint": {
-      "__type__": "cc.Vec2",
-      "x": 0.5,
-      "y": 0.5
-    },
-    "_id": "fedmU9ErBPUrDRi7s1G2DP"
   },
   {
     "__type__": "cc.Node",
@@ -195135,7 +195066,7 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 4799
+        "__id__": 4797
       }
     ],
     "_prefab": null,
@@ -195174,7 +195105,7 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 4798
+      "__id__": 4796
     },
     "_enabled": true,
     "__prefab": null,
@@ -195189,6 +195120,73 @@
       "y": 0.5
     },
     "_id": "60p8Ei3ARMAamtImC3/w7x"
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "2",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "_parent": {
+      "__id__": 4632
+    },
+    "_children": [],
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 4799
+      }
+    ],
+    "_prefab": null,
+    "_lpos": {
+      "__type__": "cc.Vec3",
+      "x": 2.198,
+      "y": 0,
+      "z": 4.378
+    },
+    "_lrot": {
+      "__type__": "cc.Quat",
+      "x": -6.938893903907228e-18,
+      "y": -1.3877787807814457e-17,
+      "z": 6.938893903907228e-18,
+      "w": 1
+    },
+    "_lscale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1.0000000000000004
+    },
+    "_mobility": 0,
+    "_layer": 1073741824,
+    "_euler": {
+      "__type__": "cc.Vec3",
+      "x": -7.951386703658792e-16,
+      "y": -1.5902773407317584e-15,
+      "z": 7.951386703658792e-16
+    },
+    "_id": "b5nITJIr1LR5oghXL7Rhph"
+  },
+  {
+    "__type__": "cc.UITransform",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 4798
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 100,
+      "height": 100
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_id": "fedmU9ErBPUrDRi7s1G2DP"
   },
   {
     "__type__": "cc.UITransform",

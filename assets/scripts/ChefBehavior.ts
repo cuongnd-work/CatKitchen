@@ -5,134 +5,124 @@ const { ccclass, property } = _decorator;
 
 enum ChefState {
     Doing,
-    Bedo,
-    Walking,
+    MoveWithBedo,
+    MoveWithWalk,
 }
 
 @ccclass('ChefBehavior')
-class ChefBehavior extends Component {
+export class ChefBehavior extends Component {
 
-    /* ================== TARGET ================== */
-
-    @property(Node)
-    pointA: Node = null!;
+    /* ================= TARGET ================= */
 
     @property(Node)
-    pointB: Node = null!;
+    pointA: Node = null!; // Node1
 
-    /* ================== MOVE ================== */
+    @property(Node)
+    pointB: Node = null!; // Node2
 
-    @property({ tooltip: 'Tốc độ di chuyển (m/s)' })
+    /* ================= MOVE ================= */
+
+    @property
     moveSpeed: number = 1.5;
 
-    @property({ tooltip: 'Khoảng cách coi như tới nơi' })
+    @property
     stopDistance: number = 0.2;
 
-    /* ================== ROTATION ================== */
+    /* ================= ROTATION ================= */
 
-    @property({ tooltip: 'Bù hướng model (0 / 90 / -90 / 180)' })
+    @property
     rotationOffsetY: number = 180;
 
-    /* ================== TIMING ================== */
-
-    @property
-    doingTime: number = 1.0;
-
-    @property
-    bedoTime: number = 0.6;
-
-    /* ================== ANIM ================== */
+    /* ================= ANIM ================= */
 
     @property(CatAnimationController)
     animCtrl: CatAnimationController = null!;
 
-    /* ================== INTERNAL ================== */
+    /* ================= INTERNAL ================= */
 
     private _state: ChefState = ChefState.Doing;
     private _currentTarget: Node = null!;
+    private _groundY: number = 0;
 
     private _dir = new Vec3();
     private _move = new Vec3();
     private _targetPos = new Vec3();
 
-    /* ================== LIFE ================== */
+    /* ================= LIFE ================= */
 
     start () {
-        this._currentTarget = this.pointB;
+        this._groundY = this.node.worldPosition.y;
+
+        // BẮT ĐẦU TẠI NODE1
+        this._currentTarget = this.pointA;
         this.enterDoing();
     }
 
     update (dt: number) {
-        if (this._state === ChefState.Walking) {
+        if (
+            this._state === ChefState.MoveWithBedo ||
+            this._state === ChefState.MoveWithWalk
+        ) {
             this.move3D(dt);
         }
     }
 
-    /* ================== FSM ================== */
+    /* ================= STATE ================= */
 
     private enterDoing () {
         this._state = ChefState.Doing;
         this.animCtrl.doDoing();
-        // this.animCtrl.setSpeed(1);
 
+        // sau khi Doing xong → đi sang Node2 bằng Bedo
         this.scheduleOnce(() => {
-            this.enterBedo();
-        }, this.doingTime);
+            this._currentTarget = this.pointB;
+            this.enterMoveWithBedo();
+        }, 1.0);
     }
 
-    private enterBedo () {
-        this._state = ChefState.Bedo;
+    private enterMoveWithBedo () {
+        this._state = ChefState.MoveWithBedo;
         this.animCtrl.doBedo();
-        // this.animCtrl.setSpeed(1);
-
-        this.scheduleOnce(() => {
-            this.enterWalk();
-        }, this.bedoTime);
     }
 
-    private enterWalk () {
-        this._state = ChefState.Walking;
+    private enterMoveWithWalk () {
+        this._state = ChefState.MoveWithWalk;
         this.animCtrl.doWalk();
-
-        // sync animation speed theo move speed
-        // this.animCtrl.setSpeed(this.moveSpeed);
     }
 
-    /* ================== MOVE 3D ================== */
+    /* ================= MOVE ================= */
 
     private move3D (dt: number) {
         const pos = this.node.worldPosition;
         this._currentTarget.getWorldPosition(this._targetPos);
 
-        // khóa Y
-        this._targetPos.y = pos.y;
+        this._targetPos.y = this._groundY;
 
         Vec3.subtract(this._dir, this._targetPos, pos);
-        const distance = this._dir.length();
+        const dist = this._dir.length();
 
-        if (distance <= this.stopDistance) {
+        if (dist <= this.stopDistance) {
             this.onReachTarget();
             return;
         }
 
         this._dir.normalize();
-
         this.rotateToDirection(this._dir);
 
         Vec3.multiplyScalar(this._move, this._dir, this.moveSpeed * dt);
         Vec3.add(this._move, pos, this._move);
 
+        this._move.y = this._groundY;
         this.node.setWorldPosition(this._move);
-
-        this.node.setPosition(this.node.position.x, 0, this.node.position.z);
+        // this.node.setPosition(this.node.x, 0, this.node.z);
     }
 
-    /* ================== ROTATE ================== */
+    /* ================= ROTATE ================= */
 
     private rotateToDirection (dir: Vec3) {
         const lookPos = new Vec3(
             this.node.worldPosition.x + dir.x,
-            this.node.worldPosition.y,
+            this._groundY,
             this.node.worldPosition.z + dir.z
         );
 
@@ -145,14 +135,17 @@ class ChefBehavior extends Component {
         }
     }
 
-    /* ================== TARGET ================== */
+    /* ================= TARGET ================= */
 
     private onReachTarget () {
-        this._currentTarget =
-            this._currentTarget === this.pointA ? this.pointB : this.pointA;
-
-        this.enterDoing();
+        if (this._state === ChefState.MoveWithBedo) {
+            // tới Node2 → quay về Node1 bằng Walk
+            this._currentTarget = this.pointA;
+            this.enterMoveWithWalk();
+        }
+        else if (this._state === ChefState.MoveWithWalk) {
+            // về Node1 → Doing
+            this.enterDoing();
+        }
     }
 }
-
-export default ChefBehavior
