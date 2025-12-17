@@ -2,33 +2,17 @@
   "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
-  "uuid": "63a8a028-b212-4c67-914a-14e987a7a5f8",
+  "uuid": "0e9a68ad-16ea-476c-9e8c-11f52c011a2d",
   "files": [
     "__original-animation-0.bin"
   ],
   "subMetas": {
-    "71119": {
-      "importer": "gltf-scene",
-      "uuid": "63a8a028-b212-4c67-914a-14e987a7a5f8@71119",
-      "displayName": "",
-      "id": "71119",
-      "name": "Idle_Customer_v01.prefab",
-      "userData": {
-        "gltfIndex": 0
-      },
-      "ver": "1.0.14",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
     "73b7f": {
       "importer": "gltf-animation",
-      "uuid": "63a8a028-b212-4c67-914a-14e987a7a5f8@73b7f",
+      "uuid": "0e9a68ad-16ea-476c-9e8c-11f52c011a2d@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Dung.animation",
+      "name": "Idle_Ver01.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
@@ -37,16 +21,28 @@
           "from": 0,
           "to": 3.200000047683716
         },
-        "events": [],
-        "additive": {
-          "enabled": false,
-          "refClip": ""
-        }
+        "events": []
       },
       "ver": "1.0.18",
       "imported": true,
       "files": [
         ".bin"
+      ],
+      "subMetas": {}
+    },
+    "eb655": {
+      "importer": "gltf-scene",
+      "uuid": "0e9a68ad-16ea-476c-9e8c-11f52c011a2d@eb655",
+      "displayName": "",
+      "id": "eb655",
+      "name": "Idle_Ver01.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
       ],
       "subMetas": {}
     }
@@ -63,15 +59,11 @@
         "fps": 30,
         "splits": [
           {
-            "name": "Dung",
+            "name": "Idle_Ver01",
             "from": 0,
             "to": 3.200000047683716,
             "wrapMode": 2,
-            "previousId": "73b7f",
-            "additive": {
-              "enabled": false,
-              "refClip": ""
-            }
+            "previousId": "73b7f"
           }
         ]
       }
@@ -100,7 +92,7 @@
       "textures": [],
       "materials": [],
       "scenes": [
-        "63a8a028-b212-4c67-914a-14e987a7a5f8@71119"
+        "0e9a68ad-16ea-476c-9e8c-11f52c011a2d@eb655"
       ]
     }
   }
