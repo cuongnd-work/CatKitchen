@@ -39,6 +39,9 @@ export class ChefBehavior extends Component {
     @property(Node)
     hamburger: Node = null;
 
+    @property(Node)
+    coin: Node = null;
+
     /* ================= ANIM ================= */
 
     @property(CatAnimationController)
@@ -102,6 +105,12 @@ export class ChefBehavior extends Component {
         this._state = ChefState.MoveWithWalk;
         this.animCtrl.doWalk();
         this.hamburger.active = false;
+
+        this.coin.active = true;
+
+        setTimeout(() => {
+            this.coin.active = false;
+        }, 500);
     }
 
     /* ================= MOVE ================= */
