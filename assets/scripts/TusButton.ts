@@ -4,14 +4,16 @@ import {
     Component,
     Sprite,
     Node,
-    Animation,
+    Vec3,
     AudioSource,
-    AudioClip
+    AudioClip,
+    Prefab
 } from 'cc';
 import { zoom_button } from "db://assets/scripts/zoom_button";
 import { ChefBehavior } from "./ChefBehavior";
 import super_html_script from "db://assets/plugins/playable-foundation/super-html/super_html_script";
 import {CurrencyView} from "db://assets/scripts/CurrencyView";
+import {object_pool_manager} from "db://assets/plugins/playable-foundation/game-foundation/object_pool";
 
 const { ccclass, property } = _decorator;
 
@@ -35,6 +37,12 @@ export class TusButton extends Component {
 
     @property(Node)
     public end: Node = null!;
+
+    @property(Prefab)
+    flash: Prefab = null!;
+
+    @property(Node)
+    public flashParent: Node = null!;
 
     @property(zoom_button)
     public zoom_button1: zoom_button = null!;
@@ -74,6 +82,7 @@ export class TusButton extends Component {
         if(!CurrencyView.instance.trySubtractCurrency(100)) return;
 
         this.playClickSound();
+        object_pool_manager.instance.Spawn(this.flash, new Vec3(0,0,0), null, this.flashParent);
 
         this._count++;
 
