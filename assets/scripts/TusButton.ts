@@ -89,9 +89,13 @@ export class TusButton extends Component {
         this.setButtonInteractable(this.buttonWorker, false);
     }
 
+    public isCompleted: boolean = false;
+
     /* ================= CLICK ================= */
 
     public ButtonSpeedClicker (): void {
+        if(this.isCompleted) return;
+
         if(!CurrencyView.instance.trySubtractCurrency(100)) return;
 
         this.playClickSound();
@@ -106,6 +110,7 @@ export class TusButton extends Component {
             if (this._count >= this.countMax)
             {
                 this.endAnim?.play();
+                this.isCompleted = true;
                 this.end.active = true;
             }
 
