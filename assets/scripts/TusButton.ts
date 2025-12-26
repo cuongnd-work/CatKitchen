@@ -140,7 +140,7 @@ export class TusButton extends Component {
     public worker: Node = null;
 
     public ButtonWorkerClicker (): void {
-        if(!CurrencyView.instance.trySubtractCurrency(500)) return;
+        if(!CurrencyView.instance.trySubtractCurrency(250)) return;
 
         this.playClickSound();
 
