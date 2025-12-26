@@ -7,7 +7,8 @@ import {
     Vec3,
     AudioSource,
     AudioClip,
-    Prefab
+    Prefab,
+    Animation
 } from 'cc';
 import { zoom_button } from "db://assets/scripts/zoom_button";
 import { ChefBehavior } from "./ChefBehavior";
@@ -32,11 +33,20 @@ export class TusButton extends Component {
     @property(ChefBehavior)
     public chefBehavior: ChefBehavior = null!;
 
+    @property(ChefBehavior)
+    public chefWorkerBehavior: ChefBehavior = null!;
+
     @property(Node)
     public handTarget: Node = null!;
 
     @property(Node)
+    public handTarget2: Node = null!;
+
+    @property(Node)
     public end: Node = null!;
+
+    @property(Animation)
+    public endAnim: Animation = null!;
 
     @property(Prefab)
     flash: Prefab = null!;
@@ -63,6 +73,9 @@ export class TusButton extends Component {
 
     private _count: number = 0;
 
+    @property({ tooltip: 'Số lần click cần thiết worker' })
+    public countWorkerMax: number = 3;
+
     /* ================= LIFE ================= */
 
     start () {
@@ -86,7 +99,20 @@ export class TusButton extends Component {
 
         this._count++;
 
-        this.chefBehavior.currentSpeed += 2.5;
+        if(this.isWorkerActive)
+        {
+            this.chefWorkerBehavior.currentSpeed += 3;
+
+            if (this._count >= this.countMax)
+            {
+                this.endAnim.play();
+                this.end.active = true;
+            }
+
+            return;
+        }
+
+        this.chefBehavior.currentSpeed += 3;
 
         if (this._count >= this.countMax) {
 
@@ -103,15 +129,32 @@ export class TusButton extends Component {
         }
     }
 
+    private isWorkerActive: boolean = false;
+
+    @property(Node)
+    public worker: Node = null;
+
     public ButtonWorkerClicker (): void {
+        if(!CurrencyView.instance.trySubtractCurrency(500)) return;
+
         this.playClickSound();
 
         this.setButtonInteractable(this.buttonSpeed, false);
 
-        super_html_script.on_click_game_end();
-        super_html_script.on_click_download();
+        this.worker.active = true;
 
-        this.end.active = true;
+        this.zoom_button2.stopZoomAndReset();
+        this.zoom_button1.startZoom();
+
+        this.setSpriteAlpha(this.zoom_button2.node, 100);
+        this.setSpriteAlpha(this.zoom_button1.node, 255);
+
+        this.setButtonInteractable(this.buttonSpeed, true);
+        this.setButtonInteractable(this.buttonWorker, false);
+
+        this.hand.position = this.handTarget2.position;
+
+        this.isWorkerActive = true;
     }
 
     /* ================= SOUND ================= */
