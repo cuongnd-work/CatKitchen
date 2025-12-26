@@ -105,7 +105,7 @@ export class TusButton extends Component {
 
             if (this._count >= this.countMax)
             {
-                this.endAnim.play();
+                this.endAnim?.play();
                 this.end.active = true;
             }
 
