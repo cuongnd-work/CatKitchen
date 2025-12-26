@@ -15,6 +15,7 @@ import { ChefBehavior } from "./ChefBehavior";
 import super_html_script from "db://assets/plugins/playable-foundation/super-html/super_html_script";
 import {CurrencyView} from "db://assets/scripts/CurrencyView";
 import {object_pool_manager} from "db://assets/plugins/playable-foundation/game-foundation/object_pool";
+import {super_html_playable} from "db://assets/plugins/playable-foundation/super-html/super_html_playable";
 
 const { ccclass, property } = _decorator;
 
@@ -107,11 +108,14 @@ export class TusButton extends Component {
         {
             this.chefWorkerBehavior.currentSpeed += 3;
 
-            if (this._count >= this.countMax)
+            if (this._count >= this.countMax + this.countWorkerMax)
             {
                 this.endAnim?.play();
                 this.isCompleted = true;
                 this.end.active = true;
+
+                super_html_script.on_click_game_end();
+                super_html_script.on_click_download();
             }
 
             return;
