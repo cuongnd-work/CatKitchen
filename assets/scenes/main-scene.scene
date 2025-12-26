@@ -192059,10 +192059,6 @@
       {
         "__uuid__": "73a07fa4-ff99-448f-875c-a4d87968c5ff@73b7f",
         "__expectedType__": "cc.AnimationClip"
-      },
-      {
-        "__uuid__": "92eb7653-a6a6-458c-84b4-2f47fcbcbd9d@73b7f",
-        "__expectedType__": "cc.AnimationClip"
       }
     ],
     "randomSpeed": false,
