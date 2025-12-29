@@ -156,7 +156,6 @@ export class ChefBehavior extends Component {
         const manager = this.resolveQueueManagerReference();
         if (this.columnIndex >= 0 || !manager || !this.animCtrl) {
             if (this.columnIndex < 0 && !manager) {
-                console.warn('[ChefBehavior] queue manager missing, cannot resolve column');
             }
             return;
         }
@@ -164,9 +163,7 @@ export class ChefBehavior extends Component {
         const detectedIndex = manager.getColumnIndexForNode(this.animCtrl.node);
         if (detectedIndex >= 0) {
             this.columnIndex = detectedIndex;
-            console.log('[ChefBehavior] auto-detected column', this.columnIndex, 'for', this.animCtrl.node.name);
         } else {
-            console.warn('[ChefBehavior] failed to detect column for', this.animCtrl.node.name);
         }
     }
 
@@ -175,45 +172,37 @@ export class ChefBehavior extends Component {
 
         const manager = this.resolveQueueManagerReference();
         if (!manager || this.columnIndex < 0) {
-            console.warn('[ChefBehavior] cannot assign front customer (manager missing or column unset)');
             return;
         }
 
         const frontNode = manager.getFrontCustomerNode(this.columnIndex);
         if (!frontNode) {
-            console.warn('[ChefBehavior] column', this.columnIndex, 'has no customers');
             return;
         }
 
         const nextCtrl = frontNode.getComponent(CatAnimationController);
         if (!nextCtrl || nextCtrl === this.animCtrl) {
             if (!nextCtrl) {
-                console.warn('[ChefBehavior] front node has no CatAnimationController', frontNode.name);
             } else {
-                console.log('[ChefBehavior] front node already assigned', frontNode.name);
             }
             return;
         }
 
         this.animCtrl = nextCtrl;
-        console.log('[ChefBehavior] assigned customer', nextCtrl.node.name, 'for column', this.columnIndex);
         this.updateQueueAdvanceSpeed();
     }
 
     private onCustomerOrderCompleted (customerNode: Node): void {
         const manager = this.resolveQueueManagerReference();
         if (!manager || !this.animCtrl) {
-            console.warn('[ChefBehavior] event ignored, missing manager/animCtrl');
             return;
         }
 
         const resolved = manager.resolveCustomerNode(customerNode);
         if (!resolved || resolved !== this.animCtrl.node) {
-            console.log('[ChefBehavior] event not for this chef', customerNode.name);
             return;
         }
 
-        console.log('[ChefBehavior] customer completed', customerNode.name, '- scheduling next assignment');
         this.scheduleOnce(() => {
             this.assignFrontCustomer();
         }, 0);

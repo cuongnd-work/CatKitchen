@@ -40,6 +40,9 @@ export class CustomersQueueManager extends Component {
     @property({ tooltip: 'Thời gian tween mèo rời hàng (giây)', min: 0 })
     exitDuration = 0.35;
 
+    @property({ tooltip: 'Hệ số làm chậm mèo khi rời hàng (>=1 chậm hơn)', min: 0 })
+    exitDurationScale = 1.5;
+
     @property({ tooltip: 'Thời gian chờ trước khi mèo quay lại cuối hàng', min: 0 })
     rejoinDelay = 0.1;
 
@@ -114,13 +117,11 @@ export class CustomersQueueManager extends Component {
     private onOrderCompleted (customerNode: Node): void {
         const entry = this.findEntry(customerNode);
         if (!entry) {
-            console.log('[CustomersQueueManager] order completed but entry not found for', customerNode.name);
             return;
         }
 
         const column = entry.column;
         if (!column || column.entries.length === 0) {
-            console.log('[CustomersQueueManager] no column/entries for', customerNode.name);
             return;
         }
 
@@ -128,16 +129,13 @@ export class CustomersQueueManager extends Component {
         if (frontEntry !== entry) {
             const index = column.entries.indexOf(entry);
             if (index < 0) {
-                console.warn('[CustomersQueueManager] completed customer not found in column list', customerNode.name);
                 return;
             }
 
-            console.warn('[CustomersQueueManager] completed customer not at front, correcting order', customerNode.name);
             column.entries.splice(index, 1);
             column.entries.unshift(entry);
         }
 
-        console.log('[CustomersQueueManager] handling completed customer', customerNode.name, 'column', column.sortIndex, 'remaining', column.entries.length - 1);
         column.entries.shift();
         const rejoinSlot = this.shiftColumnForward(column, entry.targetPosition);
         this.animateDeparture(entry, rejoinSlot);
@@ -156,8 +154,10 @@ export class CustomersQueueManager extends Component {
             sequence.to(this.sideStepDuration, { position: sideTarget }, { easing: 'sineOut' });
         }
 
+        const exitOutDuration = Math.max(0.01, this.exitDuration * Math.max(0.01, this.exitDurationScale));
+
         sequence
-            .to(this.exitDuration, { position: finalTarget }, { easing: 'sineIn' })
+            .to(exitOutDuration, { position: finalTarget }, { easing: 'sineIn' })
             .call(() => {
                 this._entryLookup.delete(entry.node.uuid);
             });
@@ -166,10 +166,11 @@ export class CustomersQueueManager extends Component {
             sequence.delay(this.rejoinDelay);
         }
 
+        const returnDuration = Math.max(this.rejoinDuration > 0 ? this.rejoinDuration : this.shiftDuration, 0.01);
+
         sequence
-            .to(Math.max(this.rejoinDuration, 0), { position: rejoinSlot }, { easing: 'sineOut' })
+            .to(returnDuration, { position: rejoinSlot }, { easing: 'sineOut' })
             .call(() => {
-                console.log('[CustomersQueueManager] reinsert customer at tail', entry.node.name);
                 this.reinsertEntry(entry, rejoinSlot);
             })
             .start();
@@ -187,6 +188,9 @@ export class CustomersQueueManager extends Component {
         column.entries.forEach((queueEntry) => {
             const previousSlot = cloneVec3(queueEntry.targetPosition);
             queueEntry.targetPosition = cloneVec3(nextSlot);
+
+            tween(queueEntry.node)
+                .stop();
 
             tween(queueEntry.node)
                 .to(advanceDuration, { position: queueEntry.targetPosition }, { easing: 'sineOut' })

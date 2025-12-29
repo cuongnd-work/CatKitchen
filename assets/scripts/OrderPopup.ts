@@ -91,7 +91,6 @@ export class OrderPopup extends Component {
     private notifyOrderCompleted (): void {
         const customerNode = this.findCustomerNode();
         if (customerNode) {
-            console.log('[OrderPopup] order completed ->', customerNode.name);
             CustomersQueueEvents.emitOrderCompleted(customerNode);
         }
 

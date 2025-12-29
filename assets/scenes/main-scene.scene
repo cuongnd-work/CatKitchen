@@ -192347,6 +192347,7 @@
     "sideStepDistance": 0.8,
     "sideStepDuration": 0.2,
     "exitDuration": 0.35,
+    "exitDurationScale": 1.5,
     "rejoinDelay": 0.1,
     "rejoinDuration": 0.4,
     "shiftDuration": 0.25,
