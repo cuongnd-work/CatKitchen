@@ -51,6 +51,7 @@ export class CustomersQueueManager extends Component {
 
     private _columns: ColumnData[] = [];
     private _entryLookup = new Map<string, QueueEntry>();
+    private _columnAdvanceMultipliers = new Map<number, number>();
 
     onLoad (): void {
         CustomersQueueEvents.on(CustomersQueueEvent.ORDER_COMPLETED, this.onOrderCompleted, this);
@@ -111,21 +112,32 @@ export class CustomersQueueManager extends Component {
     }
 
     private onOrderCompleted (customerNode: Node): void {
-        const entry = this._entryLookup.get(customerNode.uuid);
+        const entry = this.findEntry(customerNode);
         if (!entry) {
+            console.log('[CustomersQueueManager] order completed but entry not found for', customerNode.name);
             return;
         }
 
         const column = entry.column;
         if (!column || column.entries.length === 0) {
+            console.log('[CustomersQueueManager] no column/entries for', customerNode.name);
             return;
         }
 
         const frontEntry = column.entries[0];
         if (frontEntry !== entry) {
-            return;
+            const index = column.entries.indexOf(entry);
+            if (index < 0) {
+                console.warn('[CustomersQueueManager] completed customer not found in column list', customerNode.name);
+                return;
+            }
+
+            console.warn('[CustomersQueueManager] completed customer not at front, correcting order', customerNode.name);
+            column.entries.splice(index, 1);
+            column.entries.unshift(entry);
         }
 
+        console.log('[CustomersQueueManager] handling completed customer', customerNode.name, 'column', column.sortIndex, 'remaining', column.entries.length - 1);
         column.entries.shift();
         const rejoinSlot = this.shiftColumnForward(column, entry.targetPosition);
         this.animateDeparture(entry, rejoinSlot);
@@ -157,6 +169,7 @@ export class CustomersQueueManager extends Component {
         sequence
             .to(Math.max(this.rejoinDuration, 0), { position: rejoinSlot }, { easing: 'sineOut' })
             .call(() => {
+                console.log('[CustomersQueueManager] reinsert customer at tail', entry.node.name);
                 this.reinsertEntry(entry, rejoinSlot);
             })
             .start();
@@ -169,18 +182,65 @@ export class CustomersQueueManager extends Component {
             return nextSlot;
         }
 
+        const advanceDuration = this.getColumnAdvanceDuration(column);
+
         column.entries.forEach((queueEntry) => {
             const previousSlot = cloneVec3(queueEntry.targetPosition);
             queueEntry.targetPosition = cloneVec3(nextSlot);
 
             tween(queueEntry.node)
-                .to(this.shiftDuration, { position: queueEntry.targetPosition }, { easing: 'sineOut' })
+                .to(advanceDuration, { position: queueEntry.targetPosition }, { easing: 'sineOut' })
                 .start();
 
             nextSlot = previousSlot;
         });
 
         return nextSlot;
+    }
+
+    public setColumnAdvanceMultiplier (columnIndex: number, multiplier: number): void {
+        this._columnAdvanceMultipliers.set(columnIndex, Math.max(0.1, multiplier));
+    }
+
+    private getColumnAdvanceDuration (column: ColumnData): number {
+        const multiplier = this._columnAdvanceMultipliers.get(column.sortIndex) ?? 1;
+        return Math.max(0.01, this.shiftDuration / multiplier);
+    }
+
+    public resolveCustomerNode (startNode: Node | null): Node | null {
+        const entry = this.findEntry(startNode);
+        return entry ? entry.node : null;
+    }
+
+    public getColumnIndexForNode (startNode: Node | null): number {
+        const entry = this.findEntry(startNode);
+        return entry ? entry.column.sortIndex : -1;
+    }
+
+    public getFrontCustomerNode (columnIndex: number): Node | null {
+        const column = this.getColumnByIndex(columnIndex);
+        if (!column || column.entries.length === 0) {
+            return null;
+        }
+
+        return column.entries[0].node;
+    }
+
+    private getColumnByIndex (columnIndex: number): ColumnData | null {
+        return this._columns.find((col) => col.sortIndex === columnIndex) ?? null;
+    }
+
+    private findEntry (startNode: Node | null): QueueEntry | null {
+        let current: Node | null = startNode;
+        while (current) {
+            const entry = this._entryLookup.get(current.uuid);
+            if (entry) {
+                return entry;
+            }
+            current = current.parent;
+        }
+
+        return null;
     }
 
     private getSideStepDirection (column: ColumnData): number {

@@ -1,5 +1,7 @@
 import { _decorator, Component, Node, Vec3, Quat, Mat4 } from 'cc';
 import { CatAnimationController } from './CatAnimationController';
+import { CustomersQueueManager } from 'db://assets/scripts/customers/CustomersQueueManager';
+import { CustomersQueueEvent, CustomersQueueEvents } from 'db://assets/scripts/customers/CustomersQueueEvents';
 
 const { ccclass, property } = _decorator;
 
@@ -15,60 +17,91 @@ export class ChefBehavior extends Component {
     /* ================= TARGET ================= */
 
     @property(Node)
-    pointA: Node = null!; // Node1
+    pointA: Node = null!;
 
     @property(Node)
-    pointB: Node = null!; // Node2
+    pointB: Node = null!;
 
     /* ================= MOVE ================= */
 
     @property
-    public speed: number = 5;
+    public speed = 5;
 
     @property
-    public currentSpeed: number = 5;
+    public currentSpeed = 5;
 
     @property
-    stopDistance: number = 0.2;
+    stopDistance = 0.2;
 
     /* ================= ROTATION ================= */
 
     @property
-    rotationOffsetY: number = 180;
+    rotationOffsetY = 180;
 
     @property(Node)
-    hamburger: Node = null;
+    hamburger: Node = null!;
 
     @property(Node)
-    coin: Node = null;
+    coin: Node = null!;
 
     /* ================= ANIM ================= */
 
     @property(CatAnimationController)
     animCtrl: CatAnimationController = null!;
 
+    @property(CustomersQueueManager)
+    queueManager: CustomersQueueManager = null;
+
+    @property({ tooltip: 'Chỉ số hàng mèo mà đầu bếp phục vụ. Đặt -1 để tự động lấy theo mèo đầu tiên.' })
+    columnIndex = -1;
+
     /* ================= INTERNAL ================= */
 
     private _state: ChefState = ChefState.Doing;
     private _currentTarget: Node = null!;
-    private _groundY: number = 0;
+    private _groundY = 0;
 
     private _dir = new Vec3();
     private _move = new Vec3();
     private _targetPos = new Vec3();
 
+    private _invParentMat = new Mat4();
+    private _localPos = new Vec3();
+
+    private _invParentRot = new Quat();
+    private _localDir = new Vec3();
+    private _rotQuat = new Quat();
+    private _lastSpeedForQueue = -1;
+
     /* ================= LIFE ================= */
 
-    start () {
+    protected onLoad (): void {
+        CustomersQueueEvents.on(CustomersQueueEvent.ORDER_COMPLETED, this.onCustomerOrderCompleted, this);
+    }
+
+    protected onDestroy (): void {
+        CustomersQueueEvents.off(CustomersQueueEvent.ORDER_COMPLETED, this.onCustomerOrderCompleted, this);
+    }
+
+    start (): void {
         this._groundY = this.node.worldPosition.y;
 
-        // BẮT ĐẦU TẠI NODE1
         this._currentTarget = this.pointA;
         this.enterDoing();
         this.hamburger.active = false;
+        this.resolveQueueManagerReference();
+        this.resolveColumnFromCurrentCustomer();
+        this.assignFrontCustomer();
+        this._lastSpeedForQueue = this.currentSpeed;
+        this.updateQueueAdvanceSpeed();
     }
 
-    update (dt: number) {
+    update (dt: number): void {
+        if (this.currentSpeed !== this._lastSpeedForQueue) {
+            this._lastSpeedForQueue = this.currentSpeed;
+            this.updateQueueAdvanceSpeed();
+        }
+
         if (
             this._state === ChefState.MoveWithBedo ||
             this._state === ChefState.MoveWithWalk
@@ -79,7 +112,7 @@ export class ChefBehavior extends Component {
 
     /* ================= STATE ================= */
 
-    private enterDoing () {
+    private enterDoing (): void {
         this._state = ChefState.Doing;
         this.animCtrl.doDoing();
 
@@ -96,27 +129,137 @@ export class ChefBehavior extends Component {
         return 1 * this.speed / this.currentSpeed;
     }
 
-    private enterMoveWithBedo () {
+    private enterMoveWithBedo (): void {
+        this.assignFrontCustomer();
         this._state = ChefState.MoveWithBedo;
         this.animCtrl.doBedo();
     }
 
-    private enterMoveWithWalk () {
+    private enterMoveWithWalk (): void {
         this._state = ChefState.MoveWithWalk;
         this.animCtrl.doWalk();
         this.hamburger.active = false;
 
         this.coin.active = true;
 
-        if(this.currentSpeed >= 10) return;
+        if (this.currentSpeed >= 10) {
+            return;
+        }
         setTimeout(() => {
             this.coin.active = false;
         }, 1000);
     }
 
+    /* ================= CUSTOMER ================= */
+
+    private resolveColumnFromCurrentCustomer (): void {
+        const manager = this.resolveQueueManagerReference();
+        if (this.columnIndex >= 0 || !manager || !this.animCtrl) {
+            if (this.columnIndex < 0 && !manager) {
+                console.warn('[ChefBehavior] queue manager missing, cannot resolve column');
+            }
+            return;
+        }
+
+        const detectedIndex = manager.getColumnIndexForNode(this.animCtrl.node);
+        if (detectedIndex >= 0) {
+            this.columnIndex = detectedIndex;
+            console.log('[ChefBehavior] auto-detected column', this.columnIndex, 'for', this.animCtrl.node.name);
+        } else {
+            console.warn('[ChefBehavior] failed to detect column for', this.animCtrl.node.name);
+        }
+    }
+
+    private assignFrontCustomer (): void {
+        this.resolveColumnFromCurrentCustomer();
+
+        const manager = this.resolveQueueManagerReference();
+        if (!manager || this.columnIndex < 0) {
+            console.warn('[ChefBehavior] cannot assign front customer (manager missing or column unset)');
+            return;
+        }
+
+        const frontNode = manager.getFrontCustomerNode(this.columnIndex);
+        if (!frontNode) {
+            console.warn('[ChefBehavior] column', this.columnIndex, 'has no customers');
+            return;
+        }
+
+        const nextCtrl = frontNode.getComponent(CatAnimationController);
+        if (!nextCtrl || nextCtrl === this.animCtrl) {
+            if (!nextCtrl) {
+                console.warn('[ChefBehavior] front node has no CatAnimationController', frontNode.name);
+            } else {
+                console.log('[ChefBehavior] front node already assigned', frontNode.name);
+            }
+            return;
+        }
+
+        this.animCtrl = nextCtrl;
+        console.log('[ChefBehavior] assigned customer', nextCtrl.node.name, 'for column', this.columnIndex);
+        this.updateQueueAdvanceSpeed();
+    }
+
+    private onCustomerOrderCompleted (customerNode: Node): void {
+        const manager = this.resolveQueueManagerReference();
+        if (!manager || !this.animCtrl) {
+            console.warn('[ChefBehavior] event ignored, missing manager/animCtrl');
+            return;
+        }
+
+        const resolved = manager.resolveCustomerNode(customerNode);
+        if (!resolved || resolved !== this.animCtrl.node) {
+            console.log('[ChefBehavior] event not for this chef', customerNode.name);
+            return;
+        }
+
+        console.log('[ChefBehavior] customer completed', customerNode.name, '- scheduling next assignment');
+        this.scheduleOnce(() => {
+            this.assignFrontCustomer();
+        }, 0);
+    }
+
+    private resolveQueueManagerReference (): CustomersQueueManager | null {
+        if (this.queueManager) {
+            return this.queueManager;
+        }
+
+        let current: Node | null = this.node;
+        while (current) {
+            const manager = current.getComponent(CustomersQueueManager);
+            if (manager) {
+                this.queueManager = manager;
+                return manager;
+            }
+            current = current.parent;
+        }
+
+        const scene = this.node.scene;
+        if (scene) {
+            const manager = scene.getComponentInChildren(CustomersQueueManager);
+            if (manager) {
+                this.queueManager = manager;
+                return manager;
+            }
+        }
+
+        return null;
+    }
+
+    private updateQueueAdvanceSpeed (): void {
+        const manager = this.resolveQueueManagerReference();
+        if (!manager || this.columnIndex < 0) {
+            return;
+        }
+
+        const base = Math.max(0.1, this.speed);
+        const ratio = Math.max(0.1, this.currentSpeed) / base;
+        manager.setColumnAdvanceMultiplier(this.columnIndex, ratio);
+    }
+
     /* ================= MOVE ================= */
 
-    private move3D (dt: number) {
+    private move3D (dt: number): void {
         const pos = this.node.worldPosition;
         this._currentTarget.getWorldPosition(this._targetPos);
         this._targetPos.y = pos.y;
@@ -141,51 +284,31 @@ export class ChefBehavior extends Component {
         this.setWorldPosKeepLocalY0(this._move);
     }
 
-
-    private _invParentMat = new Mat4();
-    private _localPos = new Vec3();
-
-    private setWorldPosKeepLocalY0 (worldPos: Vec3) {
+    private setWorldPosKeepLocalY0 (worldPos: Vec3): void {
         const parent = this.node.parent;
         if (!parent) {
-            // không có parent → local = world
             this.node.setPosition(worldPos.x, 0, worldPos.z);
             return;
         }
 
-        // inverse parent world matrix
         Mat4.invert(this._invParentMat, parent.worldMatrix);
-
-        // world → local
         Vec3.transformMat4(this._localPos, worldPos, this._invParentMat);
-
-        // ÉP LOCAL Y = 0
         this._localPos.y = 0;
-
-        // set LOCAL position
         this.node.setPosition(this._localPos);
     }
 
     /* ================= ROTATE ================= */
 
-    private _invParentRot = new Quat();
-    private _localDir = new Vec3();
-    private _rotQuat = new Quat();
-
-    private rotateLocalToWorldDir (worldDir: Vec3) {
+    private rotateLocalToWorldDir (worldDir: Vec3): void {
         const parent = this.node.parent;
 
         if (parent) {
-            // inverse parent WORLD rotation
             Quat.invert(this._invParentRot, parent.worldRotation);
-
-            // world dir -> local dir
             Vec3.transformQuat(this._localDir, worldDir, this._invParentRot);
         } else {
             this._localDir.set(worldDir);
         }
 
-        // chỉ xoay quanh trục Y local
         const angleY = Math.atan2(this._localDir.x, this._localDir.z) * 180 / Math.PI;
 
         Quat.fromEuler(
@@ -195,20 +318,17 @@ export class ChefBehavior extends Component {
             0
         );
 
-        // SET LOCAL ROTATION
         this.node.setRotation(this._rotQuat);
     }
 
     /* ================= TARGET ================= */
 
-    private onReachTarget () {
+    private onReachTarget (): void {
         if (this._state === ChefState.MoveWithBedo) {
-            // tới Node2 → quay về Node1 bằng Walk
             this._currentTarget = this.pointA;
             this.enterMoveWithWalk();
         }
         else if (this._state === ChefState.MoveWithWalk) {
-            // về Node1 → Doing
             this.enterDoing();
         }
     }

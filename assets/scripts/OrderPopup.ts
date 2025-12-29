@@ -1,5 +1,6 @@
 import { _decorator, Component, SpriteRenderer, SpriteFrame, Label, Node, EventHandler } from 'cc';
 import { CustomersQueueEvents } from 'db://assets/scripts/customers/CustomersQueueEvents';
+import { CatAnimationController } from 'db://assets/scripts/CatAnimationController';
 const { ccclass, property } = _decorator;
 
 @ccclass('OrderPopup')
@@ -88,14 +89,28 @@ export class OrderPopup extends Component {
     }
 
     private notifyOrderCompleted (): void {
-        const customerNode = this.node?.parent ?? this.node;
+        const customerNode = this.findCustomerNode();
         if (customerNode) {
+            console.log('[OrderPopup] order completed ->', customerNode.name);
             CustomersQueueEvents.emitOrderCompleted(customerNode);
         }
 
         if (this.orderCompletedEvents.length > 0) {
             EventHandler.emitEvents(this.orderCompletedEvents, this);
         }
+    }
+
+    private findCustomerNode (): Node | null {
+        let current: Node | null = this.node;
+        while (current) {
+            if (current.getComponent(CatAnimationController)) {
+                return current;
+            }
+
+            current = current.parent;
+        }
+
+        return this.node;
     }
 
     /* ================= CORE ================= */

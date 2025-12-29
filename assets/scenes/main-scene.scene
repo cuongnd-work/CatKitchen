@@ -192347,6 +192347,8 @@
     "sideStepDistance": 0.8,
     "sideStepDuration": 0.2,
     "exitDuration": 0.35,
+    "rejoinDelay": 0.1,
+    "rejoinDuration": 0.4,
     "shiftDuration": 0.25,
     "_id": "84D63AKgBAn6DeF9ZwPOdn"
   },
@@ -198093,6 +198095,10 @@
     "animCtrl": {
       "__id__": 5033
     },
+    "queueManager": {
+      "__id__": 4895
+    },
+    "columnIndex": -1,
     "_id": "97As+PTj9FhI/45reAhIa3"
   },
   {
@@ -203994,6 +204000,10 @@
     "animCtrl": {
       "__id__": 5177
     },
+    "queueManager": {
+      "__id__": 4895
+    },
+    "columnIndex": -1,
     "_id": "98mWYWdPJFqY4EHVTCV7G1"
   },
   {
