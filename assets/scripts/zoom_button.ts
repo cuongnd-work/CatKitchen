@@ -13,10 +13,21 @@ export class zoom_button extends Component {
     @property
     delay: number = 200;
 
+    @property
+    isStartAnim: boolean = false;
+
+    @property
+    origin: Vec3 = new Vec3(0.8, 0.8, 0.8);
+
     private _originScale = new Vec3(0.8, 0.8, 0.8);
     private _zoomTween: Tween | null = null;
 
     start() {
+        this._originScale = this.origin;
+
+        if(this.isStartAnim){
+            this.startZoom();
+        }
     }
 
     public startZoom () {
