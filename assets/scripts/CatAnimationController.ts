@@ -15,6 +15,8 @@ export class CatAnimationController extends Component {
         this.resolveOrderPopup();
     }
 
+    public sellTargetPopup: OrderPopup | null = null;
+
     private resolveOrderPopup (): OrderPopup | null {
         if (!this.orderPopup) {
             this.orderPopup = this.getComponentInChildren(OrderPopup);
@@ -28,9 +30,13 @@ export class CatAnimationController extends Component {
     }
 
     public doWalk(){
-        const popup = this.resolveOrderPopup();
-        if (popup) {
-            popup.sell();
+        // const popup = this.resolveOrderPopup();
+        // if (popup) {
+        //     popup.sell();
+        // }
+
+        if(this.sellTargetPopup){
+            this.sellTargetPopup.sell();
         }
 
         if (CurrencyView.instance) {

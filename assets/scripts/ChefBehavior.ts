@@ -2,6 +2,7 @@ import { _decorator, Component, Node, Vec3, Quat, Mat4 } from 'cc';
 import { CatAnimationController } from './CatAnimationController';
 import { CustomersQueueManager } from 'db://assets/scripts/customers/CustomersQueueManager';
 import { CustomersQueueEvent, CustomersQueueEvents } from 'db://assets/scripts/customers/CustomersQueueEvents';
+import {MoveTargetProvider} from "db://assets/scripts/MoveTargetProvider";
 
 const { ccclass, property } = _decorator;
 
@@ -113,6 +114,19 @@ export class ChefBehavior extends Component {
     /* ================= STATE ================= */
 
     private enterDoing (): void {
+        const provider = MoveTargetProvider.instance;
+        if (provider) {
+            const pair = provider.getRandomTargetPair();
+            if (pair.left) {
+                this.pointB = pair.left;
+            }
+
+            const targetAnim = this.animCtrl;
+            if (targetAnim && pair.right) {
+                targetAnim.sellTargetPopup = pair.right;
+            }
+        }
+
         this._state = ChefState.Doing;
         this.animCtrl.doDoing();
 

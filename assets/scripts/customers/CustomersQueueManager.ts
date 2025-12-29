@@ -138,7 +138,8 @@ export class CustomersQueueManager extends Component {
 
         column.entries.shift();
         const rejoinSlot = this.shiftColumnForward(column, entry.targetPosition);
-        this.animateDeparture(entry, rejoinSlot);
+        // this.animateDeparture(entry, rejoinSlot);
+        this.reinsertEntry(entry, rejoinSlot);
     }
 
     private animateDeparture (entry: QueueEntry, rejoinSlot: Vec3): void {
@@ -262,10 +263,12 @@ export class CustomersQueueManager extends Component {
 
     private reinsertEntry (entry: QueueEntry, slot: Vec3): void {
         entry.targetPosition = cloneVec3(slot);
+        entry.node.active = false;
         entry.node.setPosition(slot);
         entry.column.entries.push(entry);
         this._entryLookup.set(entry.node.uuid, entry);
         this.resetCustomerOrder(entry);
+        entry.node.active = true;
     }
 
     private resetCustomerOrder (entry: QueueEntry): void {
