@@ -553,33 +553,11 @@
       {
         "__uuid__": "aa0974cb-529b-4d1d-9b3d-e9410d5176c2@f9941",
         "__expectedType__": "cc.SpriteFrame"
-      },
-      {
-        "__uuid__": "3b5c2ec0-ef38-4801-a17d-0efca6e58551@f9941",
-        "__expectedType__": "cc.SpriteFrame"
-      },
-      {
-        "__uuid__": "fc116f6b-cee2-440f-9ea1-2f4f04764a1b@f9941",
-        "__expectedType__": "cc.SpriteFrame"
-      },
-      {
-        "__uuid__": "edf25e8a-9c00-4c54-9966-0e7d98f1fab4@f9941",
-        "__expectedType__": "cc.SpriteFrame"
-      },
-      {
-        "__uuid__": "3d7fde6e-7674-4cb5-8c4b-4a3299576169@f9941",
-        "__expectedType__": "cc.SpriteFrame"
-      },
-      {
-        "__uuid__": "104576bc-5822-43f0-b08a-04e6432cfd8a@f9941",
-        "__expectedType__": "cc.SpriteFrame"
-      },
-      {
-        "__uuid__": "8d0a2e1b-2f74-4d16-b744-b0d4fe8dd83a@f9941",
-        "__expectedType__": "cc.SpriteFrame"
       }
     ],
     "alwaysUseFirst": false,
+    "initialCount": 1,
+    "orderCompletedEvents": [],
     "_id": ""
   },
   {
