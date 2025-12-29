@@ -112,10 +112,7 @@ export class TusButton extends Component {
             {
                 this.endAnim?.play();
                 this.isCompleted = true;
-                this.end.active = true;
-
-                super_html_script.on_click_game_end();
-                super_html_script.on_click_download();
+                // this.end.active = true;
             }
 
             return;
