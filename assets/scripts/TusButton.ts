@@ -77,6 +77,16 @@ export class TusButton extends Component {
     @property({ tooltip: 'Số lần click cần thiết worker' })
     public countWorkerMax: number = 3;
 
+    private readonly speedCostAmount: number = 100;
+    private readonly workerCostAmount: number = 250;
+
+    private isB1Interact: boolean = true;
+    private isB2Interact: boolean = false;
+
+    private readonly currencyChangeHandler = () => {
+        this.refreshButtonAvailability();
+    };
+
     /* ================= LIFE ================= */
 
     start () {
@@ -88,6 +98,9 @@ export class TusButton extends Component {
 
         this.setButtonInteractable(this.buttonSpeed, true);
         this.setButtonInteractable(this.buttonWorker, false);
+
+        CurrencyView.onCurrencyChanged(this.currencyChangeHandler, this);
+        this.refreshButtonAvailability();
     }
 
     public isCompleted: boolean = false;
@@ -97,7 +110,7 @@ export class TusButton extends Component {
     public ButtonSpeedClicker (): void {
         if(this.isCompleted) return;
 
-        if(!CurrencyView.instance.trySubtractCurrency(100)) return;
+        if(!CurrencyView.instance.trySubtractCurrency(this.speedCostAmount)) return;
 
         this.playClickSound();
         object_pool_manager.instance.Spawn(this.flash, new Vec3(0,0,0), null, this.flashParent);
@@ -141,7 +154,7 @@ export class TusButton extends Component {
     public worker: Node = null;
 
     public ButtonWorkerClicker (): void {
-        if(!CurrencyView.instance.trySubtractCurrency(250)) return;
+        if(!CurrencyView.instance.trySubtractCurrency(this.workerCostAmount)) return;
 
         this.playClickSound();
 
@@ -182,8 +195,40 @@ export class TusButton extends Component {
         sprite.color = c;
     }
 
-    private setButtonInteractable (btn: Button, enable: boolean) {
+    private refreshButtonAvailability () {
+        const currencyView = CurrencyView.instance;
+        const canAffordSpeed = currencyView ? currencyView.canAfford(this.speedCostAmount) : true;
+        const canAffordWorker = currencyView ? currencyView.canAfford(this.workerCostAmount) : true;
+
+        this.applyButtonState(this.buttonSpeed, this.isB1Interact && canAffordSpeed, canAffordSpeed);
+        this.applyButtonState(this.buttonWorker, this.isB2Interact && canAffordWorker, canAffordWorker);
+    }
+
+    private applyButtonState (btn: Button, enable: boolean, canAfford: boolean) {
         if (!btn) return;
         btn.interactable = enable;
+        if(!enable) {
+            this.setSpriteAlpha(btn.node.parent, 100);
+            return;
+        }
+        this.setSpriteAlpha(btn.node.parent, canAfford ? 255 : 100);
+    }
+
+    private setButtonInteractable (btn: Button, enable: boolean) {
+        if (!btn) return;
+
+        if (btn === this.buttonSpeed) {
+            this.isB1Interact = enable;
+        } else if (btn === this.buttonWorker) {
+            this.isB2Interact = enable;
+        } else {
+            btn.interactable = enable;
+        }
+
+        this.refreshButtonAvailability();
+    }
+
+    onDestroy () {
+        CurrencyView.offCurrencyChanged(this.currencyChangeHandler, this);
     }
 }

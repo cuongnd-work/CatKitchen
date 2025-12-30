@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, Color, tween } from 'cc';
+import { _decorator, Component, Label, Color, tween, EventTarget } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('CurrencyView')
@@ -33,16 +33,33 @@ export class CurrencyView extends Component {
         this.addCurrency(50);
     }
 
+    private static _eventTarget: EventTarget = new EventTarget();
+    public static readonly EVENT_CHANGED: string = 'currency-changed';
+
+    public static onCurrencyChanged(callback: () => void, target?: any) {
+        this._eventTarget.on(this.EVENT_CHANGED, callback, target);
+    }
+
+    public static offCurrencyChanged(callback: () => void, target?: any) {
+        this._eventTarget.off(this.EVENT_CHANGED, callback, target);
+    }
+
+    private notifyCurrencyChanged() {
+        CurrencyView._eventTarget.emit(CurrencyView.EVENT_CHANGED);
+    }
+
     public addCurrency(amount: number) {
         if (amount <= 0) return;
         this.targetValue += amount;
         this.startTween(true);
+        this.notifyCurrencyChanged();
     }
 
     public subtractCurrency(amount: number) {
         if (amount <= 0) return;
         this.targetValue -= amount;
         this.startTween(false);
+        this.notifyCurrencyChanged();
     }
 
     public trySubtractCurrency(amount: number) {
@@ -50,6 +67,10 @@ export class CurrencyView extends Component {
         this.subtractCurrency(amount);
 
         return true;
+    }
+
+    public canAfford(amount: number): boolean {
+        return this.targetValue >= amount;
     }
 
     private startTween(isAdd: boolean) {
