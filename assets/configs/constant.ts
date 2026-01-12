@@ -13,6 +13,11 @@
         DEFAULT: ''
     }
 
+    static TRACKING = {
+        PROJECT_ID: "Game05",
+        PLAYABLE_ID: "PA0002"
+    }
+
     static EFFECT_NAME = {
         EFFECT_TEST: 'effect_ex',
         EFFECT_EX: 'effect_ex',
