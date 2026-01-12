@@ -5,24 +5,6 @@
   "uuid": "3b1151d6-d507-4bdf-83c7-d19b01753833",
   "files": [],
   "subMetas": {
-    "c999b": {
-      "importer": "gltf-mesh",
-      "uuid": "3b1151d6-d507-4bdf-83c7-d19b01753833@c999b",
-      "displayName": "",
-      "id": "c999b",
-      "name": "K2.mesh",
-      "userData": {
-        "gltfIndex": 0,
-        "triangleCount": 910
-      },
-      "ver": "1.1.1",
-      "imported": true,
-      "files": [
-        ".bin",
-        ".json"
-      ],
-      "subMetas": {}
-    },
     "5e49e": {
       "importer": "gltf-embeded-image",
       "uuid": "3b1151d6-d507-4bdf-83c7-d19b01753833@5e49e",
@@ -63,6 +45,24 @@
       ],
       "subMetas": {}
     },
+    "c999b": {
+      "importer": "gltf-mesh",
+      "uuid": "3b1151d6-d507-4bdf-83c7-d19b01753833@c999b",
+      "displayName": "",
+      "id": "c999b",
+      "name": "K2.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 910
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
     "0a1ef": {
       "importer": "texture",
       "uuid": "3b1151d6-d507-4bdf-83c7-d19b01753833@0a1ef",
@@ -76,8 +76,8 @@
         "magfilter": "linear",
         "mipfilter": "none",
         "anisotropy": 0,
-        "isUuid": true,
-        "imageUuidOrDatabaseUri": "3b1151d6-d507-4bdf-83c7-d19b01753833@5e49e"
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/KitchenGradient.png"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -99,8 +99,8 @@
         "magfilter": "linear",
         "mipfilter": "none",
         "anisotropy": 0,
-        "isUuid": true,
-        "imageUuidOrDatabaseUri": "3b1151d6-d507-4bdf-83c7-d19b01753833@ef396"
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/KitchenGradient.png"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -162,11 +162,11 @@
     "imageMetas": [
       {
         "name": "base_color_texture",
-        "uri": "3b1151d6-d507-4bdf-83c7-d19b01753833@5e49e"
+        "uri": "db://assets/3D/textures/KitchenGradient.png"
       },
       {
         "name": "base_color_texture",
-        "uri": "3b1151d6-d507-4bdf-83c7-d19b01753833@ef396"
+        "uri": "db://assets/3D/textures/KitchenGradient.png"
       }
     ],
     "fbx": {
