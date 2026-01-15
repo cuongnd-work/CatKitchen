@@ -41,7 +41,7 @@
             "_value": false
           },
           "graphics": {
-            "_value": false
+            "_value": true
           },
           "ui-skew": {
             "_value": false
@@ -56,7 +56,7 @@
             "_value": false
           },
           "physics": {
-            "_value": false,
+            "_value": true,
             "_option": "physics-ammo"
           },
           "physics-ammo": {
@@ -189,7 +189,9 @@
             "_value": false
           }
         },
-        "flags": {},
+        "flags": {
+          "LOAD_BULLET_MANUALLY": false
+        },
         "name": "Build Playable Config",
         "includeModules": [
           "2d",
@@ -199,7 +201,9 @@
           "base",
           "custom-pipeline",
           "gfx-webgl",
+          "graphics",
           "particle-2d",
+          "physics-ammo",
           "skeletal-animation",
           "tween",
           "ui"
