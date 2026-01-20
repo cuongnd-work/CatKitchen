@@ -1,6 +1,6 @@
 {
   "package_version": 2,
-  "version": "5.2.0",
+  "version": "5.2.2",
   "name": "super-html",
   "description": "i18n:super-html.description",
   "author": "https://github.com/magician-f",
@@ -49,5 +49,5 @@
     "build": "tsc -b",
     "watch": "tsc -w"
   },
-  "_storeId": "55cd7069a6042537328c6c71fc1c072e"
+  "_storeId": "f780376a3b8f799b667778489f2b26e6"
 }
