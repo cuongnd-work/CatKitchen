@@ -2,18 +2,18 @@
   "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
-  "uuid": "2663d549-8087-4ee5-bd96-f3a54d4bb89d",
+  "uuid": "b95de664-6c99-4d50-9185-f33b7c336921",
   "files": [],
   "subMetas": {
-    "651a7": {
+    "41ac8": {
       "importer": "gltf-mesh",
-      "uuid": "2663d549-8087-4ee5-bd96-f3a54d4bb89d@651a7",
+      "uuid": "b95de664-6c99-4d50-9185-f33b7c336921@41ac8",
       "displayName": "",
-      "id": "651a7",
-      "name": "K11.001.mesh",
+      "id": "41ac8",
+      "name": "Cube.001.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 656
+        "triangleCount": 1248
       },
       "ver": "1.1.1",
       "imported": true,
@@ -23,35 +23,12 @@
       ],
       "subMetas": {}
     },
-    "7d6ab": {
-      "importer": "texture",
-      "uuid": "2663d549-8087-4ee5-bd96-f3a54d4bb89d@7d6ab",
-      "displayName": "",
-      "id": "7d6ab",
-      "name": "base_color_texture.texture",
-      "userData": {
-        "wrapModeS": "repeat",
-        "wrapModeT": "repeat",
-        "minfilter": "linear",
-        "magfilter": "linear",
-        "mipfilter": "none",
-        "anisotropy": 0,
-        "isUuid": false,
-        "imageUuidOrDatabaseUri": "db://assets/3D/textures/KitchenGradient.png"
-      },
-      "ver": "1.0.22",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "ce83f": {
+    "d17a7": {
       "importer": "gltf-material",
-      "uuid": "2663d549-8087-4ee5-bd96-f3a54d4bb89d@ce83f",
+      "uuid": "b95de664-6c99-4d50-9185-f33b7c336921@d17a7",
       "displayName": "",
-      "id": "ce83f",
-      "name": "KichenGradiant.material",
+      "id": "d17a7",
+      "name": "Green A.material",
       "userData": {
         "gltfIndex": 0
       },
@@ -62,12 +39,44 @@
       ],
       "subMetas": {}
     },
-    "69f24": {
-      "importer": "gltf-scene",
-      "uuid": "2663d549-8087-4ee5-bd96-f3a54d4bb89d@69f24",
+    "a7eee": {
+      "importer": "gltf-material",
+      "uuid": "b95de664-6c99-4d50-9185-f33b7c336921@a7eee",
       "displayName": "",
-      "id": "69f24",
-      "name": "K34.prefab",
+      "id": "a7eee",
+      "name": "Green B.material",
+      "userData": {
+        "gltfIndex": 1
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "1ef71": {
+      "importer": "gltf-material",
+      "uuid": "b95de664-6c99-4d50-9185-f33b7c336921@1ef71",
+      "displayName": "",
+      "id": "1ef71",
+      "name": "Outline.material",
+      "userData": {
+        "gltfIndex": 2
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "42efd": {
+      "importer": "gltf-scene",
+      "uuid": "b95de664-6c99-4d50-9185-f33b7c336921@42efd",
+      "displayName": "",
+      "id": "42efd",
+      "name": "money.prefab",
       "userData": {
         "gltfIndex": 0
       },
@@ -80,12 +89,7 @@
     }
   },
   "userData": {
-    "imageMetas": [
-      {
-        "name": "base_color_texture",
-        "uri": "db://assets/3D/textures/KitchenGradient.png"
-      }
-    ],
+    "imageMetas": [],
     "fbx": {
       "smartMaterialEnabled": true
     },
@@ -109,17 +113,17 @@
     },
     "assetFinder": {
       "meshes": [
-        "2663d549-8087-4ee5-bd96-f3a54d4bb89d@651a7"
+        "b95de664-6c99-4d50-9185-f33b7c336921@41ac8"
       ],
       "skeletons": [],
-      "textures": [
-        "2663d549-8087-4ee5-bd96-f3a54d4bb89d@7d6ab"
-      ],
+      "textures": [],
       "materials": [
-        "2663d549-8087-4ee5-bd96-f3a54d4bb89d@ce83f"
+        "b95de664-6c99-4d50-9185-f33b7c336921@d17a7",
+        "b95de664-6c99-4d50-9185-f33b7c336921@a7eee",
+        "b95de664-6c99-4d50-9185-f33b7c336921@1ef71"
       ],
       "scenes": [
-        "2663d549-8087-4ee5-bd96-f3a54d4bb89d@69f24"
+        "b95de664-6c99-4d50-9185-f33b7c336921@42efd"
       ]
     }
   }
