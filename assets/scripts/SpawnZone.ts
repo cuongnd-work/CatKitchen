@@ -140,7 +140,7 @@ export class SpawnZone extends Component {
         this._tempStartScale.set(this.startScale);
         spawned.setScale(this._tempStartScale);
 
-        this.computeStackedPosition(this._spawnPosition);
+        this.computeStackedPosition(this._spawnPosition, targetParent);
         targetParent.inverseTransformPoint(this._finalLocalPos, this._spawnPosition);
 
         this.getStartWorldPosition(this._startWorldPos);
@@ -158,7 +158,7 @@ export class SpawnZone extends Component {
             .start();
     }
 
-    private computeStackedPosition(out: Vec3): void {
+    private computeStackedPosition(out: Vec3, referenceNode: Node): void {
         const columns = Math.max(1, Math.floor(this.columns));
         const rows = Math.max(1, Math.floor(this.rows));
         const perLayer = columns * rows;
@@ -168,7 +168,7 @@ export class SpawnZone extends Component {
         const rowIndex = Math.floor(cellIndex / columns);
         const columnIndex = cellIndex % columns;
 
-        this.node.getWorldPosition(this._baseWorldPos);
+        referenceNode.getWorldPosition(this._baseWorldPos);
         const halfWidth = (columns - 1) * this.horizontalSpacing * 0.5;
         const halfDepth = (rows - 1) * this.depthSpacing * 0.5;
 
