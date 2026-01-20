@@ -1534,15 +1534,21 @@
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
-      "z": 0
+      "z": -0.4
     },
     "carryScale": {
       "__type__": "cc.Vec3",
-      "x": 3,
-      "y": 3,
-      "z": 3
+      "x": 4,
+      "y": 4,
+      "z": 4
     },
-    "carryVerticalSpacing": 0.08,
+    "carryVerticalSpacing": 0.3,
+    "carryStackDirection": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 1,
+      "z": 0
+    },
     "collectInterval": 0.25,
     "carryMoveDuration": 0.25,
     "carryMoveEasing": "quadOut",

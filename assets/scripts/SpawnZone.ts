@@ -37,8 +37,11 @@ export class SpawnZone extends Component {
     @property({ type: Vec3, tooltip: 'Scale applied to prefabs once they attach to the character.' })
     public carryScale: Vec3 = new Vec3(1, 1, 1);
 
-    @property({ tooltip: 'Vertical spacing applied between prefabs stacked on the character.' })
+    @property({ tooltip: 'Spacing distance applied between prefabs stacked on the character.' })
     public carryVerticalSpacing = 0.08;
+
+    @property({ type: Vec3, tooltip: 'Local direction (character space) used to stack prefabs (set 0,0,-1 to line them behind the character).' })
+    public carryStackDirection: Vec3 = new Vec3(0, 1, 0);
 
     @property({ tooltip: 'Seconds between moving each prefab while the character stays inside the collect trigger.' })
     public collectInterval = 0.25;
@@ -108,6 +111,7 @@ export class SpawnZone extends Component {
     private _carryTargetWorld: Vec3 = new Vec3();
     private _carryOffsetWorld: Vec3 = new Vec3();
     private _anchorWorldRotation: Quat = new Quat();
+    private _carryStackWorld: Vec3 = new Vec3();
     private _nodeSlotIndex: Map<Node, number> = new Map();
     private _freeSlots: number[] = [];
     private _nextSlotIndex = 0;
@@ -322,13 +326,27 @@ export class SpawnZone extends Component {
         this._collectedItems.push(item);
 
         anchor.getWorldPosition(this._carryTargetWorld);
+        anchor.getWorldRotation(this._anchorWorldRotation);
+
         if (this.carryOffset.x !== 0 || this.carryOffset.y !== 0 || this.carryOffset.z !== 0) {
             this._carryOffsetWorld.set(this.carryOffset.x, this.carryOffset.y, this.carryOffset.z);
-            anchor.getWorldRotation(this._anchorWorldRotation);
             Vec3.transformQuat(this._carryOffsetWorld, this._carryOffsetWorld, this._anchorWorldRotation);
             Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._carryOffsetWorld);
         }
-        this._carryTargetWorld.y += index * this.carryVerticalSpacing;
+
+        if (index > 0 && this.carryVerticalSpacing !== 0) {
+            if (this.carryStackDirection.x !== 0 || this.carryStackDirection.y !== 0 || this.carryStackDirection.z !== 0) {
+                this._carryStackWorld.set(this.carryStackDirection.x, this.carryStackDirection.y, this.carryStackDirection.z);
+                Vec3.transformQuat(this._carryStackWorld, this._carryStackWorld, this._anchorWorldRotation);
+                if (this._carryStackWorld.lengthSqr() > 0.0001) {
+                    this._carryStackWorld.normalize();
+                    this._carryStackWorld.multiplyScalar(index * this.carryVerticalSpacing);
+                    Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._carryStackWorld);
+                }
+            } else {
+                this._carryTargetWorld.y += index * this.carryVerticalSpacing;
+            }
+        }
 
         const element = this.ensureElementComponent(item);
         if (element) {
