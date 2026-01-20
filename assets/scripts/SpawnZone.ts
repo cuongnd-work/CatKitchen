@@ -1,4 +1,5 @@
-import { _decorator, Component, Node, Prefab, instantiate, Collider, ITriggerEvent, Vec3, macro } from 'cc';
+import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, macro, tween, TweenEasing } from 'cc';
+import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 const { ccclass, property } = _decorator;
 
 const EVENT_TRIGGER_ENTER = 'onTriggerEnter';
@@ -39,11 +40,34 @@ export class SpawnZone extends Component {
     @property({ tooltip: 'Reset the stacking layout when the character leaves the zone.' })
     public resetStackOnExit = false;
 
+    @property({ type: Node, tooltip: 'Node where prefabs first appear before tweening to the stacked slot.' })
+    public startPoint: Node | null = null;
+
+    @property({ type: Vec3, tooltip: 'Initial scale applied at startPoint before tweening to the prefab scale.' })
+    public startScale: Vec3 = new Vec3(0.2, 0.2, 0.2);
+
+    @property({ tooltip: 'Seconds the prefab takes to travel from the startPoint to the stacked slot.' })
+    public moveDuration = 0.35;
+
+    @property({ tooltip: 'Easing for the travel tween.' })
+    public moveEasing: TweenEasing = 'quadOut';
+
+    @property({ tooltip: 'Seconds the prefab takes to grow back to its original scale.' })
+    public scaleDuration = 0.35;
+
+    @property({ tooltip: 'Easing for the scale tween.' })
+    public scaleEasing: TweenEasing = 'quadOut';
+
     private _isCharacterInside = false;
     private _isSpawning = false;
     private _spawnPosition: Vec3 = new Vec3();
+    private _finalLocalPos: Vec3 = new Vec3();
+    private _startLocalPos: Vec3 = new Vec3();
+    private _startWorldPos: Vec3 = new Vec3();
     private _spawnCount = 0;
     private _baseWorldPos: Vec3 = new Vec3();
+    private _tempStartScale: Vec3 = new Vec3();
+    private _targetScale: Vec3 = new Vec3();
 
     protected onEnable(): void {
         const collider = this.getComponent(Collider);
@@ -107,11 +131,31 @@ export class SpawnZone extends Component {
         if (!this._isCharacterInside || !this.prefabToSpawn) {
             return;
         }
-        const spawned = instantiate(this.prefabToSpawn);
         const targetParent = this.spawnParent ?? this.node;
-        spawned.setParent(targetParent);
+        const spawned = object_pool_manager.instance.Spawn(this.prefabToSpawn, undefined, undefined, targetParent);
+        if (!spawned) {
+            return;
+        }
+        spawned.getScale(this._targetScale);
+        this._tempStartScale.set(this.startScale);
+        spawned.setScale(this._tempStartScale);
+
         this.computeStackedPosition(this._spawnPosition);
-        spawned.setWorldPosition(this._spawnPosition);
+        targetParent.inverseTransformPoint(this._finalLocalPos, this._spawnPosition);
+
+        this.getStartWorldPosition(this._startWorldPos);
+        targetParent.inverseTransformPoint(this._startLocalPos, this._startWorldPos);
+        spawned.setPosition(this._startLocalPos);
+
+        const finalLocal = new Vec3(this._finalLocalPos.x, this._finalLocalPos.y, this._finalLocalPos.z);
+        tween(spawned)
+            .to(this.moveDuration, { position: finalLocal }, { easing: this.moveEasing })
+            .start();
+
+        const finalScale = new Vec3(this._targetScale.x, this._targetScale.y, this._targetScale.z);
+        tween(spawned)
+            .to(this.scaleDuration, { scale: finalScale }, { easing: this.scaleEasing })
+            .start();
     }
 
     private computeStackedPosition(out: Vec3): void {
@@ -135,5 +179,13 @@ export class SpawnZone extends Component {
         );
 
         this._spawnCount++;
+    }
+
+    private getStartWorldPosition(out: Vec3): void {
+        if (this.startPoint) {
+            this.startPoint.getWorldPosition(out);
+        } else {
+            this.node.getWorldPosition(out);
+        }
     }
 }
