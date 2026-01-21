@@ -1,5 +1,6 @@
 import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween } from 'cc';
 import { CollectibleItem } from './CollectibleItem';
+import { SpawnZone } from './SpawnZone';
 
 const { ccclass, property } = _decorator;
 
@@ -14,6 +15,9 @@ export class ItemSellTrigger extends Component {
     @property({ type: Node, tooltip: 'Destination node items fly toward when sold.' })
     public sellTarget: Node | null = null;
 
+    @property({ type: Node, tooltip: 'Optional node with a Collider that detects the character (defaults to this node).' })
+    public triggerArea: Node | null = null;
+
     @property({ tooltip: 'Collectible type identifier this trigger will sell (case insensitive).' })
     public sellTypeId = '';
 
@@ -25,6 +29,24 @@ export class ItemSellTrigger extends Component {
 
     @property({ tooltip: 'Tween easing while moving items toward the sellTarget.' })
     public sellEasing: TweenEasing = 'quadOut';
+
+    @property({ tooltip: 'Local scale items tween toward while selling (use 1 to keep original size).' })
+    public sellScale: Vec3 = new Vec3(1, 1, 1);
+
+    @property({ tooltip: 'Grid columns used to arrange sold items on the sell target.', min: 1, step: 1 })
+    public soldColumns = 4;
+
+    @property({ tooltip: 'Grid rows used to arrange sold items on the sell target.', min: 1, step: 1 })
+    public soldRows = 4;
+
+    @property({ tooltip: 'Distance between columns when arranging sold items.' })
+    public soldHorizontalSpacing = 0.35;
+
+    @property({ tooltip: 'Distance between rows when arranging sold items.' })
+    public soldDepthSpacing = 0.35;
+
+    @property({ tooltip: 'Distance between sold item layers.' })
+    public soldVerticalSpacing = 0.25;
 
     @property({ tooltip: 'Seconds between scans while waiting for new items.' })
     public rescanInterval = 0.1;
@@ -38,6 +60,9 @@ export class ItemSellTrigger extends Component {
     private _worldTarget: Vec3 = new Vec3();
     private _localTemp: Vec3 = new Vec3();
     private _worldTemp: Vec3 = new Vec3();
+    private _scaleTemp: Vec3 = new Vec3(1, 1, 1);
+    private _soldSlotIndex: Map<Node, number> = new Map();
+    private _soldNextSlotIndex = 0;
     private _rescanTimer = 0;
     private _activeItem: Node | null = null;
 
@@ -57,7 +82,7 @@ export class ItemSellTrigger extends Component {
     }
 
     private registerColliderEvents (): void {
-        const collider = this.getComponent(Collider);
+        const collider = this.getTriggerCollider();
         if (!collider) {
             console.warn(`[ItemSellTrigger] ${this.node.name} is missing a Collider to detect the character.`);
             return;
@@ -68,13 +93,21 @@ export class ItemSellTrigger extends Component {
     }
 
     private unregisterColliderEvents (): void {
-        const collider = this.getComponent(Collider);
+        const collider = this.getTriggerCollider();
         if (!collider) {
             return;
         }
         collider.off('onTriggerEnter', this.onTriggerEnter, this);
         collider.off('onTriggerExit', this.onTriggerExit, this);
         collider.off('onTriggerStay', this.onTriggerStay, this);
+    }
+
+    private getTriggerCollider (): Collider | null {
+        const node = this.triggerArea ?? this.node;
+        if (!node) {
+            return null;
+        }
+        return node.getComponent(Collider);
     }
 
     private onTriggerEnter (event: ITriggerEvent): void {
@@ -109,7 +142,7 @@ export class ItemSellTrigger extends Component {
         this._characterOverlaps.delete(otherCollider);
         if (this._characterInside && this._characterOverlaps.size === 0) {
             this._characterInside = false;
-            this.stopAllSelling(false);
+            this.stopAllSelling(true);
         }
     }
 
@@ -192,28 +225,32 @@ export class ItemSellTrigger extends Component {
             return;
         }
 
-        sellTarget.getWorldPosition(this._worldTarget);
-
-        item.getWorldPosition(this._worldTemp);
-        sellTarget.inverseTransformPoint(this._localTemp, this._worldTemp);
-
+        const slotIndex = this.registerSoldItem(item);
         const parent = sellTarget;
         Tween.stopAllByTarget(item);
+        item.getWorldPosition(this._worldTemp);
+        parent.inverseTransformPoint(this._localTemp, this._worldTemp);
         item.setParent(parent);
         item.setPosition(this._localTemp);
 
+        this.computeSoldStackPosition(this._worldTarget, parent, slotIndex);
         parent.inverseTransformPoint(this._localTemp, this._worldTarget);
         const targetLocal = new Vec3(this._localTemp.x, this._localTemp.y, this._localTemp.z);
+
+        const targetScale = this._scaleTemp;
+        targetScale.set(this.sellScale.x, this.sellScale.y, this.sellScale.z);
 
         this._isSelling = true;
         this._activeItem = item;
         tween(item)
-            .to(Math.max(0, this.sellDuration), { position: targetLocal }, { easing: this.sellEasing })
+            .to(
+                Math.max(0, this.sellDuration),
+                { position: targetLocal, scale: targetScale },
+                { easing: this.sellEasing },
+            )
             .call(() => {
                 this._queuedItems.delete(item);
-                if (item.isValid) {
-                    item.destroy();
-                }
+                this.applySoldSlotPosition(item, slotIndex);
                 this._isSelling = false;
                 this._activeItem = null;
                 this._rescanTimer = 0;
@@ -272,19 +309,76 @@ export class ItemSellTrigger extends Component {
         this._queuedItems.clear();
         this._rescanTimer = 0;
 
-        if (stopActiveTween) {
+        if (stopActiveTween || !this._isSelling) {
             this.stopActiveTween();
             this._isSelling = false;
-        } else if (!this._isSelling) {
-            this.stopActiveTween();
         }
     }
 
     private stopActiveTween (): void {
         if (this._activeItem && this._activeItem.isValid) {
             Tween.stopAllByTarget(this._activeItem);
+            const slotIndex = this._soldSlotIndex.get(this._activeItem);
+            if (slotIndex !== undefined) {
+                this.applySoldSlotPosition(this._activeItem, slotIndex);
+            }
         }
         this._activeItem = null;
+    }
+
+    private registerSoldItem (item: Node): number {
+        const existing = this._soldSlotIndex.get(item);
+        if (existing !== undefined) {
+            return existing;
+        }
+
+        this.releaseFromCarryAnchor(item);
+        const slotIndex = this._soldNextSlotIndex;
+        this._soldNextSlotIndex++;
+        this._soldSlotIndex.set(item, slotIndex);
+        return slotIndex;
+    }
+
+    private releaseFromCarryAnchor (item: Node): void {
+        SpawnZone.releaseCarriedItemInternal(item);
+    }
+
+    private computeSoldStackPosition (out: Vec3, reference: Node, slotIndex: number): void {
+        const columns = Math.max(1, Math.floor(this.soldColumns));
+        const rows = Math.max(1, Math.floor(this.soldRows));
+        const perLayer = columns * rows;
+
+        const layerIndex = Math.floor(slotIndex / perLayer);
+        const cellIndex = slotIndex % perLayer;
+        const rowIndex = Math.floor(cellIndex / columns);
+        const columnIndex = cellIndex % columns;
+
+        reference.getWorldPosition(out);
+        const baseX = out.x;
+        const baseY = out.y;
+        const baseZ = out.z;
+
+        const halfWidth = (columns - 1) * this.soldHorizontalSpacing * 0.5;
+        const halfDepth = (rows - 1) * this.soldDepthSpacing * 0.5;
+
+        out.set(
+            baseX + columnIndex * this.soldHorizontalSpacing - halfWidth,
+            baseY + layerIndex * this.soldVerticalSpacing,
+            baseZ + rowIndex * this.soldDepthSpacing - halfDepth,
+        );
+    }
+
+    private applySoldSlotPosition (item: Node, slotIndex: number): void {
+        const parent = this.sellTarget;
+        if (!parent || !item.isValid) {
+            return;
+        }
+
+        this.computeSoldStackPosition(this._worldTarget, parent, slotIndex);
+        parent.inverseTransformPoint(this._localTemp, this._worldTarget);
+        item.setParent(parent);
+        item.setPosition(this._localTemp);
+        item.setScale(this.sellScale.x, this.sellScale.y, this.sellScale.z);
     }
 
 }

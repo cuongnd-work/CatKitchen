@@ -23,6 +23,19 @@ type AnchorCarryState = {
 export class SpawnZone extends Component {
     private static _anchorCarryStates: Map<Node, AnchorCarryState> = new Map();
 
+    public static releaseCarriedItemInternal (node: Node | null): void {
+        if (!node) {
+            return;
+        }
+        for (const [, state] of SpawnZone._anchorCarryStates) {
+            const handler = state.destroyHandlers.get(node);
+            if (handler) {
+                handler();
+                break;
+            }
+        }
+    }
+
     @property({ type: Node, tooltip: 'Character node to watch for trigger overlap.' })
     public character: Node | null = null;
 
@@ -720,4 +733,8 @@ export class SpawnZone extends Component {
         this._freeSlots.length = 0;
         this._nextSlotIndex = 0;
     }
+}
+
+export function releaseCarriedItem (node: Node | null): void {
+    SpawnZone.releaseCarriedItemInternal(node);
 }
