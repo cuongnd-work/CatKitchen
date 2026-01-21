@@ -2067,6 +2067,7 @@
     "rejoinDelay": 0.1,
     "rejoinDuration": 0.4,
     "shiftDuration": 0.25,
+    "frontAdvanceDelay": 0.3,
     "_id": "4079q5zNZD8JtNS1/16/Zy"
   },
   {

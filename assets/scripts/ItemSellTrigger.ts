@@ -301,7 +301,7 @@ export class ItemSellTrigger extends Component {
             .call(() => {
                 this._queuedItems.delete(item);
                 this.applySoldSlotPosition(item, slotIndex);
-                this.stageSoldItem(item);
+                this.stageSoldItem(item, true);
                 this._isSelling = false;
                 this._activeItem = null;
                 this._rescanTimer = 0;
@@ -544,7 +544,6 @@ export class ItemSellTrigger extends Component {
             return;
         }
 
-        this.releaseSoldSlot(item);
         this.deliverItemToCustomer(item, customerNode, orderPopup ?? null, manager);
     }
 
@@ -610,6 +609,8 @@ export class ItemSellTrigger extends Component {
             this.tryServeCustomer();
             return;
         }
+
+        this.releaseSoldSlot(item);
 
         if (this.completeCustomerOnDeliveryStart) {
             manager.completeServingCustomer(customerNode);

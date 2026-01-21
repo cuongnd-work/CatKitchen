@@ -18,6 +18,11 @@ type QueueEntry = {
     column: ColumnData;
 };
 
+type ServingState = {
+    column: ColumnData;
+    freedSlot: Vec3;
+};
+
 function cloneVec3 (source: Vec3): Vec3 {
     return new Vec3(source.x, source.y, source.z);
 
@@ -51,12 +56,13 @@ export class CustomersQueueManager extends Component {
 
     @property({ tooltip: 'Thời gian tween mèo còn lại tiến lên (giây)', min: 0 })
     shiftDuration = 0.25;
+    @property({ tooltip: 'Delay (seconds) before the next customer advances after a sale completes', min: 0 })
+    frontAdvanceDelay = 0.3;
 
     private _columns: ColumnData[] = [];
     private _entryLookup = new Map<string, QueueEntry>();
     private _columnAdvanceMultipliers = new Map<number, number>();
-    private _servingReturnSlots = new Map<string, Vec3>();
-    private _completedServingEntries = new Set<string>();
+    private _servingStates = new Map<string, ServingState>();
     private _worldScratch: Vec3 = new Vec3();
 
     onLoad (): void {
@@ -123,11 +129,9 @@ export class CustomersQueueManager extends Component {
             return false;
         }
 
-        if (this._servingReturnSlots.has(entry.node.uuid)) {
+        if (this._servingStates.has(entry.node.uuid)) {
             return false;
         }
-
-        this._completedServingEntries.delete(entry.node.uuid);
 
         const column = entry.column;
         if (!column || column.entries.length === 0) {
@@ -140,8 +144,11 @@ export class CustomersQueueManager extends Component {
         }
 
         column.entries.shift();
-        const rejoinSlot = this.shiftColumnForward(column, entry.targetPosition);
-        this._servingReturnSlots.set(entry.node.uuid, cloneVec3(rejoinSlot));
+        const state: ServingState = {
+            column,
+            freedSlot: cloneVec3(entry.targetPosition),
+        };
+        this._servingStates.set(entry.node.uuid, state);
         return true;
     }
 
@@ -151,15 +158,19 @@ export class CustomersQueueManager extends Component {
             return false;
         }
 
-        if (this._completedServingEntries.delete(entry.node.uuid)) {
-            return true;
-        }
-
-        const servingSlot = this._servingReturnSlots.get(entry.node.uuid);
-        if (servingSlot) {
-            this._servingReturnSlots.delete(entry.node.uuid);
-            this.reinsertEntry(entry, servingSlot);
-            this._completedServingEntries.add(entry.node.uuid);
+        const state = this._servingStates.get(entry.node.uuid);
+        if (state) {
+            this._servingStates.delete(entry.node.uuid);
+            const performAdvance = () => {
+                const rejoinSlot = this.shiftColumnForward(state.column, state.freedSlot);
+                this.reinsertEntry(entry, rejoinSlot);
+            };
+            const delay = Math.max(0, this.frontAdvanceDelay);
+            if (delay > 0) {
+                this.scheduleOnce(performAdvance, delay);
+            } else {
+                performAdvance();
+            }
             return true;
         }
 
@@ -180,9 +191,8 @@ export class CustomersQueueManager extends Component {
         }
 
         column.entries.shift();
-        const rejoinSlot = this.shiftColumnForward(column, entry.targetPosition);
-        this.reinsertEntry(entry, rejoinSlot);
-        this._completedServingEntries.add(entry.node.uuid);
+        const fallbackSlot = this.shiftColumnForward(column, entry.targetPosition);
+        this.reinsertEntry(entry, fallbackSlot);
         return true;
     }
 
@@ -290,6 +300,10 @@ export class CustomersQueueManager extends Component {
                 return;
             }
 
+            if (this._servingStates.has(node.uuid)) {
+                return;
+            }
+
             node.getWorldPosition(this._worldScratch);
             const candidateZ = this._worldScratch.z;
             const candidateX = this._worldScratch.x;
@@ -361,3 +375,6 @@ export class CustomersQueueManager extends Component {
         }
     }
 }
+
+
+
