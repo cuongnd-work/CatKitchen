@@ -1,9 +1,10 @@
-import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween } from 'cc';
+import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween, Prefab } from 'cc';
 import { CollectibleItem } from './CollectibleItem';
 import { SpawnZone } from './SpawnZone';
 import { CustomersQueueManager } from 'db://assets/scripts/customers/CustomersQueueManager';
 import { OrderPopup } from 'db://assets/scripts/OrderPopup';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
+import { MoneyStackItem } from './MoneyStackItem';
 
 const { ccclass, property } = _decorator;
 
@@ -87,6 +88,51 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'Always target the absolute front-most customer determined by the queue manager.' })
     public serveAbsoluteFrontCustomer = true;
 
+    @property({ type: Prefab, tooltip: 'Prefab spawned on the money stack when an item is sold.' })
+    public moneyPrefab: Prefab | null = null;
+
+    @property({ type: Node, tooltip: 'Root transform where money bundles are stacked (4x4 grid).' })
+    public moneyStackNode: Node | null = null;
+
+    @property({ tooltip: 'Money stack grid columns.', min: 1, step: 1 })
+    public moneyColumns = 4;
+
+    @property({ tooltip: 'Money stack grid rows.', min: 1, step: 1 })
+    public moneyRows = 4;
+
+    @property({ tooltip: 'Money stack horizontal spacing.' })
+    public moneyHorizontalSpacing = 0.35;
+
+    @property({ tooltip: 'Money stack depth spacing.' })
+    public moneyDepthSpacing = 0.35;
+
+    @property({ tooltip: 'Money stack vertical spacing.' })
+    public moneyVerticalSpacing = 0.25;
+
+    @property({ tooltip: 'Money bundles collected per trigger check.', min: 1, step: 1 })
+    public moneyCollectBatch = 4;
+
+    @property({ tooltip: 'Duration (seconds) to move collected money toward the character.' })
+    public moneyCollectDuration = 0.25;
+
+    @property({ tooltip: 'Tween easing for money collection.' })
+    public moneyCollectEasing: TweenEasing = 'quadOut';
+
+    @property({ tooltip: 'World offset applied when money reaches the character.' })
+    public moneyCollectOffset: Vec3 = new Vec3(0, 0.35, 0);
+
+    @property({ type: Node, tooltip: 'Anchor on the character where collected money bundles are stacked (defaults to character carry anchor).' })
+    public moneyCarryAnchor: Node | null = null;
+
+    @property({ tooltip: 'Local stacking direction for carried money bundles.' })
+    public moneyCarryDirection: Vec3 = new Vec3(0, 1, 0);
+
+    @property({ tooltip: 'Spacing between carried money bundles.' })
+    public moneyCarrySpacing = 0.08;
+
+    @property({ type: SpawnZone, tooltip: 'Reference SpawnZone to mirror carry settings for collected money.' })
+    public moneyCarrySource: SpawnZone | null = null;
+
     private _sellQueue: Node[] = [];
     private _queuedItems: Set<Node> = new Set();
     private _characterOverlaps: Set<Collider> = new Set();
@@ -101,6 +147,16 @@ export class ItemSellTrigger extends Component {
     private _soldNextSlotIndex = 0;
     private _rescanTimer = 0;
     private _activeItem: Node | null = null;
+    private _moneySlotIndex: Map<Node, number> = new Map();
+    private _moneyFreeSlots: number[] = [];
+    private _moneyNextSlotIndex = 0;
+    private _activeMoneyCollections: Set<Node> = new Set();
+    private _moneyTargetWorld: Vec3 = new Vec3();
+    private _moneyTargetLocal: Vec3 = new Vec3();
+    private _moneyStackCollider: Collider | null = null;
+    private _isCharacterAtMoneyStack = false;
+    private _carriedMoney: Node[] = [];
+    private _moneyCarryDir: Vec3 = new Vec3();
     private _stagedItems: Node[] = [];
     private _soldFreeSlots: number[] = [];
     private _customerRescanTimer = 0;
@@ -110,10 +166,12 @@ export class ItemSellTrigger extends Component {
     update (deltaTime: number): void {
         this.updateSellingLoop(deltaTime);
         this.updateCustomerServing(deltaTime);
+        this.collectMoneyBundles();
     }
 
     protected onEnable (): void {
         this.registerColliderEvents();
+        this.setupMoneyStackTrigger();
     }
 
     protected onDisable (): void {
@@ -122,6 +180,12 @@ export class ItemSellTrigger extends Component {
         this._characterOverlaps.clear();
         this.stopAllSelling(true);
         this.stopCustomerDelivery();
+        this.teardownMoneyStackTrigger();
+        this.resetMoneyCollections();
+    }
+
+    protected start (): void {
+        this.applyMoneyCarrySettingsFromSource();
     }
 
     private registerColliderEvents (): void {
@@ -652,6 +716,8 @@ export class ItemSellTrigger extends Component {
             soldOut = popup.sell();
         }
 
+        this.spawnMoneyReward();
+
         if (soldOut && customerNode && customerNode.isValid) {
             manager.completeServingCustomer(customerNode);
         }
@@ -669,6 +735,282 @@ export class ItemSellTrigger extends Component {
         }
 
         object_pool_manager.instance.Recycle(item);
+    }
+
+    private spawnMoneyReward (): void {
+        const prefab = this.moneyPrefab;
+        const stackNode = this.moneyStackNode;
+        if (!prefab || !stackNode) {
+            return;
+        }
+
+        const reward = object_pool_manager.instance.Spawn(prefab);
+        if (!reward) {
+            return;
+        }
+
+        reward.setParent(stackNode);
+        reward.setScale(1, 1, 1);
+        reward.setRotationFromEuler(0, 0, 0);
+        reward.setPosition(0, 0, 0);
+        reward.active = true;
+
+        const collectible = reward.getComponent(CollectibleItem) ?? reward.addComponent(CollectibleItem);
+        collectible.typeId = 'money';
+        collectible.ensureTypeId();
+
+        const info = reward.getComponent(MoneyStackItem) ?? reward.addComponent(MoneyStackItem);
+        info.owner = this;
+
+        const slotIndex = this.acquireMoneySlotIndex();
+        info.slotIndex = slotIndex;
+        this._moneySlotIndex.set(reward, slotIndex);
+        this.applyMoneySlotPosition(reward, slotIndex);
+    }
+
+    private acquireMoneySlotIndex (): number {
+        if (this._moneyFreeSlots.length > 0) {
+            return this._moneyFreeSlots.shift() as number;
+        }
+
+        const slotIndex = this._moneyNextSlotIndex;
+        this._moneyNextSlotIndex++;
+        return slotIndex;
+    }
+
+    private releaseMoneySlotIndex (slotIndex: number): void {
+        if (slotIndex < 0) {
+            return;
+        }
+
+        let inserted = false;
+        for (let i = 0; i < this._moneyFreeSlots.length; i++) {
+            if (slotIndex < this._moneyFreeSlots[i]) {
+                this._moneyFreeSlots.splice(i, 0, slotIndex);
+                inserted = true;
+                break;
+            }
+        }
+
+        if (!inserted) {
+            this._moneyFreeSlots.push(slotIndex);
+        }
+    }
+
+    private applyMoneySlotPosition (reward: Node, slotIndex: number): void {
+        const parent = this.moneyStackNode ?? this.resolveSellTarget();
+        if (!parent || !reward.isValid) {
+            return;
+        }
+
+        this.computeMoneyStackPosition(this._worldTarget, parent, slotIndex);
+        parent.inverseTransformPoint(this._localTemp, this._worldTarget);
+        reward.setPosition(this._localTemp);
+    }
+
+    private computeMoneyStackPosition (out: Vec3, reference: Node, slotIndex: number): void {
+        const columns = Math.max(1, Math.floor(this.moneyColumns));
+        const rows = Math.max(1, Math.floor(this.moneyRows));
+        const perLayer = columns * rows;
+
+        const layerIndex = Math.floor(slotIndex / perLayer);
+        const cellIndex = slotIndex % perLayer;
+        const rowIndex = Math.floor(cellIndex / columns);
+        const columnIndex = cellIndex % columns;
+
+        reference.getWorldPosition(out);
+        const baseX = out.x;
+        const baseY = out.y;
+        const baseZ = out.z;
+
+        const halfWidth = (columns - 1) * this.moneyHorizontalSpacing * 0.5;
+        const halfDepth = (rows - 1) * this.moneyDepthSpacing * 0.5;
+
+        out.set(
+            baseX + columnIndex * this.moneyHorizontalSpacing - halfWidth,
+            baseY + layerIndex * this.moneyVerticalSpacing,
+            baseZ + rowIndex * this.moneyDepthSpacing - halfDepth,
+        );
+    }
+
+    private collectMoneyBundles (): void {
+        if (!this._isCharacterAtMoneyStack || !this.moneyStackNode || !this.character) {
+            return;
+        }
+
+        const children = this.moneyStackNode.children.slice();
+        children.sort((a, b) => {
+            const slotA = a ? (a.getComponent(MoneyStackItem)?.slotIndex ?? this._moneySlotIndex.get(a) ?? 0) : 0;
+            const slotB = b ? (b.getComponent(MoneyStackItem)?.slotIndex ?? this._moneySlotIndex.get(b) ?? 0) : 0;
+            return slotA - slotB;
+        });
+
+        const limit = Math.max(1, Math.floor(this.moneyCollectBatch));
+        let collected = 0;
+        for (let i = 0; i < children.length && collected < limit; i++) {
+            const child = children[i];
+            if (!child || !child.isValid || this._activeMoneyCollections.has(child)) {
+                continue;
+            }
+
+            const collectible = child.getComponent(CollectibleItem);
+            if (!collectible || !collectible.matchesType('money')) {
+                continue;
+            }
+
+            const info = child.getComponent(MoneyStackItem);
+            if (!info) {
+                continue;
+            }
+
+            this.startCollectingMoneyBundle(child, info);
+            collected++;
+        }
+    }
+
+    private startCollectingMoneyBundle (bundle: Node, info: MoneyStackItem): void {
+        const parent = bundle.parent;
+        if (!parent || !this.character) {
+            return;
+        }
+
+        this._activeMoneyCollections.add(bundle);
+        this.character.getWorldPosition(this._moneyTargetWorld);
+        this._moneyTargetWorld.add(this.moneyCollectOffset);
+        parent.inverseTransformPoint(this._moneyTargetLocal, this._moneyTargetWorld);
+
+        Tween.stopAllByTarget(bundle);
+        tween(bundle)
+            .to(
+                Math.max(0.01, this.moneyCollectDuration),
+                { position: new Vec3(this._moneyTargetLocal.x, this._moneyTargetLocal.y, this._moneyTargetLocal.z) },
+                { easing: this.moneyCollectEasing },
+            )
+            .call(() => {
+                this._activeMoneyCollections.delete(bundle);
+                this.onMoneyBundleCollected(bundle);
+                this.attachCollectedMoney(bundle);
+            })
+            .start();
+    }
+
+    public onMoneyBundleCollected (reward: Node): void {
+        const info = reward.getComponent(MoneyStackItem);
+        const slotIndex = info?.slotIndex ?? this._moneySlotIndex.get(reward) ?? -1;
+        if (slotIndex >= 0) {
+            this.releaseMoneySlotIndex(slotIndex);
+        }
+        this._moneySlotIndex.delete(reward);
+        info?.reset();
+    }
+
+    private attachCollectedMoney (bundle: Node): void {
+        const anchor = this.moneyCarryAnchor ?? this.characterCarryAnchor ?? this.character;
+        if (!anchor || !bundle || !bundle.isValid) {
+            object_pool_manager.instance.Recycle(bundle);
+            return;
+        }
+
+        const collectible = bundle.getComponent(CollectibleItem) ?? bundle.addComponent(CollectibleItem);
+        collectible.typeId = 'money';
+        collectible.ensureTypeId();
+
+        const dir = this._moneyCarryDir;
+        dir.set(this.moneyCarryDirection.x, this.moneyCarryDirection.y, this.moneyCarryDirection.z);
+        if (dir.lengthSqr() < 0.0001) {
+            dir.set(0, 1, 0);
+        }
+        dir.normalize();
+
+        const index = this._carriedMoney.length;
+        const spacing = Math.max(0, this.moneyCarrySpacing);
+
+        bundle.removeFromParent();
+        anchor.addChild(bundle);
+        bundle.setScale(1, 1, 1);
+        bundle.setRotationFromEuler(0, 0, 0);
+        bundle.setPosition(dir.x * index * spacing, dir.y * index * spacing, dir.z * index * spacing);
+
+        this._carriedMoney.push(bundle);
+    }
+
+    private setupMoneyStackTrigger (): void {
+        this.teardownMoneyStackTrigger();
+        const stackNode = this.moneyStackNode;
+        if (!stackNode) {
+            return;
+        }
+
+        const collider = stackNode.getComponent(Collider);
+        if (!collider) {
+            console.warn(`[ItemSellTrigger] ${this.node.name} moneyStackNode is missing a Collider for collection.`);
+            return;
+        }
+
+        this._moneyStackCollider = collider;
+        collider.on('onTriggerEnter', this.onMoneyStackTriggerEnter, this);
+        collider.on('onTriggerStay', this.onMoneyStackTriggerEnter, this);
+        collider.on('onTriggerExit', this.onMoneyStackTriggerExit, this);
+    }
+
+    private teardownMoneyStackTrigger (): void {
+        if (!this._moneyStackCollider) {
+            return;
+        }
+
+        const collider = this._moneyStackCollider;
+        collider.off('onTriggerEnter', this.onMoneyStackTriggerEnter, this);
+        collider.off('onTriggerStay', this.onMoneyStackTriggerEnter, this);
+        collider.off('onTriggerExit', this.onMoneyStackTriggerExit, this);
+        this._moneyStackCollider = null;
+        this._isCharacterAtMoneyStack = false;
+    }
+
+    private onMoneyStackTriggerEnter (event: ITriggerEvent): void {
+        this.handleMoneyStackTrigger(event, true);
+    }
+
+    private onMoneyStackTriggerExit (event: ITriggerEvent): void {
+        this.handleMoneyStackTrigger(event, false);
+    }
+
+    private handleMoneyStackTrigger (event: ITriggerEvent, inside: boolean): void {
+        const otherNode = event.otherCollider?.node;
+        if (!otherNode || !this.isCharacterNode(otherNode)) {
+            return;
+        }
+
+        this.setMoneyStackOverlap(inside);
+    }
+
+    public setMoneyStackOverlap (state: boolean): void {
+        this._isCharacterAtMoneyStack = state;
+        if (!state) {
+            this.resetMoneyCollections();
+        }
+    }
+
+    private applyMoneyCarrySettingsFromSource (): void {
+        const source = this.moneyCarrySource;
+        if (!source) {
+            return;
+        }
+
+        if (!this.moneyCarryAnchor) {
+            this.moneyCarryAnchor = source.characterCarryAnchor ?? source.character ?? this.character;
+        }
+
+        if (source.carryStackDirection) {
+            this.moneyCarryDirection.set(
+                source.carryStackDirection.x,
+                source.carryStackDirection.y,
+                source.carryStackDirection.z,
+            );
+        }
+
+        if (source.carryVerticalSpacing > 0) {
+            this.moneyCarrySpacing = source.carryVerticalSpacing;
+        }
     }
 
     private stopCustomerDelivery (): void {
@@ -689,6 +1031,15 @@ export class ItemSellTrigger extends Component {
         const slotIndex = this.registerSoldItem(item);
         this.applySoldSlotPosition(item, slotIndex);
         this.stageSoldItem(item, true, false);
+    }
+
+    private resetMoneyCollections (): void {
+        this._activeMoneyCollections.forEach((node) => {
+            if (node && node.isValid) {
+                Tween.stopAllByTarget(node);
+            }
+        });
+        this._activeMoneyCollections.clear();
     }
 
 }
