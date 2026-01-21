@@ -1,6 +1,9 @@
 import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween } from 'cc';
 import { CollectibleItem } from './CollectibleItem';
 import { SpawnZone } from './SpawnZone';
+import { CustomersQueueManager } from 'db://assets/scripts/customers/CustomersQueueManager';
+import { OrderPopup } from 'db://assets/scripts/OrderPopup';
+import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 
 const { ccclass, property } = _decorator;
 
@@ -24,7 +27,10 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'Local stacking direction used to figure out the top item within the anchor.' })
     public stackDirection: Vec3 = new Vec3(0, 1, 0);
 
-    @property({ tooltip: 'Duration (seconds) for each item to travel toward sellTarget.' })
+    @property({
+        tooltip: 'Duration (seconds) for items moving from the character to the sell zone.',
+        displayName: 'Character → Sell Duration',
+    })
     public sellDuration = 0.35;
 
     @property({ tooltip: 'Tween easing while moving items toward the sellTarget.' })
@@ -51,6 +57,33 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'Seconds between scans while waiting for new items.' })
     public rescanInterval = 0.1;
 
+    @property({ type: CustomersQueueManager, tooltip: 'Queue manager used to find the front customer.' })
+    public queueManager: CustomersQueueManager | null = null;
+
+    @property({ tooltip: 'Zero-based queue column index served by this trigger (-1 to auto-detect using the character).', step: 1 })
+    public queueColumnIndex = -1;
+
+    @property({ tooltip: 'Seconds between attempts to deliver staged items to customers.' })
+    public customerRescanInterval = 0.1;
+
+    @property({
+        tooltip: 'Duration (seconds) for items moving from the sell zone to the customer.',
+        displayName: 'Sell → Customer Duration',
+    })
+    public deliverDuration = 0.6;
+
+    @property({ tooltip: 'Tween easing applied while delivering staged items to the customer.' })
+    public deliverEasing: TweenEasing = 'quadOut';
+
+    @property({ tooltip: 'Scale items tween toward before reaching the customer.' })
+    public deliverScale: Vec3 = new Vec3(0.1, 0.1, 0.1);
+
+    @property({ tooltip: 'World offset applied on top of the customer node while delivering items.' })
+    public customerOffset: Vec3 = new Vec3(0, 0.35, 0);
+
+    @property({ tooltip: 'Complete/advance the customer as soon as delivery starts instead of waiting for the throw to finish.' })
+    public completeCustomerOnDeliveryStart = true;
+
     private _sellQueue: Node[] = [];
     private _queuedItems: Set<Node> = new Set();
     private _characterOverlaps: Set<Collider> = new Set();
@@ -65,9 +98,15 @@ export class ItemSellTrigger extends Component {
     private _soldNextSlotIndex = 0;
     private _rescanTimer = 0;
     private _activeItem: Node | null = null;
+    private _stagedItems: Node[] = [];
+    private _soldFreeSlots: number[] = [];
+    private _customerRescanTimer = 0;
+    private _isDeliveringToCustomer = false;
+    private _customerItem: Node | null = null;
 
     update (deltaTime: number): void {
         this.updateSellingLoop(deltaTime);
+        this.updateCustomerServing(deltaTime);
     }
 
     protected onEnable (): void {
@@ -79,6 +118,7 @@ export class ItemSellTrigger extends Component {
         this._characterInside = false;
         this._characterOverlaps.clear();
         this.stopAllSelling(true);
+        this.stopCustomerDelivery();
     }
 
     private registerColliderEvents (): void {
@@ -108,6 +148,13 @@ export class ItemSellTrigger extends Component {
             return null;
         }
         return node.getComponent(Collider);
+    }
+
+    private resolveSellTarget (): Node | null {
+        if (this.sellTarget) {
+            return this.sellTarget;
+        }
+        return this.triggerArea ?? null;
     }
 
     private onTriggerEnter (event: ITriggerEvent): void {
@@ -219,7 +266,7 @@ export class ItemSellTrigger extends Component {
     }
 
     private animateToSellTarget (item: Node): void {
-        const sellTarget = this.sellTarget;
+        const sellTarget = this.resolveSellTarget();
         if (!sellTarget || !this._characterInside) {
             this.stopAllSelling(false);
             return;
@@ -251,6 +298,7 @@ export class ItemSellTrigger extends Component {
             .call(() => {
                 this._queuedItems.delete(item);
                 this.applySoldSlotPosition(item, slotIndex);
+                this.stageSoldItem(item);
                 this._isSelling = false;
                 this._activeItem = null;
                 this._rescanTimer = 0;
@@ -262,7 +310,7 @@ export class ItemSellTrigger extends Component {
         if (!this._characterInside || this._isSelling) {
             return;
         }
-        if (!this.sellTarget) {
+        if (!this.resolveSellTarget()) {
             this.stopAllSelling(true);
             return;
         }
@@ -308,6 +356,7 @@ export class ItemSellTrigger extends Component {
         this._sellQueue.length = 0;
         this._queuedItems.clear();
         this._rescanTimer = 0;
+        this._customerRescanTimer = 0;
 
         if (stopActiveTween || !this._isSelling) {
             this.stopActiveTween();
@@ -333,8 +382,7 @@ export class ItemSellTrigger extends Component {
         }
 
         this.releaseFromCarryAnchor(item);
-        const slotIndex = this._soldNextSlotIndex;
-        this._soldNextSlotIndex++;
+        const slotIndex = this.acquireSoldSlotIndex();
         this._soldSlotIndex.set(item, slotIndex);
         return slotIndex;
     }
@@ -369,7 +417,7 @@ export class ItemSellTrigger extends Component {
     }
 
     private applySoldSlotPosition (item: Node, slotIndex: number): void {
-        const parent = this.sellTarget;
+        const parent = this.resolveSellTarget();
         if (!parent || !item.isValid) {
             return;
         }
@@ -379,6 +427,264 @@ export class ItemSellTrigger extends Component {
         item.setParent(parent);
         item.setPosition(this._localTemp);
         item.setScale(this.sellScale.x, this.sellScale.y, this.sellScale.z);
+    }
+
+    private acquireSoldSlotIndex (): number {
+        if (this._soldFreeSlots.length > 0) {
+            return this._soldFreeSlots.shift() as number;
+        }
+
+        const slotIndex = this._soldNextSlotIndex;
+        this._soldNextSlotIndex++;
+        return slotIndex;
+    }
+
+    private releaseSoldSlot (item: Node): void {
+        const slotIndex = this._soldSlotIndex.get(item);
+        if (slotIndex === undefined) {
+            return;
+        }
+
+        this._soldSlotIndex.delete(item);
+
+        let inserted = false;
+        for (let i = 0; i < this._soldFreeSlots.length; i++) {
+            if (slotIndex < this._soldFreeSlots[i]) {
+                this._soldFreeSlots.splice(i, 0, slotIndex);
+                inserted = true;
+                break;
+            }
+        }
+
+        if (!inserted) {
+            this._soldFreeSlots.push(slotIndex);
+        }
+    }
+
+    private stageSoldItem (item: Node, atFront = false, autoServe = true): void {
+        if (!item || !item.isValid) {
+            return;
+        }
+
+        if (this._stagedItems.indexOf(item) !== -1) {
+            return;
+        }
+
+        if (atFront) {
+            this._stagedItems.unshift(item);
+        } else {
+            this._stagedItems.push(item);
+        }
+
+        this._customerRescanTimer = 0;
+
+        if (autoServe && !this._isDeliveringToCustomer) {
+            this.tryServeCustomer();
+        }
+    }
+
+    private dequeueStagedItem (): Node | null {
+        while (this._stagedItems.length > 0) {
+            const candidate = this._stagedItems.shift() ?? null;
+            if (candidate && candidate.isValid) {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private updateCustomerServing (deltaTime: number): void {
+        if (this._stagedItems.length === 0) {
+            this._customerRescanTimer = 0;
+            return;
+        }
+
+        if (this._isDeliveringToCustomer) {
+            return;
+        }
+
+        this._customerRescanTimer -= deltaTime;
+        if (this._customerRescanTimer > 0) {
+            return;
+        }
+
+        this._customerRescanTimer = Math.max(0.02, this.customerRescanInterval);
+        this.tryServeCustomer();
+    }
+
+    private tryServeCustomer (): void {
+        if (this._isDeliveringToCustomer || this._stagedItems.length === 0) {
+            return;
+        }
+
+        const manager = this.resolveQueueManager();
+        if (!manager) {
+            return;
+        }
+
+        const columnIndex = this.resolveTargetColumnIndex(manager);
+        const customerNode = columnIndex >= 0
+            ? manager.getFrontCustomerNode(columnIndex)
+            : manager.getFrontMostCustomerNode();
+        if (!customerNode || !customerNode.isValid) {
+            return;
+        }
+
+        const orderPopup = customerNode.getComponentInChildren(OrderPopup);
+        if (orderPopup && orderPopup.isSoldOut()) {
+            return;
+        }
+
+        const item = this.dequeueStagedItem();
+        if (!item) {
+            return;
+        }
+
+        this.releaseSoldSlot(item);
+        this.deliverItemToCustomer(item, customerNode, orderPopup ?? null, manager);
+    }
+
+    private resolveQueueManager (): CustomersQueueManager | null {
+        if (this.queueManager) {
+            return this.queueManager;
+        }
+
+        let current: Node | null = this.node;
+        while (current) {
+            const manager = current.getComponent(CustomersQueueManager);
+            if (manager) {
+                this.queueManager = manager;
+                return manager;
+            }
+            current = current.parent;
+        }
+
+        const scene = this.node.scene;
+        if (scene) {
+            const manager = scene.getComponentInChildren(CustomersQueueManager);
+            if (manager) {
+                this.queueManager = manager;
+                return manager;
+            }
+        }
+
+        return null;
+    }
+
+    private resolveTargetColumnIndex (manager: CustomersQueueManager): number {
+        if (this.queueColumnIndex >= 0) {
+            return Math.floor(this.queueColumnIndex);
+        }
+
+        if (this.character) {
+            const detected = manager.getColumnIndexForNode(this.character);
+            if (detected >= 0) {
+                return detected;
+            }
+        }
+
+        return -1;
+    }
+
+    private deliverItemToCustomer (item: Node, customerNode: Node, popup: OrderPopup | null, manager: CustomersQueueManager): void {
+        if (!item || !item.isValid) {
+            return;
+        }
+
+        const parent = item.parent ?? this.resolveSellTarget() ?? this.node;
+        if (!parent) {
+            return;
+        }
+
+        Tween.stopAllByTarget(item);
+        const accepted = manager.beginServingCustomer(customerNode);
+        if (!accepted) {
+            this.stageSoldItem(item, true, false);
+            this._customerItem = null;
+            this._isDeliveringToCustomer = false;
+            this._customerRescanTimer = 0;
+            this.tryServeCustomer();
+            return;
+        }
+
+        if (this.completeCustomerOnDeliveryStart) {
+            manager.completeServingCustomer(customerNode);
+        }
+
+        this.computeCustomerTargetPosition(this._worldTarget, customerNode, popup);
+        parent.inverseTransformPoint(this._localTemp, this._worldTarget);
+        const targetLocal = new Vec3(this._localTemp.x, this._localTemp.y, this._localTemp.z);
+
+        const targetScale = this._scaleTemp;
+        targetScale.set(this.deliverScale.x, this.deliverScale.y, this.deliverScale.z);
+
+        this._isDeliveringToCustomer = true;
+        this._customerItem = item;
+
+        tween(item)
+            .to(
+                Math.max(0.01, this.deliverDuration),
+                { position: targetLocal, scale: targetScale },
+                { easing: this.deliverEasing },
+            )
+            .call(() => {
+                this.handleCustomerDeliveryComplete(item, popup, customerNode, manager);
+            })
+            .start();
+    }
+
+    private computeCustomerTargetPosition (out: Vec3, customerNode: Node, popup: OrderPopup | null): void {
+        const targetNode = popup && popup.node && popup.node.isValid ? popup.node : customerNode;
+        targetNode.getWorldPosition(out);
+        out.x += this.customerOffset.x;
+        out.y += this.customerOffset.y;
+        out.z += this.customerOffset.z;
+    }
+
+    private handleCustomerDeliveryComplete (item: Node, popup: OrderPopup | null, customerNode: Node, manager: CustomersQueueManager): void {
+        let soldOut = true;
+        if (popup && popup.node && popup.node.isValid) {
+            soldOut = popup.sell();
+        }
+
+        if (soldOut && customerNode && customerNode.isValid) {
+            manager.completeServingCustomer(customerNode);
+        }
+
+        this.recycleSoldItem(item);
+        this._customerItem = null;
+        this._isDeliveringToCustomer = false;
+        this._customerRescanTimer = 0;
+        this.tryServeCustomer();
+    }
+
+    private recycleSoldItem (item: Node): void {
+        if (!item || !item.isValid) {
+            return;
+        }
+
+        object_pool_manager.instance.Recycle(item);
+    }
+
+    private stopCustomerDelivery (): void {
+        if (!this._customerItem) {
+            this._isDeliveringToCustomer = false;
+            return;
+        }
+
+        const item = this._customerItem;
+        this._customerItem = null;
+        this._isDeliveringToCustomer = false;
+
+        if (!item || !item.isValid) {
+            return;
+        }
+
+        Tween.stopAllByTarget(item);
+        const slotIndex = this.registerSoldItem(item);
+        this.applySoldSlotPosition(item, slotIndex);
+        this.stageSoldItem(item, true, false);
     }
 
 }

@@ -55,6 +55,8 @@ export class CustomersQueueManager extends Component {
     private _columns: ColumnData[] = [];
     private _entryLookup = new Map<string, QueueEntry>();
     private _columnAdvanceMultipliers = new Map<number, number>();
+    private _servingReturnSlots = new Map<string, Vec3>();
+    private _completedServingEntries = new Set<string>();
 
     onLoad (): void {
         CustomersQueueEvents.on(CustomersQueueEvent.ORDER_COMPLETED, this.onOrderCompleted, this);
@@ -114,22 +116,62 @@ export class CustomersQueueManager extends Component {
         return column;
     }
 
-    private onOrderCompleted (customerNode: Node): void {
+    public beginServingCustomer (customerNode: Node): boolean {
         const entry = this.findEntry(customerNode);
         if (!entry) {
-            return;
+            return false;
+        }
+
+        if (this._servingReturnSlots.has(entry.node.uuid)) {
+            return false;
+        }
+
+        this._completedServingEntries.delete(entry.node.uuid);
+
+        const column = entry.column;
+        if (!column || column.entries.length === 0) {
+            return false;
+        }
+
+        const frontEntry = column.entries[0];
+        if (frontEntry !== entry) {
+            return false;
+        }
+
+        column.entries.shift();
+        const rejoinSlot = this.shiftColumnForward(column, entry.targetPosition);
+        this._servingReturnSlots.set(entry.node.uuid, cloneVec3(rejoinSlot));
+        return true;
+    }
+
+    public completeServingCustomer (customerNode: Node): boolean {
+        const entry = this.findEntry(customerNode);
+        if (!entry) {
+            return false;
+        }
+
+        if (this._completedServingEntries.delete(entry.node.uuid)) {
+            return true;
+        }
+
+        const servingSlot = this._servingReturnSlots.get(entry.node.uuid);
+        if (servingSlot) {
+            this._servingReturnSlots.delete(entry.node.uuid);
+            this.reinsertEntry(entry, servingSlot);
+            this._completedServingEntries.add(entry.node.uuid);
+            return true;
         }
 
         const column = entry.column;
         if (!column || column.entries.length === 0) {
-            return;
+            return false;
         }
 
         const frontEntry = column.entries[0];
         if (frontEntry !== entry) {
             const index = column.entries.indexOf(entry);
             if (index < 0) {
-                return;
+                return false;
             }
 
             column.entries.splice(index, 1);
@@ -138,8 +180,13 @@ export class CustomersQueueManager extends Component {
 
         column.entries.shift();
         const rejoinSlot = this.shiftColumnForward(column, entry.targetPosition);
-        // this.animateDeparture(entry, rejoinSlot);
         this.reinsertEntry(entry, rejoinSlot);
+        this._completedServingEntries.add(entry.node.uuid);
+        return true;
+    }
+
+    private onOrderCompleted (customerNode: Node): void {
+        this.completeServingCustomer(customerNode);
     }
 
     private animateDeparture (entry: QueueEntry, rejoinSlot: Vec3): void {
@@ -229,6 +276,26 @@ export class CustomersQueueManager extends Component {
         }
 
         return column.entries[0].node;
+    }
+
+    public getFrontMostCustomerNode (): Node | null {
+        let bestEntry: QueueEntry | null = null;
+        let bestZ = Number.POSITIVE_INFINITY;
+
+        this._columns.forEach((column) => {
+            if (column.entries.length === 0) {
+                return;
+            }
+
+            const frontEntry = column.entries[0];
+            const targetZ = frontEntry.targetPosition.z;
+            if (!bestEntry || targetZ < bestZ) {
+                bestEntry = frontEntry;
+                bestZ = targetZ;
+            }
+        });
+
+        return bestEntry ? bestEntry.node : null;
     }
 
     private getColumnByIndex (columnIndex: number): ColumnData | null {
