@@ -1,6 +1,6 @@
 import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, Quat, macro, tween, Tween, TweenEasing } from 'cc';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
-import { SpawnZoneElement } from './SpawnZoneElement';
+import { CollectibleItem } from './CollectibleItem';
 const { ccclass, property } = _decorator;
 
 const EVENT_TRIGGER_ENTER = 'onTriggerEnter';
@@ -105,6 +105,7 @@ export class SpawnZone extends Component {
     private _targetScale: Vec3 = new Vec3();
     private _availableItems: SpawnedSlotEntry[] = [];
     private _collectedItems: Node[] = [];
+    private _collectibleLookup: Map<Node, CollectibleItem> = new Map();
     private _isCharacterInCollectTrigger = false;
     private _isCollectingScheduled = false;
     private _collectTriggerCollider: Collider | null = null;
@@ -260,8 +261,8 @@ export class SpawnZone extends Component {
         if (!spawned) {
             return;
         }
+        this.ensureCollectibleItem(spawned);
         const slotIndex = this.acquireSlotIndex();
-        this.ensureElementComponent(spawned);
         this._availableItems.push({ node: spawned, slotIndex });
         this._nodeSlotIndex.set(spawned, slotIndex);
         spawned.getScale(this._targetScale);
@@ -324,6 +325,7 @@ export class SpawnZone extends Component {
 
         const index = this._collectedItems.length;
         this._collectedItems.push(item);
+        this.ensureCollectibleItem(item);
 
         anchor.getWorldPosition(this._carryTargetWorld);
         anchor.getWorldRotation(this._anchorWorldRotation);
@@ -348,30 +350,67 @@ export class SpawnZone extends Component {
             }
         }
 
-        const element = this.ensureElementComponent(item);
-        if (element) {
-            element.moveTo(
-                anchor,
-                this._carryTargetWorld,
-                this.carryMoveDuration,
-                this.carryMoveEasing,
-                this.carryRotation,
-                this.carryScale
-            );
-            return;
-        }
         this.defaultMoveToParent(item, anchor, this._carryTargetWorld, this.carryRotation, this.carryScale);
     }
 
-    private ensureElementComponent(node: Node): SpawnZoneElement | null {
-        if (!node.isValid) {
+    private ensureCollectibleItem(node: Node): CollectibleItem | null {
+        if (!node || !node.isValid) {
             return null;
         }
-        let element = node.getComponent(SpawnZoneElement);
-        if (!element) {
-            element = node.addComponent(SpawnZoneElement);
+
+        let collectible = this._collectibleLookup.get(node);
+        if (!collectible || !collectible.node.isValid) {
+            collectible = node.getComponent(CollectibleItem) ?? node.addComponent(CollectibleItem);
         }
-        return element ?? null;
+
+        if (!collectible) {
+            return null;
+        }
+
+        collectible.ensureTypeId();
+        this._collectibleLookup.set(node, collectible);
+        return collectible;
+    }
+
+    public getCollectibleForNode(target: Node | null): CollectibleItem | null {
+        if (!target) {
+            return null;
+        }
+
+        const collectible = this._collectibleLookup.get(target);
+        if (collectible) {
+            if (collectible.node.isValid) {
+                return collectible;
+            }
+            this._collectibleLookup.delete(target);
+        }
+
+        return this.ensureCollectibleItem(target);
+    }
+
+    public getCollectedCollectibles(): CollectibleItem[] {
+        const results: CollectibleItem[] = [];
+        this._collectedItems.forEach((node) => {
+            const collectible = this.getCollectibleForNode(node);
+            if (collectible) {
+                results.push(collectible);
+            }
+        });
+        return results;
+    }
+
+    public getCollectedItemTypes(): string[] {
+        const types: string[] = [];
+        this._collectedItems.forEach((node) => {
+            const collectible = this.getCollectibleForNode(node);
+            if (collectible) {
+                const typeId = collectible.getTypeId();
+                if (typeId.length > 0) {
+                    types.push(typeId);
+                }
+            }
+        });
+        return types;
     }
 
     private defaultMoveToParent(node: Node, parent: Node, worldTarget: Vec3, rotation?: Vec3, scale?: Vec3): void {

@@ -25,11 +25,11 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 7
+        "__id__": 9
       }
     ],
     "_prefab": {
-      "__id__": 9
+      "__id__": 11
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -181,8 +181,10 @@
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
+  null,
+  null,
   {
-    "__type__": "f71a5al7B9NeJ/+iKYCec8p",
+    "__type__": "44c43jv/RtBIpjvsTrA+kv9",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -191,13 +193,14 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 8
+      "__id__": 10
     },
+    "typeId": "burger",
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "9bjbDNoQhFOrC1trWGQsD4"
+    "fileId": "8d7wKSI1VGA7V8M2PFQThp"
   },
   {
     "__type__": "cc.PrefabInfo",
