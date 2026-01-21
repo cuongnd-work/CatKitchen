@@ -11,8 +11,18 @@ type SpawnedSlotEntry = {
     slotIndex: number;
 };
 
+type AnchorCarryState = {
+    items: Node[];
+    typeOrder: string[];
+    typeCounts: Map<string, number>;
+    typeKeys: Map<Node, string>;
+    destroyHandlers: Map<Node, () => void>;
+};
+
 @ccclass('SpawnZone')
 export class SpawnZone extends Component {
+    private static _anchorCarryStates: Map<Node, AnchorCarryState> = new Map();
+
     @property({ type: Node, tooltip: 'Character node to watch for trigger overlap.' })
     public character: Node | null = null;
 
@@ -42,6 +52,12 @@ export class SpawnZone extends Component {
 
     @property({ type: Vec3, tooltip: 'Local direction (character space) used to stack prefabs (set 0,0,-1 to line them behind the character).' })
     public carryStackDirection: Vec3 = new Vec3(0, 1, 0);
+
+    @property({ tooltip: 'Maximum distinct collectible types the character can carry at the same time.' })
+    public maxCarryTypes = 2;
+
+    @property({ tooltip: 'Z-axis offset (character space) applied per item type after the first (e.g. 0.4 keeps the second type 0.4 units behind).' })
+    public typeZOffsetSpacing = 0.4;
 
     @property({ tooltip: 'Seconds between moving each prefab while the character stays inside the collect trigger.' })
     public collectInterval = 0.25;
@@ -104,7 +120,6 @@ export class SpawnZone extends Component {
     private _tempStartScale: Vec3 = new Vec3();
     private _targetScale: Vec3 = new Vec3();
     private _availableItems: SpawnedSlotEntry[] = [];
-    private _collectedItems: Node[] = [];
     private _collectibleLookup: Map<Node, CollectibleItem> = new Map();
     private _isCharacterInCollectTrigger = false;
     private _isCollectingScheduled = false;
@@ -113,9 +128,28 @@ export class SpawnZone extends Component {
     private _carryOffsetWorld: Vec3 = new Vec3();
     private _anchorWorldRotation: Quat = new Quat();
     private _carryStackWorld: Vec3 = new Vec3();
+    private _typeOffsetWorld: Vec3 = new Vec3();
     private _nodeSlotIndex: Map<Node, number> = new Map();
     private _freeSlots: number[] = [];
     private _nextSlotIndex = 0;
+
+    private getCarryState(anchor: Node | null, autoCreate = false): AnchorCarryState | null {
+        if (!anchor) {
+            return null;
+        }
+        let state = SpawnZone._anchorCarryStates.get(anchor) ?? null;
+        if (!state && autoCreate) {
+            state = {
+                items: [],
+                typeOrder: [],
+                typeCounts: new Map(),
+                typeKeys: new Map(),
+                destroyHandlers: new Map(),
+            };
+            SpawnZone._anchorCarryStates.set(anchor, state);
+        }
+        return state;
+    }
 
     protected onEnable(): void {
         const collider = this.getComponent(Collider);
@@ -245,11 +279,16 @@ export class SpawnZone extends Component {
         if (!this._isCharacterInCollectTrigger) {
             return;
         }
-        const nextItem = this.getNextQueuedItem();
-        if (!nextItem) {
+        const entry = this.getNextQueuedEntry();
+        if (!entry) {
             return;
         }
-        this.transferItemToCharacter(nextItem);
+        const carried = this.transferItemToCharacter(entry.node);
+        if (carried) {
+            this.releaseSlotIndex(entry.slotIndex);
+            return;
+        }
+        this.queueSpawnEntry(entry);
     }
 
     private spawnPrefab(): void {
@@ -287,7 +326,7 @@ export class SpawnZone extends Component {
             .start();
     }
 
-    private getNextQueuedItem(): Node | null {
+    private getNextQueuedEntry(): SpawnedSlotEntry | null {
         let selectedIndex = -1;
         let selectedEntry = -1;
         for (let i = 0; i < this._availableItems.length; i++) {
@@ -312,20 +351,47 @@ export class SpawnZone extends Component {
         }
         const [entry] = this._availableItems.splice(selectedEntry, 1);
         this._nodeSlotIndex.delete(entry.node);
-        this.releaseSlotIndex(entry.slotIndex);
-        return entry.node;
+        return entry;
     }
 
-    private transferItemToCharacter(item: Node): void {
-        const anchor = this.characterCarryAnchor ?? this.character;
-        if (!anchor) {
-            console.warn(`[SpawnZone] ${this.node.name} needs characterCarryAnchor or character assigned to move prefabs to the player.`);
+    private queueSpawnEntry(entry: SpawnedSlotEntry): void {
+        const node = entry.node;
+        if (!node || !node.isValid) {
+            this.releaseSlotIndex(entry.slotIndex);
+            if (node) {
+                this._nodeSlotIndex.delete(node);
+            }
             return;
         }
 
-        const index = this._collectedItems.length;
-        this._collectedItems.push(item);
-        this.ensureCollectibleItem(item);
+        this._nodeSlotIndex.set(node, entry.slotIndex);
+        this._availableItems.push(entry);
+    }
+
+    private transferItemToCharacter(item: Node): boolean {
+        const anchor = this.characterCarryAnchor ?? this.character;
+        if (!anchor) {
+            console.warn(`[SpawnZone] ${this.node.name} needs characterCarryAnchor or character assigned to move prefabs to the player.`);
+            return false;
+        }
+
+        const state = this.getCarryState(anchor, true);
+        if (!state) {
+            return false;
+        }
+
+        const collectible = this.ensureCollectibleItem(item);
+        const rawTypeId = collectible?.getTypeId() ?? item.name ?? '';
+        const typeKey = this.resolveTypeKey(rawTypeId);
+        const typeSlot = this.getOrRegisterTypeSlot(state, typeKey);
+        if (typeSlot === -1) {
+            return false;
+        }
+
+        const stackIndex = this.getTypeStackIndex(state, typeKey);
+        state.items.push(item);
+        this.incrementTypeCount(state, typeKey);
+        this.registerCollectedItemCleanup(anchor, state, item, typeKey);
 
         anchor.getWorldPosition(this._carryTargetWorld);
         anchor.getWorldRotation(this._anchorWorldRotation);
@@ -336,21 +402,24 @@ export class SpawnZone extends Component {
             Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._carryOffsetWorld);
         }
 
-        if (index > 0 && this.carryVerticalSpacing !== 0) {
+        if (stackIndex > 0 && this.carryVerticalSpacing !== 0) {
             if (this.carryStackDirection.x !== 0 || this.carryStackDirection.y !== 0 || this.carryStackDirection.z !== 0) {
                 this._carryStackWorld.set(this.carryStackDirection.x, this.carryStackDirection.y, this.carryStackDirection.z);
                 Vec3.transformQuat(this._carryStackWorld, this._carryStackWorld, this._anchorWorldRotation);
                 if (this._carryStackWorld.lengthSqr() > 0.0001) {
                     this._carryStackWorld.normalize();
-                    this._carryStackWorld.multiplyScalar(index * this.carryVerticalSpacing);
+                    this._carryStackWorld.multiplyScalar(stackIndex * this.carryVerticalSpacing);
                     Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._carryStackWorld);
                 }
             } else {
-                this._carryTargetWorld.y += index * this.carryVerticalSpacing;
+                this._carryTargetWorld.y += stackIndex * this.carryVerticalSpacing;
             }
         }
 
+        this.applyTypeOffset(typeSlot);
+
         this.defaultMoveToParent(item, anchor, this._carryTargetWorld, this.carryRotation, this.carryScale);
+        return true;
     }
 
     private ensureCollectibleItem(node: Node): CollectibleItem | null {
@@ -390,7 +459,13 @@ export class SpawnZone extends Component {
 
     public getCollectedCollectibles(): CollectibleItem[] {
         const results: CollectibleItem[] = [];
-        this._collectedItems.forEach((node) => {
+        const anchor = this.characterCarryAnchor ?? this.character;
+        const state = this.getCarryState(anchor);
+        if (!state) {
+            return results;
+        }
+
+        state.items.forEach((node) => {
             const collectible = this.getCollectibleForNode(node);
             if (collectible) {
                 results.push(collectible);
@@ -401,7 +476,13 @@ export class SpawnZone extends Component {
 
     public getCollectedItemTypes(): string[] {
         const types: string[] = [];
-        this._collectedItems.forEach((node) => {
+        const anchor = this.characterCarryAnchor ?? this.character;
+        const state = this.getCarryState(anchor);
+        if (!state) {
+            return types;
+        }
+
+        state.items.forEach((node) => {
             const collectible = this.getCollectibleForNode(node);
             if (collectible) {
                 const typeId = collectible.getTypeId();
@@ -411,6 +492,130 @@ export class SpawnZone extends Component {
             }
         });
         return types;
+    }
+
+    public releaseCollectedItem(node: Node | null): void {
+        if (!node) {
+            return;
+        }
+
+        const anchor = this.characterCarryAnchor ?? this.character;
+        const state = this.getCarryState(anchor);
+        if (!anchor || !state) {
+            return;
+        }
+
+        const typeKey = state.typeKeys.get(node);
+        if (!typeKey) {
+            return;
+        }
+
+        this.onCollectedItemReleased(anchor, state, node, typeKey);
+    }
+
+    private getOrRegisterTypeSlot(state: AnchorCarryState, typeKey: string): number {
+        const existing = state.typeOrder.indexOf(typeKey);
+        if (existing !== -1) {
+            return existing;
+        }
+
+        const maxTypes = Math.max(1, Math.floor(this.maxCarryTypes));
+        if (state.typeOrder.length >= maxTypes) {
+            return -1;
+        }
+
+        state.typeOrder.push(typeKey);
+        return state.typeOrder.length - 1;
+    }
+
+    private incrementTypeCount(state: AnchorCarryState, typeKey: string): void {
+        const current = state.typeCounts.get(typeKey) ?? 0;
+        state.typeCounts.set(typeKey, current + 1);
+    }
+
+    private getTypeStackIndex(state: AnchorCarryState, typeKey: string): number {
+        return state.typeCounts.get(typeKey) ?? 0;
+    }
+
+    private resolveTypeKey(typeId: string): string {
+        const trimmed = typeId?.trim();
+        if (trimmed && trimmed.length > 0) {
+            return trimmed;
+        }
+        return '__default__';
+    }
+
+    private applyTypeOffset(typeSlot: number): void {
+        if (typeSlot <= 0 || this.typeZOffsetSpacing === 0) {
+            return;
+        }
+
+        this._typeOffsetWorld.set(0, 0, typeSlot * this.typeZOffsetSpacing);
+        Vec3.transformQuat(this._typeOffsetWorld, this._typeOffsetWorld, this._anchorWorldRotation);
+        Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._typeOffsetWorld);
+    }
+
+    private registerCollectedItemCleanup(anchor: Node, state: AnchorCarryState, node: Node, typeKey: string): void {
+        if (!node || !node.isValid) {
+            return;
+        }
+
+        state.typeKeys.set(node, typeKey);
+        const handler = () => {
+            this.onCollectedItemReleased(anchor, state, node, typeKey);
+        };
+        state.destroyHandlers.set(node, handler);
+        node.on(Node.EventType.NODE_DESTROYED, handler, this);
+    }
+
+    private onCollectedItemReleased(anchor: Node, state: AnchorCarryState, node: Node, typeKey: string): void {
+        this.unregisterCollectedItemCleanup(state, node);
+        state.typeKeys.delete(node);
+        this.removeCollectedItemReference(state, node);
+
+        const current = state.typeCounts.get(typeKey);
+        if (current === undefined) {
+            return;
+        }
+
+        if (current <= 1) {
+            state.typeCounts.delete(typeKey);
+            const orderIndex = state.typeOrder.indexOf(typeKey);
+            if (orderIndex !== -1) {
+                state.typeOrder.splice(orderIndex, 1);
+            }
+        } else {
+            state.typeCounts.set(typeKey, current - 1);
+        }
+
+        this.cleanupAnchorCarryState(anchor, state);
+    }
+
+    private removeCollectedItemReference(state: AnchorCarryState, node: Node): void {
+        const index = state.items.indexOf(node);
+        if (index !== -1) {
+            state.items.splice(index, 1);
+        }
+    }
+
+    private unregisterCollectedItemCleanup(state: AnchorCarryState, node: Node): void {
+        const handler = state.destroyHandlers.get(node);
+        if (!handler) {
+            return;
+        }
+        node.off(Node.EventType.NODE_DESTROYED, handler, this);
+        state.destroyHandlers.delete(node);
+    }
+
+    private cleanupAnchorCarryState(anchor: Node, state: AnchorCarryState): void {
+        if (state.items.length > 0) {
+            return;
+        }
+        state.typeOrder.length = 0;
+        state.typeCounts.clear();
+        state.typeKeys.clear();
+        state.destroyHandlers.clear();
+        SpawnZone._anchorCarryStates.delete(anchor);
     }
 
     private defaultMoveToParent(node: Node, parent: Node, worldTarget: Vec3, rotation?: Vec3, scale?: Vec3): void {

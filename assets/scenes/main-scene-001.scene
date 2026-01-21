@@ -1549,6 +1549,8 @@
       "y": 1,
       "z": 0
     },
+    "maxCarryTypes": 2,
+    "typeZOffsetSpacing": -0.4,
     "collectInterval": 0.25,
     "carryMoveDuration": 0.25,
     "carryMoveEasing": "quadOut",
@@ -2414,6 +2416,8 @@
       "y": 1,
       "z": 0
     },
+    "maxCarryTypes": 2,
+    "typeZOffsetSpacing": -0.4,
     "collectInterval": 0.25,
     "carryMoveDuration": 0.25,
     "carryMoveEasing": "quadOut",
