@@ -25,11 +25,11 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 9
+        "__id__": 7
       }
     ],
     "_prefab": {
-      "__id__": 11
+      "__id__": 9
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -121,7 +121,7 @@
     },
     "_materials": [
       {
-        "__uuid__": "9b20e874-bc1b-41df-9a4a-04947fc5d1f9@ce83f",
+        "__uuid__": "318d0b03-fdbe-4f91-88a3-912cb4a37a22",
         "__expectedType__": "cc.Material"
       }
     ],
@@ -181,8 +181,6 @@
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
-  null,
-  null,
   {
     "__type__": "44c43jv/RtBIpjvsTrA+kv9",
     "_name": "",
@@ -193,7 +191,7 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 10
+      "__id__": 8
     },
     "typeId": "cola",
     "_id": ""
