@@ -388,37 +388,11 @@ export class SpawnZone extends Component {
             return false;
         }
 
-        const stackIndex = this.getTypeStackIndex(state, typeKey);
         state.items.push(item);
         this.incrementTypeCount(state, typeKey);
         this.registerCollectedItemCleanup(anchor, state, item, typeKey);
 
-        anchor.getWorldPosition(this._carryTargetWorld);
-        anchor.getWorldRotation(this._anchorWorldRotation);
-
-        if (this.carryOffset.x !== 0 || this.carryOffset.y !== 0 || this.carryOffset.z !== 0) {
-            this._carryOffsetWorld.set(this.carryOffset.x, this.carryOffset.y, this.carryOffset.z);
-            Vec3.transformQuat(this._carryOffsetWorld, this._carryOffsetWorld, this._anchorWorldRotation);
-            Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._carryOffsetWorld);
-        }
-
-        if (stackIndex > 0 && this.carryVerticalSpacing !== 0) {
-            if (this.carryStackDirection.x !== 0 || this.carryStackDirection.y !== 0 || this.carryStackDirection.z !== 0) {
-                this._carryStackWorld.set(this.carryStackDirection.x, this.carryStackDirection.y, this.carryStackDirection.z);
-                Vec3.transformQuat(this._carryStackWorld, this._carryStackWorld, this._anchorWorldRotation);
-                if (this._carryStackWorld.lengthSqr() > 0.0001) {
-                    this._carryStackWorld.normalize();
-                    this._carryStackWorld.multiplyScalar(stackIndex * this.carryVerticalSpacing);
-                    Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._carryStackWorld);
-                }
-            } else {
-                this._carryTargetWorld.y += stackIndex * this.carryVerticalSpacing;
-            }
-        }
-
-        this.applyTypeOffset(typeSlot);
-
-        this.defaultMoveToParent(item, anchor, this._carryTargetWorld, this.carryRotation, this.carryScale);
+        this.relayoutTypeColumn(anchor, state, typeKey);
         return true;
     }
 
@@ -533,8 +507,67 @@ export class SpawnZone extends Component {
         state.typeCounts.set(typeKey, current + 1);
     }
 
-    private getTypeStackIndex(state: AnchorCarryState, typeKey: string): number {
-        return state.typeCounts.get(typeKey) ?? 0;
+    private computeCarryWorldTargetFrom(anchorWorldPos: Vec3, anchorWorldRot: Quat, typeSlot: number, stackIndex: number, out: Vec3): void {
+        out.set(anchorWorldPos);
+
+        if (this.carryOffset.x !== 0 || this.carryOffset.y !== 0 || this.carryOffset.z !== 0) {
+            this._carryOffsetWorld.set(this.carryOffset.x, this.carryOffset.y, this.carryOffset.z);
+            Vec3.transformQuat(this._carryOffsetWorld, this._carryOffsetWorld, anchorWorldRot);
+            Vec3.add(out, out, this._carryOffsetWorld);
+        }
+
+        if (stackIndex > 0 && this.carryVerticalSpacing !== 0) {
+            if (this.carryStackDirection.x !== 0 || this.carryStackDirection.y !== 0 || this.carryStackDirection.z !== 0) {
+                this._carryStackWorld.set(this.carryStackDirection.x, this.carryStackDirection.y, this.carryStackDirection.z);
+                Vec3.transformQuat(this._carryStackWorld, this._carryStackWorld, anchorWorldRot);
+                if (this._carryStackWorld.lengthSqr() > 0.0001) {
+                    this._carryStackWorld.normalize();
+                    this._carryStackWorld.multiplyScalar(stackIndex * this.carryVerticalSpacing);
+                    Vec3.add(out, out, this._carryStackWorld);
+                }
+            } else {
+                out.y += stackIndex * this.carryVerticalSpacing;
+            }
+        }
+
+        if (typeSlot > 0 && this.typeZOffsetSpacing !== 0) {
+            this._typeOffsetWorld.set(0, 0, typeSlot * this.typeZOffsetSpacing);
+            Vec3.transformQuat(this._typeOffsetWorld, this._typeOffsetWorld, anchorWorldRot);
+            Vec3.add(out, out, this._typeOffsetWorld);
+        }
+    }
+
+    private relayoutTypeColumn(anchor: Node, state: AnchorCarryState, typeKey: string): void {
+        const typeSlot = state.typeOrder.indexOf(typeKey);
+        if (typeSlot === -1) {
+            return;
+        }
+
+        const worldPos = this._baseWorldPos;
+        const worldRot = this._anchorWorldRotation;
+        anchor.getWorldPosition(worldPos);
+        anchor.getWorldRotation(worldRot);
+
+        const nodes: Node[] = [];
+        state.items.forEach((node) => {
+            if (!node || !node.isValid) {
+                return;
+            }
+            if (state.typeKeys.get(node) === typeKey) {
+                nodes.push(node);
+            }
+        });
+
+        nodes.forEach((node, index) => {
+            this.computeCarryWorldTargetFrom(worldPos, worldRot, typeSlot, index, this._carryTargetWorld);
+            this.defaultMoveToParent(node, anchor, this._carryTargetWorld, this.carryRotation, this.carryScale);
+        });
+    }
+
+    private relayoutAllColumns(anchor: Node, state: AnchorCarryState): void {
+        state.typeOrder.forEach((typeKey) => {
+            this.relayoutTypeColumn(anchor, state, typeKey);
+        });
     }
 
     private resolveTypeKey(typeId: string): string {
@@ -543,16 +576,6 @@ export class SpawnZone extends Component {
             return trimmed;
         }
         return '__default__';
-    }
-
-    private applyTypeOffset(typeSlot: number): void {
-        if (typeSlot <= 0 || this.typeZOffsetSpacing === 0) {
-            return;
-        }
-
-        this._typeOffsetWorld.set(0, 0, typeSlot * this.typeZOffsetSpacing);
-        Vec3.transformQuat(this._typeOffsetWorld, this._typeOffsetWorld, this._anchorWorldRotation);
-        Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._typeOffsetWorld);
     }
 
     private registerCollectedItemCleanup(anchor: Node, state: AnchorCarryState, node: Node, typeKey: string): void {
@@ -584,8 +607,10 @@ export class SpawnZone extends Component {
             if (orderIndex !== -1) {
                 state.typeOrder.splice(orderIndex, 1);
             }
+            this.relayoutAllColumns(anchor, state);
         } else {
             state.typeCounts.set(typeKey, current - 1);
+            this.relayoutTypeColumn(anchor, state, typeKey);
         }
 
         this.cleanupAnchorCarryState(anchor, state);
