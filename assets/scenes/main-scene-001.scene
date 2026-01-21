@@ -1998,7 +1998,8 @@
       "y": 0.35,
       "z": 0
     },
-    "completeCustomerOnDeliveryStart": true,
+    "completeCustomerOnDeliveryStart": false,
+    "serveAbsoluteFrontCustomer": true,
     "_id": "41Hgz+QbNAf6qG1nI/QxHj"
   },
   {
@@ -50059,7 +50060,8 @@
       "y": 0.35,
       "z": 0
     },
-    "completeCustomerOnDeliveryStart": true,
+    "completeCustomerOnDeliveryStart": false,
+    "serveAbsoluteFrontCustomer": true,
     "_id": "2cWp0Vlg1GHII32ar9vujS"
   },
   {

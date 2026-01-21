@@ -82,7 +82,10 @@ export class ItemSellTrigger extends Component {
     public customerOffset: Vec3 = new Vec3(0, 0.35, 0);
 
     @property({ tooltip: 'Complete/advance the customer as soon as delivery starts instead of waiting for the throw to finish.' })
-    public completeCustomerOnDeliveryStart = true;
+    public completeCustomerOnDeliveryStart = false;
+
+    @property({ tooltip: 'Always target the absolute front-most customer determined by the queue manager.' })
+    public serveAbsoluteFrontCustomer = true;
 
     private _sellQueue: Node[] = [];
     private _queuedItems: Set<Node> = new Set();
@@ -523,7 +526,7 @@ export class ItemSellTrigger extends Component {
             return;
         }
 
-        const columnIndex = this.resolveTargetColumnIndex(manager);
+        const columnIndex = this.serveAbsoluteFrontCustomer ? -1 : this.resolveTargetColumnIndex(manager);
         const customerNode = columnIndex >= 0
             ? manager.getFrontCustomerNode(columnIndex)
             : manager.getFrontMostCustomerNode();

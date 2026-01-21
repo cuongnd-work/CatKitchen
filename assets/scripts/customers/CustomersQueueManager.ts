@@ -57,6 +57,7 @@ export class CustomersQueueManager extends Component {
     private _columnAdvanceMultipliers = new Map<number, number>();
     private _servingReturnSlots = new Map<string, Vec3>();
     private _completedServingEntries = new Set<string>();
+    private _worldScratch: Vec3 = new Vec3();
 
     onLoad (): void {
         CustomersQueueEvents.on(CustomersQueueEvent.ORDER_COMPLETED, this.onOrderCompleted, this);
@@ -279,23 +280,32 @@ export class CustomersQueueManager extends Component {
     }
 
     public getFrontMostCustomerNode (): Node | null {
-        let bestEntry: QueueEntry | null = null;
+        let bestNode: Node | null = null;
         let bestZ = Number.POSITIVE_INFINITY;
+        let bestX = Number.POSITIVE_INFINITY;
 
-        this._columns.forEach((column) => {
-            if (column.entries.length === 0) {
+        this._entryLookup.forEach((entry) => {
+            const node = entry.node;
+            if (!node || !node.isValid || !node.activeInHierarchy) {
                 return;
             }
 
-            const frontEntry = column.entries[0];
-            const targetZ = frontEntry.targetPosition.z;
-            if (!bestEntry || targetZ < bestZ) {
-                bestEntry = frontEntry;
-                bestZ = targetZ;
+            node.getWorldPosition(this._worldScratch);
+            const candidateZ = this._worldScratch.z;
+            const candidateX = this._worldScratch.x;
+
+            if (
+                !bestNode ||
+                candidateZ < bestZ - 0.0001 ||
+                (Math.abs(candidateZ - bestZ) <= 0.0001 && candidateX < bestX - 0.0001)
+            ) {
+                bestNode = node;
+                bestZ = candidateZ;
+                bestX = candidateX;
             }
         });
 
-        return bestEntry ? bestEntry.node : null;
+        return bestNode;
     }
 
     private getColumnByIndex (columnIndex: number): ColumnData | null {
