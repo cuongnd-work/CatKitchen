@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Vec3, RigidBody, SkeletalAnimation, AnimationClip } from 'cc';
+import { SpawnZone } from './SpawnZone';
 
 const { ccclass, property } = _decorator;
 
@@ -6,6 +7,7 @@ const _tempPos = new Vec3();
 const _targetPos = new Vec3();
 const _moveDir = new Vec3();
 const _velocity = new Vec3();
+const _currentVel = new Vec3();
 
 @ccclass('WorkerWaypointPatrol')
 export class WorkerWaypointPatrol extends Component {
@@ -29,6 +31,12 @@ export class WorkerWaypointPatrol extends Component {
 
     @property({ type: AnimationClip, tooltip: 'Move animation clip (optional).' })
     public moveAnimClip: AnimationClip | null = null;
+
+    @property({ type: [SpawnZone], tooltip: 'Spawn zones that should stack items behind the worker.' })
+    public linkedSpawnZones: SpawnZone[] = [];
+
+    @property({ tooltip: 'Carry direction (local) applied to linked spawn zones.' })
+    public spawnZoneCarryDirection: Vec3 = new Vec3(0, 0, -1);
 
     private _waypoints: Node[] = [];
     private _currentIndex = 0;
@@ -64,6 +72,8 @@ export class WorkerWaypointPatrol extends Component {
             console.warn('[WorkerWaypointPatrol] At least two waypoints are required.', this.node.name);
             this.enabled = false;
         }
+
+        this.applySpawnZoneCarryDirection();
     }
 
     protected update (deltaTime: number): void {
@@ -110,9 +120,10 @@ export class WorkerWaypointPatrol extends Component {
 
     private applyMovement (direction: Vec3, deltaTime: number): void {
         if (this._rigidBody) {
+            this._rigidBody.getLinearVelocity(_currentVel);
             _velocity.set(direction);
             _velocity.multiplyScalar(this.moveSpeed);
-            _velocity.y = this._rigidBody.linearVelocity.y;
+            _velocity.y = _currentVel.y;
             this._rigidBody.setLinearVelocity(_velocity);
         } else {
             _tempPos.add(direction.multiplyScalar(this.moveSpeed * deltaTime));
@@ -151,5 +162,17 @@ export class WorkerWaypointPatrol extends Component {
         if (this._anim && this.idleAnimClip) {
             this._anim.crossFade(this.idleAnimClip.name, 0.2);
         }
+    }
+
+    private applySpawnZoneCarryDirection (): void {
+        if (!this.linkedSpawnZones || this.linkedSpawnZones.length === 0) {
+            return;
+        }
+        this.linkedSpawnZones.forEach((zone) => {
+            if (!zone) {
+                return;
+            }
+            zone.carryStackDirection.set(this.spawnZoneCarryDirection);
+        });
     }
 }
