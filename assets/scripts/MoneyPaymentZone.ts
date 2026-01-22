@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, Tween, TweenEasing } from 'cc';
+import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, Tween, TweenEasing, Label } from 'cc';
 import { ItemSellTrigger } from './ItemSellTrigger';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 
@@ -45,6 +45,9 @@ export abstract class MoneyPaymentZone extends Component {
     @property({ type: [Node], tooltip: 'Nodes disabled when this payment completes.' })
     public nodesToDisable: Node[] = [];
 
+    @property({ type: Label, tooltip: 'Label that displays the required payment amount.' })
+    public requiredAmountLabel: Label | null = null;
+
     private _isCharacterInside = false;
     private _consumeTimer = 0;
     private _currentValue = 0;
@@ -52,6 +55,10 @@ export abstract class MoneyPaymentZone extends Component {
     private _worldTemp: Vec3 = new Vec3();
     private _worldTarget: Vec3 = new Vec3();
     private _localTemp: Vec3 = new Vec3();
+
+    protected onLoad (): void {
+        this.updateRequiredAmountLabel();
+    }
 
     update (deltaTime: number): void {
         this.processConsumption(deltaTime);
@@ -236,6 +243,13 @@ export abstract class MoneyPaymentZone extends Component {
                 node.active = false;
             }
         });
+    }
+
+    protected updateRequiredAmountLabel (): void {
+        if (!this.requiredAmountLabel) {
+            return;
+        }
+        this.requiredAmountLabel.string = `${this.requiredAmount}`;
     }
 
     protected abstract onPaymentSatisfied (amount: number): void;

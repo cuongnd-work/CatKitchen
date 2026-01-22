@@ -55082,7 +55082,7 @@
     "consumeDuration": 0.25,
     "consumeEasing": "quadOut",
     "moneyValuePerBundle": 20,
-    "requiredAmount": 100,
+    "requiredAmount": 200,
     "loopPayments": false,
     "nodesToDisable": [
       {
@@ -55092,6 +55092,9 @@
         "__id__": 1233
       }
     ],
+    "requiredAmountLabel": {
+      "__id__": 1387
+    },
     "workerNode": {
       "__id__": 1391
     },
@@ -60699,13 +60702,16 @@
     "consumeDuration": 0.25,
     "consumeEasing": "quadOut",
     "moneyValuePerBundle": 20,
-    "requiredAmount": 100,
+    "requiredAmount": 300,
     "loopPayments": false,
     "nodesToDisable": [
       {
         "__id__": 1515
       }
     ],
+    "requiredAmountLabel": {
+      "__id__": 1520
+    },
     "workerNode": {
       "__id__": 1239
     },
