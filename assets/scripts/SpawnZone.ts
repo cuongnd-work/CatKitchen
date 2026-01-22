@@ -1,6 +1,7 @@
 import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, Quat, macro, tween, Tween, TweenEasing } from 'cc';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 import { CollectibleItem } from './CollectibleItem';
+import { getMoneyCarryShift } from './MoneyCarryRegistry';
 const { ccclass, property } = _decorator;
 
 const EVENT_TRIGGER_ENTER = 'onTriggerEnter';
@@ -34,6 +35,17 @@ export class SpawnZone extends Component {
                 break;
             }
         }
+    }
+
+    public static getAnchorTypeCount (anchor: Node | null): number {
+        if (!anchor) {
+            return 0;
+        }
+        const state = SpawnZone._anchorCarryStates.get(anchor);
+        if (!state) {
+            return 0;
+        }
+        return state.typeOrder.length;
     }
 
     @property({ type: Node, tooltip: 'Character node to watch for trigger overlap.' })
@@ -142,6 +154,8 @@ export class SpawnZone extends Component {
     private _anchorWorldRotation: Quat = new Quat();
     private _carryStackWorld: Vec3 = new Vec3();
     private _typeOffsetWorld: Vec3 = new Vec3();
+    private _moneyCarryLocal: Vec3 = new Vec3();
+    private _moneyCarryWorld: Vec3 = new Vec3();
     private _nodeSlotIndex: Map<Node, number> = new Map();
     private _freeSlots: number[] = [];
     private _nextSlotIndex = 0;
@@ -561,6 +575,11 @@ export class SpawnZone extends Component {
         anchor.getWorldPosition(worldPos);
         anchor.getWorldRotation(worldRot);
 
+        const moneyShift = getMoneyCarryShift(anchor, this._moneyCarryLocal);
+        if (moneyShift <= 0) {
+            this._moneyCarryLocal.set(0, 0, 0);
+        }
+
         const nodes: Node[] = [];
         state.items.forEach((node) => {
             if (!node || !node.isValid) {
@@ -573,6 +592,12 @@ export class SpawnZone extends Component {
 
         nodes.forEach((node, index) => {
             this.computeCarryWorldTargetFrom(worldPos, worldRot, typeSlot, index, this._carryTargetWorld);
+            if (moneyShift > 0) {
+                this._moneyCarryWorld.set(this._moneyCarryLocal.x, this._moneyCarryLocal.y, this._moneyCarryLocal.z);
+                Vec3.transformQuat(this._moneyCarryWorld, this._moneyCarryWorld, worldRot);
+                this._moneyCarryWorld.multiplyScalar(moneyShift);
+                Vec3.add(this._carryTargetWorld, this._carryTargetWorld, this._moneyCarryWorld);
+            }
             this.defaultMoveToParent(node, anchor, this._carryTargetWorld, this.carryRotation, this.carryScale);
         });
     }

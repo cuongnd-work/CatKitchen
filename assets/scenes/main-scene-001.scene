@@ -1540,15 +1540,15 @@
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
-      "z": -0.4
+      "z": -0.6
     },
     "carryScale": {
       "__type__": "cc.Vec3",
-      "x": 4,
-      "y": 4,
-      "z": 4
+      "x": 3.2,
+      "y": 3.2,
+      "z": 3.2
     },
-    "carryVerticalSpacing": 0.3,
+    "carryVerticalSpacing": 0.4,
     "carryStackDirection": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -1564,9 +1564,9 @@
     "spawnDelayOnEnter": 0,
     "columns": 4,
     "rows": 4,
-    "horizontalSpacing": 0.3,
-    "depthSpacing": 0.3,
-    "verticalSpacing": 0.3,
+    "horizontalSpacing": 0.5,
+    "depthSpacing": 0.5,
+    "verticalSpacing": 0.5,
     "resetStackOnExit": false,
     "startPoint": {
       "__id__": 91
@@ -2022,13 +2022,13 @@
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
-      "z": -0.5
+      "z": -0.8
     },
     "moneyCarryOffset": {
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
-      "z": -0.5
+      "z": -0.8
     },
     "moneyCarryScale": {
       "__type__": "cc.Vec3",
@@ -2042,7 +2042,14 @@
       "y": 1,
       "z": 0
     },
-    "moneyCarrySpacing": 0.2,
+    "moneyCarrySpacing": 0.3,
+    "moneyCarryTypeSpacing": 0.3,
+    "moneyCarryTypeAxis": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 1
+    },
     "_id": "41Hgz+QbNAf6qG1nI/QxHj"
   },
   {
@@ -50251,6 +50258,13 @@
       "z": 0
     },
     "moneyCarrySpacing": 0.08,
+    "moneyCarryTypeSpacing": 0.4,
+    "moneyCarryTypeAxis": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 1
+    },
     "_id": "2cWp0Vlg1GHII32ar9vujS"
   },
   {
