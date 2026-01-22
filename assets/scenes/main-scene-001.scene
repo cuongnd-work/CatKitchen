@@ -49390,7 +49390,7 @@
     "_id": "55iLgNogBAqplPzNAqNJ6q"
   },
   {
-    "__type__": "b031el2QNxNDpWTzE8OkM+I",
+    "__type__": "3af94VqbVJIk4QxnizdWgO6",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -49427,7 +49427,9 @@
     "moneyValuePerBundle": 20,
     "requiredAmount": 100,
     "loopPayments": true,
-    "_id": "1eU05viL9GgqabiYOD7iJJ"
+    "workerNode": null,
+    "hireMessage": "Worker level 1 hired!",
+    "_id": "d0UByDZ+dFHJYVYqlGvct5"
   },
   {
     "__type__": "cc.Node",

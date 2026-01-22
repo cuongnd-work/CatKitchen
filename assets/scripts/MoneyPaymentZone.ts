@@ -5,7 +5,7 @@ import { object_pool_manager } from 'db://assets/plugins/playable-foundation/gam
 const { ccclass, property } = _decorator;
 
 @ccclass('MoneyPaymentZone')
-export class MoneyPaymentZone extends Component {
+export abstract class MoneyPaymentZone extends Component {
     @property({ type: Node, tooltip: 'Character node required to activate the payment zone.' })
     public character: Node | null = null;
 
@@ -177,12 +177,12 @@ export class MoneyPaymentZone extends Component {
         }
 
         while (this._currentValue >= requirement) {
-            console.log(`[MoneyPaymentZone] ${this.node.name} received ${requirement}. Current surplus=${this._currentValue - requirement}.`);
+            this.onPaymentSatisfied(requirement);
             if (this.loopPayments) {
                 this._currentValue -= requirement;
-            } else {
-                break;
+                continue;
             }
+            break;
         }
     }
 
@@ -208,4 +208,6 @@ export class MoneyPaymentZone extends Component {
             object_pool_manager.instance.Recycle(bundle);
         }
     }
+
+    protected abstract onPaymentSatisfied (amount: number): void;
 }
