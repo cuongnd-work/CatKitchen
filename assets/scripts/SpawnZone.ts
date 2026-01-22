@@ -159,6 +159,7 @@ export class SpawnZone extends Component {
     private _nodeSlotIndex: Map<Node, number> = new Map();
     private _freeSlots: number[] = [];
     private _nextSlotIndex = 0;
+    private _autoCollectEnabled = false;
 
     private getCarryState(anchor: Node | null, autoCreate = false): AnchorCarryState | null {
         if (!anchor) {
@@ -300,6 +301,21 @@ export class SpawnZone extends Component {
         }
         this._isCollectingScheduled = false;
         this.unschedule(this.collectNextPrefab);
+    }
+
+    public setAutoCollectEnabled(state: boolean): void {
+        if (this._autoCollectEnabled === state) {
+            return;
+        }
+        this._autoCollectEnabled = state;
+
+        if (state) {
+            this._isCharacterInside = true;
+            this.startSpawning();
+        } else {
+            this._isCharacterInside = false;
+            this.stopSpawning();
+        }
     }
 
     private collectNextPrefab(): void {

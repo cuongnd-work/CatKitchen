@@ -49429,6 +49429,9 @@
     "loopPayments": true,
     "workerNode": null,
     "hireMessage": "Worker level 1 hired!",
+    "autoSpawnZone": {
+      "__id__": 86
+    },
     "_id": "d0UByDZ+dFHJYVYqlGvct5"
   },
   {
