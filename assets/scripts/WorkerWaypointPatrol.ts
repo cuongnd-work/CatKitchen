@@ -21,7 +21,13 @@ export class WorkerWaypointPatrol extends Component {
     @property({ tooltip: 'Units per second while walking.' })
     public moveSpeed = 1.5;
 
-    @property({ tooltip: 'Seconds spent waiting at each waypoint.' })
+    @property({ tooltip: 'Seconds spent waiting after reaching waypoint A.' })
+    public pauseDurationA = 3;
+
+    @property({ tooltip: 'Seconds spent waiting after reaching waypoint B.' })
+    public pauseDurationB = 3;
+
+    @property({ tooltip: 'Fallback pause duration used if no specific value is provided.' })
     public pauseDuration = 3;
 
     @property({ tooltip: 'Distance threshold (world units) to consider the waypoint reached.' })
@@ -101,7 +107,8 @@ export class WorkerWaypointPatrol extends Component {
             }
         }
 
-        const target = this._waypoints[this._currentIndex];
+        const currentIndex = this._currentIndex;
+        const target = this._waypoints[currentIndex];
         if (!target) {
             return;
         }
@@ -112,7 +119,7 @@ export class WorkerWaypointPatrol extends Component {
 
         const distance = _moveDir.length();
         if (distance <= Math.max(0.01, this.arrivalThreshold)) {
-            this.beginWait();
+            this.beginWait(currentIndex);
             return;
         }
 
@@ -121,11 +128,11 @@ export class WorkerWaypointPatrol extends Component {
         this.applyMovement(_moveDir, deltaTime);
     }
 
-    private beginWait (): void {
+    private beginWait (reachedIndex: number): void {
         this.stopMovement();
         this._isWaiting = true;
-        this._waitTimer = Math.max(0, this.pauseDuration);
-        this._currentIndex = (this._currentIndex + 1) % this._waypoints.length;
+        this._waitTimer = Math.max(0, this.getPauseDurationForIndex(reachedIndex));
+        this._currentIndex = (reachedIndex + 1) % this._waypoints.length;
     }
 
     private applyMovement (direction: Vec3, deltaTime: number): void {
@@ -172,6 +179,16 @@ export class WorkerWaypointPatrol extends Component {
         if (this._anim && this.idleAnimClip) {
             this._anim.crossFade(this.idleAnimClip.name, 0.2);
         }
+    }
+
+    private getPauseDurationForIndex (index: number): number {
+        if (index === 0) {
+            return this.pauseDurationA;
+        }
+        if (index === 1) {
+            return this.pauseDurationB;
+        }
+        return this.pauseDuration;
     }
 
     protected onDestroy (): void {
