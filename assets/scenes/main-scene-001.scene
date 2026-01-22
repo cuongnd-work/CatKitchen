@@ -2021,18 +2021,28 @@
     "moneyCollectOffset": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0.35,
-      "z": 0
+      "y": 0,
+      "z": -0.5
     },
-    "moneyCarryAnchor": null,
+    "moneyCarryOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": -0.5
+    },
+    "moneyCarryScale": {
+      "__type__": "cc.Vec3",
+      "x": 2.5,
+      "y": 2.5,
+      "z": 2.5
+    },
     "moneyCarryDirection": {
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 1,
       "z": 0
     },
-    "moneyCarrySpacing": 0.08,
-    "moneyCarrySource": null,
+    "moneyCarrySpacing": 0.2,
     "_id": "41Hgz+QbNAf6qG1nI/QxHj"
   },
   {
@@ -50222,7 +50232,18 @@
       "y": 0.35,
       "z": 0
     },
-    "moneyCarryAnchor": null,
+    "moneyCarryOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "moneyCarryScale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1
+    },
     "moneyCarryDirection": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -50230,7 +50251,6 @@
       "z": 0
     },
     "moneyCarrySpacing": 0.08,
-    "moneyCarrySource": null,
     "_id": "2cWp0Vlg1GHII32ar9vujS"
   },
   {

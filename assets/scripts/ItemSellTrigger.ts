@@ -121,17 +121,17 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'World offset applied when money reaches the character.' })
     public moneyCollectOffset: Vec3 = new Vec3(0, 0.35, 0);
 
-    @property({ type: Node, tooltip: 'Anchor on the character where collected money bundles are stacked (defaults to character carry anchor).' })
-    public moneyCarryAnchor: Node | null = null;
+    @property({ tooltip: 'Local offset applied to the carried money stack relative to the character anchor.' })
+    public moneyCarryOffset: Vec3 = new Vec3(0, 0, 0);
+
+    @property({ tooltip: 'Local scale applied to carried money bundles.' })
+    public moneyCarryScale: Vec3 = new Vec3(1, 1, 1);
 
     @property({ tooltip: 'Local stacking direction for carried money bundles.' })
     public moneyCarryDirection: Vec3 = new Vec3(0, 1, 0);
 
     @property({ tooltip: 'Spacing between carried money bundles.' })
     public moneyCarrySpacing = 0.08;
-
-    @property({ type: SpawnZone, tooltip: 'Reference SpawnZone to mirror carry settings for collected money.' })
-    public moneyCarrySource: SpawnZone | null = null;
 
     private _sellQueue: Node[] = [];
     private _queuedItems: Set<Node> = new Set();
@@ -182,10 +182,6 @@ export class ItemSellTrigger extends Component {
         this.stopCustomerDelivery();
         this.teardownMoneyStackTrigger();
         this.resetMoneyCollections();
-    }
-
-    protected start (): void {
-        this.applyMoneyCarrySettingsFromSource();
     }
 
     private registerColliderEvents (): void {
@@ -905,7 +901,7 @@ export class ItemSellTrigger extends Component {
     }
 
     private attachCollectedMoney (bundle: Node): void {
-        const anchor = this.moneyCarryAnchor ?? this.characterCarryAnchor ?? this.character;
+        const anchor = this.characterCarryAnchor ?? this.character;
         if (!anchor || !bundle || !bundle.isValid) {
             object_pool_manager.instance.Recycle(bundle);
             return;
@@ -924,12 +920,17 @@ export class ItemSellTrigger extends Component {
 
         const index = this._carriedMoney.length;
         const spacing = Math.max(0, this.moneyCarrySpacing);
+        const offset = this.moneyCarryOffset;
 
         bundle.removeFromParent();
         anchor.addChild(bundle);
-        bundle.setScale(1, 1, 1);
+        bundle.setScale(this.moneyCarryScale.x, this.moneyCarryScale.y, this.moneyCarryScale.z);
         bundle.setRotationFromEuler(0, 0, 0);
-        bundle.setPosition(dir.x * index * spacing, dir.y * index * spacing, dir.z * index * spacing);
+        bundle.setPosition(
+            offset.x + dir.x * index * spacing,
+            offset.y + dir.y * index * spacing,
+            offset.z + dir.z * index * spacing,
+        );
 
         this._carriedMoney.push(bundle);
     }
@@ -987,29 +988,6 @@ export class ItemSellTrigger extends Component {
         this._isCharacterAtMoneyStack = state;
         if (!state) {
             this.resetMoneyCollections();
-        }
-    }
-
-    private applyMoneyCarrySettingsFromSource (): void {
-        const source = this.moneyCarrySource;
-        if (!source) {
-            return;
-        }
-
-        if (!this.moneyCarryAnchor) {
-            this.moneyCarryAnchor = source.characterCarryAnchor ?? source.character ?? this.character;
-        }
-
-        if (source.carryStackDirection) {
-            this.moneyCarryDirection.set(
-                source.carryStackDirection.x,
-                source.carryStackDirection.y,
-                source.carryStackDirection.z,
-            );
-        }
-
-        if (source.carryVerticalSpacing > 0) {
-            this.moneyCarrySpacing = source.carryVerticalSpacing;
         }
     }
 
