@@ -55181,6 +55181,13 @@
     "requiredAmountLabel": {
       "__id__": 1389
     },
+    "progressSprite": {
+      "__id__": 1386
+    },
+    "progressBaseMaterial": {
+      "__uuid__": "e3a960cc-81a6-43bd-8af7-5aa336e7b34b",
+      "__expectedType__": "cc.Material"
+    },
     "workerNode": {
       "__id__": 1393
     },
@@ -60714,16 +60721,16 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -0.012,
+      "x": 0.02,
       "y": 0.097,
       "z": 0.068
     },
     "_lrot": {
       "__type__": "cc.Quat",
-      "x": -0.7071067811865475,
-      "y": 0,
-      "z": 0,
-      "w": 0.7071067811865476
+      "x": -0.5,
+      "y": -0.5,
+      "z": -0.4999999999999999,
+      "w": 0.5000000000000001
     },
     "_lscale": {
       "__type__": "cc.Vec3",
@@ -60736,7 +60743,7 @@
     "_euler": {
       "__type__": "cc.Vec3",
       "x": -89.99999999999999,
-      "y": 0,
+      "y": -90,
       "z": 0
     },
     "_id": "5126Gy3ZhEg51FwVsXTvO9"
@@ -60883,6 +60890,13 @@
     ],
     "requiredAmountLabel": {
       "__id__": 1522
+    },
+    "progressSprite": {
+      "__id__": 1524
+    },
+    "progressBaseMaterial": {
+      "__uuid__": "e3a960cc-81a6-43bd-8af7-5aa336e7b34b",
+      "__expectedType__": "cc.Material"
     },
     "workerNode": {
       "__id__": 1239

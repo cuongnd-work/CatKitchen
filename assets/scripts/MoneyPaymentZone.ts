@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, Tween, TweenEasing, Label } from 'cc';
+import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, Tween, TweenEasing, Label, SpriteRenderer, Material } from 'cc';
 import { ItemSellTrigger } from './ItemSellTrigger';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 
@@ -48,6 +48,12 @@ export abstract class MoneyPaymentZone extends Component {
     @property({ type: Label, tooltip: 'Label that displays the required payment amount.' })
     public requiredAmountLabel: Label | null = null;
 
+    @property({ type: SpriteRenderer, tooltip: 'Sprite renderer whose material exposes fillAmount (0-1).' })
+    public progressSprite: SpriteRenderer | null = null;
+
+    @property({ type: Material, tooltip: 'Optional base material used when the sprite has no shared material assigned.' })
+    public progressBaseMaterial: Material | null = null;
+
     private _isCharacterInside = false;
     private _consumeTimer = 0;
     private _currentValue = 0;
@@ -55,9 +61,11 @@ export abstract class MoneyPaymentZone extends Component {
     private _worldTemp: Vec3 = new Vec3();
     private _worldTarget: Vec3 = new Vec3();
     private _localTemp: Vec3 = new Vec3();
+    private _progressMaterial: Material | null = null;
 
     protected onLoad (): void {
         this.updateRequiredAmountLabel();
+        this.updateProgressSprite();
     }
 
     update (deltaTime: number): void {
@@ -175,6 +183,7 @@ export abstract class MoneyPaymentZone extends Component {
                 this._activeDeposits.delete(bundle);
                 this.recycleBundle(bundle);
                 this._currentValue += this.moneyValuePerBundle;
+                this.updateProgressSprite();
                 this.reportPaymentProgress();
             })
             .start();
@@ -190,6 +199,7 @@ export abstract class MoneyPaymentZone extends Component {
             this.onPaymentSatisfied(requirement);
             if (this.loopPayments) {
                 this._currentValue -= requirement;
+                this.updateProgressSprite();
                 continue;
             }
             break;
@@ -250,6 +260,31 @@ export abstract class MoneyPaymentZone extends Component {
             return;
         }
         this.requiredAmountLabel.string = `${this.requiredAmount}`;
+    }
+
+    protected updateProgressSprite (): void {
+        const material = this.ensureProgressMaterial();
+        if (!material) {
+            return;
+        }
+        const requirement = Math.max(1, Math.floor(this.requiredAmount));
+        const ratio = Math.min(1, Math.max(0, requirement > 0 ? this._currentValue / requirement : 0));
+        material.setProperty('fillAmount', ratio);
+    }
+
+    private ensureProgressMaterial (): Material | null {
+        if (!this.progressSprite) {
+            return null;
+        }
+
+        if (!this.progressSprite.getSharedMaterial(0) && this.progressBaseMaterial) {
+            this.progressSprite.setMaterial(this.progressBaseMaterial, 0);
+        }
+
+        if (!this._progressMaterial) {
+            this._progressMaterial = this.progressSprite.getMaterialInstance(0);
+        }
+        return this._progressMaterial;
     }
 
     protected abstract onPaymentSatisfied (amount: number): void;
