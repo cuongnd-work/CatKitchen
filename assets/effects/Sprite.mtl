@@ -29,6 +29,13 @@
         "__uuid__": "49db1950-e272-4740-8b68-690f644a8ecd@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
+      "mainColor": {
+        "__type__": "cc.Color",
+        "r": 214,
+        "g": 255,
+        "b": 0,
+        "a": 255
+      },
       "alphaThreshold": 0.5
     }
   ]
