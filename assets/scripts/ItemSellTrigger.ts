@@ -7,6 +7,14 @@ import { OrderPopup } from 'db://assets/scripts/OrderPopup';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 import { MoneyStackItem } from './MoneyStackItem';
 
+type MoneyCarryBasis = {
+    spacing: number;
+    typeSpacing: number;
+    baseX: number;
+    baseY: number;
+    baseZ: number;
+};
+
 const { ccclass, property } = _decorator;
 
 @ccclass('ItemSellTrigger')
@@ -113,6 +121,12 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'Money bundles collected per trigger check.', min: 1, step: 1 })
     public moneyCollectBatch = 4;
 
+    @property({ tooltip: 'Duration (seconds) money rewards take to settle on the money stack.' })
+    public moneySpawnDuration = 0.25;
+
+    @property({ tooltip: 'Tween easing used while spawning money rewards onto the stack.' })
+    public moneySpawnEasing: TweenEasing = 'quadOut';
+
     @property({ tooltip: 'Duration (seconds) to move collected money toward the character.' })
     public moneyCollectDuration = 0.25;
 
@@ -121,6 +135,12 @@ export class ItemSellTrigger extends Component {
 
     @property({ tooltip: 'World offset applied when money reaches the character.' })
     public moneyCollectOffset: Vec3 = new Vec3(0, 0.35, 0);
+
+    @property({ tooltip: 'Duration (seconds) money bundles take to slide into the carried stack.' })
+    public moneyCarryAttachDuration = 0.15;
+
+    @property({ tooltip: 'Tween easing used while money bundles settle onto the carried stack.' })
+    public moneyCarryAttachEasing: TweenEasing = 'quadOut';
 
     @property({ tooltip: 'Local offset applied to the carried money stack relative to the character anchor.' })
     public moneyCarryOffset: Vec3 = new Vec3(0, 0, 0);
@@ -168,6 +188,8 @@ export class ItemSellTrigger extends Component {
     private _moneyCarryShift = 0;
     private _moneyTypeOrder = 0;
     private _needsMoneyRelayout = false;
+    private _moneyStackSpawnLocal: Vec3 = new Vec3();
+    private _moneyCarryTargetLocal: Vec3 = new Vec3();
     private _stagedItems: Node[] = [];
     private _soldFreeSlots: number[] = [];
     private _customerRescanTimer = 0;
@@ -758,10 +780,13 @@ export class ItemSellTrigger extends Component {
             return;
         }
 
-        reward.setParent(stackNode);
+        if (!stackNode || !stackNode.isValid) {
+            object_pool_manager.instance.Recycle(reward);
+            return;
+        }
+
         reward.setScale(1, 1, 1);
         reward.setRotationFromEuler(0, 0, 0);
-        reward.setPosition(0, 0, 0);
         reward.active = true;
 
         const collectible = reward.getComponent(CollectibleItem) ?? reward.addComponent(CollectibleItem);
@@ -774,7 +799,31 @@ export class ItemSellTrigger extends Component {
         const slotIndex = this.acquireMoneySlotIndex();
         info.slotIndex = slotIndex;
         this._moneySlotIndex.set(reward, slotIndex);
-        this.applyMoneySlotPosition(reward, slotIndex);
+
+        const targetWorld = this._worldTarget;
+        this.computeMoneyStackPosition(targetWorld, stackNode, slotIndex);
+
+        const spawnReference = this.resolveSellTarget() ?? stackNode;
+        spawnReference.getWorldPosition(this._worldTemp);
+        stackNode.inverseTransformPoint(this._moneyStackSpawnLocal, this._worldTemp);
+
+        stackNode.addChild(reward);
+        reward.setPosition(this._moneyStackSpawnLocal);
+
+        stackNode.inverseTransformPoint(this._localTemp, targetWorld);
+        const targetLocal = new Vec3(this._localTemp.x, this._localTemp.y, this._localTemp.z);
+
+        Tween.stopAllByTarget(reward);
+        tween(reward)
+            .to(
+                Math.max(0.01, this.moneySpawnDuration),
+                { position: targetLocal },
+                { easing: this.moneySpawnEasing },
+            )
+            .call(() => {
+                reward.setPosition(targetLocal);
+            })
+            .start();
     }
 
     private acquireMoneySlotIndex (): number {
@@ -804,17 +853,6 @@ export class ItemSellTrigger extends Component {
         if (!inserted) {
             this._moneyFreeSlots.push(slotIndex);
         }
-    }
-
-    private applyMoneySlotPosition (reward: Node, slotIndex: number): void {
-        const parent = this.moneyStackNode ?? this.resolveSellTarget();
-        if (!parent || !reward.isValid) {
-            return;
-        }
-
-        this.computeMoneyStackPosition(this._worldTarget, parent, slotIndex);
-        parent.inverseTransformPoint(this._localTemp, this._worldTarget);
-        reward.setPosition(this._localTemp);
     }
 
     private computeMoneyStackPosition (out: Vec3, reference: Node, slotIndex: number): void {
@@ -924,12 +962,40 @@ export class ItemSellTrigger extends Component {
         collectible.typeId = 'money';
         collectible.ensureTypeId();
 
+        bundle.getWorldPosition(this._worldTemp);
         bundle.removeFromParent();
         anchor.addChild(bundle);
+        anchor.inverseTransformPoint(this._localTemp, this._worldTemp);
+        bundle.setPosition(this._localTemp);
+        bundle.setScale(this.moneyCarryScale.x, this.moneyCarryScale.y, this.moneyCarryScale.z);
+        bundle.setRotationFromEuler(0, 0, 0);
+
         this._carriedMoney.push(bundle);
         this._moneyTypeOrder = this.resolveMoneyTypeOrder(anchor);
-        this._needsMoneyRelayout = true;
-        this.relayoutCarriedMoney(anchor);
+
+        const basis = this.computeMoneyCarryBasis();
+        const dir = this._moneyCarryDir;
+        const index = this._carriedMoney.length - 1;
+        const targetLocal = new Vec3(
+            basis.baseX + dir.x * index * basis.spacing,
+            basis.baseY + dir.y * index * basis.spacing,
+            basis.baseZ + dir.z * index * basis.spacing,
+        );
+
+        const duration = Math.max(0.01, this.moneyCarryAttachDuration);
+        Tween.stopAllByTarget(bundle);
+        tween(bundle)
+            .to(duration, { position: targetLocal }, { easing: this.moneyCarryAttachEasing })
+            .call(() => {
+                bundle.setPosition(targetLocal);
+            })
+            .start();
+
+        if (this._moneyTypeOrder === 0 && basis.typeSpacing > 0) {
+            setMoneyCarryShift(anchor, this._moneyTypeAxis, basis.typeSpacing);
+        } else {
+            clearMoneyCarryShift(anchor);
+        }
     }
 
     private updateMoneyCarryLayout (): void {
@@ -1001,12 +1067,7 @@ export class ItemSellTrigger extends Component {
         return count;
     }
 
-    private relayoutCarriedMoney (anchor: Node): void {
-        if (!anchor) {
-            clearMoneyCarryShift(null);
-            return;
-        }
-
+    private computeMoneyCarryBasis (): MoneyCarryBasis {
         const dir = this._moneyCarryDir;
         dir.set(this.moneyCarryDirection.x, this.moneyCarryDirection.y, this.moneyCarryDirection.z);
         if (dir.lengthSqr() < 0.0001) {
@@ -1023,12 +1084,27 @@ export class ItemSellTrigger extends Component {
 
         const typeSpacing = Math.max(0, this.moneyCarryTypeSpacing);
         const spacing = Math.max(0, this.moneyCarrySpacing);
-        const offset = this.moneyCarryOffset;
         const carryShift = Math.max(0, this._moneyTypeOrder) * typeSpacing;
         this._moneyCarryShift = carryShift;
-        const baseOffsetX = offset.x + axis.x * carryShift;
-        const baseOffsetY = offset.y + axis.y * carryShift;
-        const baseOffsetZ = offset.z + axis.z * carryShift;
+
+        const offset = this.moneyCarryOffset;
+        return {
+            spacing,
+            typeSpacing,
+            baseX: offset.x + axis.x * carryShift,
+            baseY: offset.y + axis.y * carryShift,
+            baseZ: offset.z + axis.z * carryShift,
+        };
+    }
+
+    private relayoutCarriedMoney (anchor: Node): void {
+        if (!anchor) {
+            clearMoneyCarryShift(null);
+            return;
+        }
+
+        const basis = this.computeMoneyCarryBasis();
+        const dir = this._moneyCarryDir;
 
         for (let i = 0; i < this._carriedMoney.length; i++) {
             const node = this._carriedMoney[i];
@@ -1045,16 +1121,16 @@ export class ItemSellTrigger extends Component {
             node.setScale(this.moneyCarryScale.x, this.moneyCarryScale.y, this.moneyCarryScale.z);
             node.setRotationFromEuler(0, 0, 0);
             node.setPosition(
-                baseOffsetX + dir.x * i * spacing,
-                baseOffsetY + dir.y * i * spacing,
-                baseOffsetZ + dir.z * i * spacing,
+                basis.baseX + dir.x * i * basis.spacing,
+                basis.baseY + dir.y * i * basis.spacing,
+                basis.baseZ + dir.z * i * basis.spacing,
             );
         }
 
-        if (this._carriedMoney.length === 0 || typeSpacing <= 0) {
+        if (this._carriedMoney.length === 0 || basis.typeSpacing <= 0) {
             clearMoneyCarryShift(anchor);
         } else if (this._moneyTypeOrder === 0) {
-            setMoneyCarryShift(anchor, axis, typeSpacing);
+            setMoneyCarryShift(anchor, this._moneyTypeAxis, basis.typeSpacing);
         } else {
             clearMoneyCarryShift(anchor);
         }

@@ -2010,13 +2010,15 @@
     "moneyStackNode": {
       "__id__": 1247
     },
-    "moneyColumns": 4,
-    "moneyRows": 4,
-    "moneyHorizontalSpacing": 0.35,
-    "moneyDepthSpacing": 0.35,
-    "moneyVerticalSpacing": 0.25,
+    "moneyColumns": 3,
+    "moneyRows": 3,
+    "moneyHorizontalSpacing": 0.75,
+    "moneyDepthSpacing": 0.3,
+    "moneyVerticalSpacing": 0.1,
     "moneyCollectBatch": 4,
-    "moneyCollectDuration": 0.25,
+    "moneySpawnDuration": 0.15,
+    "moneySpawnEasing": "quadOut",
+    "moneyCollectDuration": 0.15,
     "moneyCollectEasing": "quadOut",
     "moneyCollectOffset": {
       "__type__": "cc.Vec3",
@@ -2024,6 +2026,8 @@
       "y": 0,
       "z": -0.8
     },
+    "moneyCarryAttachDuration": 0.15,
+    "moneyCarryAttachEasing": "quadOut",
     "moneyCarryOffset": {
       "__type__": "cc.Vec3",
       "x": 0,
@@ -49047,7 +49051,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -3.743,
-      "y": 0.503,
+      "y": 0.103,
       "z": 5.815
     },
     "_lrot": {
@@ -49093,9 +49097,9 @@
     },
     "_size": {
       "__type__": "cc.Vec3",
-      "x": 1,
+      "x": 1.924,
       "y": 1,
-      "z": 1
+      "z": 1.433
     },
     "_id": "0fjGQhycBK1L8QGAlih+ql"
   },
@@ -50231,6 +50235,8 @@
     "moneyDepthSpacing": 0.35,
     "moneyVerticalSpacing": 0.25,
     "moneyCollectBatch": 4,
+    "moneySpawnDuration": 0.25,
+    "moneySpawnEasing": "quadOut",
     "moneyCollectDuration": 0.25,
     "moneyCollectEasing": "quadOut",
     "moneyCollectOffset": {
@@ -50239,6 +50245,8 @@
       "y": 0.35,
       "z": 0
     },
+    "moneyCarryAttachDuration": 0.15,
+    "moneyCarryAttachEasing": "quadOut",
     "moneyCarryOffset": {
       "__type__": "cc.Vec3",
       "x": 0,
