@@ -42,6 +42,9 @@ export abstract class MoneyPaymentZone extends Component {
     @property({ tooltip: 'Reset progress each time the required amount is reached.' })
     public loopPayments = true;
 
+    @property({ type: [Node], tooltip: 'Nodes disabled when this payment completes.' })
+    public nodesToDisable: Node[] = [];
+
     private _isCharacterInside = false;
     private _consumeTimer = 0;
     private _currentValue = 0;
@@ -184,6 +187,10 @@ export abstract class MoneyPaymentZone extends Component {
             }
             break;
         }
+
+        if (!this.loopPayments && this._currentValue >= requirement) {
+            this.disablePaymentZone();
+        }
     }
 
     private cleanupDeposits (): void {
@@ -207,6 +214,28 @@ export abstract class MoneyPaymentZone extends Component {
         } else {
             object_pool_manager.instance.Recycle(bundle);
         }
+    }
+
+    protected disablePaymentZone (): void {
+        this._isCharacterInside = false;
+        this.cleanupDeposits();
+        const collider = this.getTriggerCollider();
+        if (collider) {
+            collider.enabled = false;
+        }
+        this.disableExtraNodes();
+        this.enabled = false;
+    }
+
+    protected disableExtraNodes (): void {
+        if (!this.nodesToDisable) {
+            return;
+        }
+        this.nodesToDisable.forEach((node) => {
+            if (node) {
+                node.active = false;
+            }
+        });
     }
 
     protected abstract onPaymentSatisfied (amount: number): void;
