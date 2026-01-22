@@ -40,6 +40,21 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'Collectible type identifier this trigger will sell (case insensitive).' })
     public sellTypeId = '';
 
+    @property({ tooltip: 'Collectible type id used to trigger reward nodes when enough are sold.' })
+    public thresholdItemTypeId = '';
+
+    @property({ tooltip: 'Sale count required to activate the primary threshold node.', min: 0, step: 1 })
+    public thresholdItemCountPrimary = 0;
+
+    @property({ type: Node, tooltip: 'Node activated when the primary threshold is reached.' })
+    public saleThresholdPrimaryNode: Node | null = null;
+
+    @property({ tooltip: 'Sale count required to activate the secondary threshold node.', min: 0, step: 1 })
+    public thresholdItemCountSecondary = 0;
+
+    @property({ type: Node, tooltip: 'Node activated when the secondary threshold is reached.' })
+    public saleThresholdSecondaryNode: Node | null = null;
+
     @property({ tooltip: 'Local stacking direction used to figure out the top item within the anchor.' })
     public stackDirection: Vec3 = new Vec3(0, 1, 0);
 
@@ -200,6 +215,8 @@ export class ItemSellTrigger extends Component {
     private _runtimeSellers: Map<Node, Node | null> = new Map();
     private _activeSellerNode: Node | null = null;
     private _activeSellerAnchor: Node | null = null;
+    private _soldTypeCounts: Map<string, number> = new Map();
+    private _triggeredSaleNodes: Set<Node> = new Set();
     private _stagedItems: Node[] = [];
     private _soldFreeSlots: number[] = [];
     private _customerRescanTimer = 0;
@@ -643,10 +660,41 @@ export class ItemSellTrigger extends Component {
             this._stagedItems.push(item);
         }
 
+        this.handleSaleThreshold(item);
         this._customerRescanTimer = 0;
 
         if (autoServe && !this._isDeliveringToCustomer) {
             this.tryServeCustomer();
+        }
+    }
+
+    private handleSaleThreshold (item: Node | null): void {
+        if (!item || !item.isValid) {
+            return;
+        }
+
+        const target = this.thresholdItemTypeId?.trim().toLowerCase();
+        if (!target) {
+            return;
+        }
+
+        const collectible = item.getComponent(CollectibleItem);
+        const typeId = collectible?.getTypeId().trim().toLowerCase();
+        if (!typeId || typeId !== target) {
+            return;
+        }
+
+        const next = (this._soldTypeCounts.get(target) ?? 0) + 1;
+        this._soldTypeCounts.set(target, next);
+
+        if (this.saleThresholdPrimaryNode && next >= Math.max(1, Math.floor(this.thresholdItemCountPrimary))) {
+            this.saleThresholdPrimaryNode.active = true;
+            this.saleThresholdPrimaryNode = null;
+        }
+
+        if (this.saleThresholdSecondaryNode && next >= Math.max(1, Math.floor(this.thresholdItemCountSecondary))) {
+            this.saleThresholdSecondaryNode.active = true;
+            this.saleThresholdSecondaryNode = null;
         }
     }
 
