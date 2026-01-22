@@ -115,7 +115,7 @@
             "_value": false
           },
           "particle-2d": {
-            "_value": true
+            "_value": false
           },
           "audio": {
             "_value": true
@@ -202,7 +202,6 @@
           "custom-pipeline",
           "gfx-webgl",
           "graphics",
-          "particle-2d",
           "physics-ammo",
           "skeletal-animation",
           "tween",
