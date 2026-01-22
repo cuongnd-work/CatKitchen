@@ -45,6 +45,9 @@ export abstract class MoneyPaymentZone extends Component {
     @property({ type: [Node], tooltip: 'Nodes disabled when this payment completes.' })
     public nodesToDisable: Node[] = [];
 
+    @property({ type: Node, tooltip: 'Node activated when this payment succeeds (optional).' })
+    public nodeToActivateOnComplete: Node | null = null;
+
     @property({ type: Label, tooltip: 'Label that displays the required payment amount.' })
     public requiredAmountLabel: Label | null = null;
 
@@ -241,6 +244,10 @@ export abstract class MoneyPaymentZone extends Component {
             collider.enabled = false;
         }
         this.disableExtraNodes();
+        if (this.nodeToActivateOnComplete) {
+            this.nodeToActivateOnComplete.active = true;
+            this.nodeToActivateOnComplete = null;
+        }
         this.enabled = false;
     }
 
