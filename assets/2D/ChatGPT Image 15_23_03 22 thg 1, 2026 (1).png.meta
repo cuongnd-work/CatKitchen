@@ -2,7 +2,7 @@
   "ver": "1.0.27",
   "importer": "image",
   "imported": true,
-  "uuid": "8c7b3f56-854e-4a83-b7b0-0de5fb6ce72c",
+  "uuid": "84e2add8-9319-4c25-961c-36acb0b1fa6c",
   "files": [
     ".json",
     ".png"
@@ -10,8 +10,8 @@
   "subMetas": {
     "6c48a": {
       "importer": "texture",
-      "uuid": "8c7b3f56-854e-4a83-b7b0-0de5fb6ce72c@6c48a",
-      "displayName": "btn_hire",
+      "uuid": "84e2add8-9319-4c25-961c-36acb0b1fa6c@6c48a",
+      "displayName": "ChatGPT Image 15_23_03 22 thg 1, 2026 (1)",
       "id": "6c48a",
       "name": "texture",
       "userData": {
@@ -22,7 +22,7 @@
         "mipfilter": "none",
         "anisotropy": 0,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "8c7b3f56-854e-4a83-b7b0-0de5fb6ce72c",
+        "imageUuidOrDatabaseUri": "84e2add8-9319-4c25-961c-36acb0b1fa6c",
         "visible": false
       },
       "ver": "1.0.22",
@@ -34,8 +34,8 @@
     },
     "f9941": {
       "importer": "sprite-frame",
-      "uuid": "8c7b3f56-854e-4a83-b7b0-0de5fb6ce72c@f9941",
-      "displayName": "btn_hire",
+      "uuid": "84e2add8-9319-4c25-961c-36acb0b1fa6c@f9941",
+      "displayName": "ChatGPT Image 15_23_03 22 thg 1, 2026 (1)",
       "id": "f9941",
       "name": "spriteFrame",
       "userData": {
@@ -113,7 +113,7 @@
           ]
         },
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "8c7b3f56-854e-4a83-b7b0-0de5fb6ce72c@6c48a",
+        "imageUuidOrDatabaseUri": "84e2add8-9319-4c25-961c-36acb0b1fa6c@6c48a",
         "atlasUuid": "",
         "trimType": "none"
       },
@@ -129,6 +129,6 @@
     "type": "sprite-frame",
     "hasAlpha": true,
     "fixAlphaTransparencyArtifacts": false,
-    "redirect": "8c7b3f56-854e-4a83-b7b0-0de5fb6ce72c@6c48a"
+    "redirect": "84e2add8-9319-4c25-961c-36acb0b1fa6c@6c48a"
   }
 }
