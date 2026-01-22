@@ -51,6 +51,12 @@ export class SpawnZone extends Component {
     @property({ type: Node, tooltip: 'Character node to watch for trigger overlap.' })
     public character: Node | null = null;
 
+    @property({ type: [Node], tooltip: 'Additional characters allowed to spawn and collect from this zone.' })
+    public additionalCollectors: Node[] = [];
+
+    @property({ type: [Node], tooltip: 'Carry anchors paired with additional collectors (matching indices).' })
+    public additionalCarryAnchors: Node[] = [];
+
     @property({ type: Prefab, tooltip: 'Prefab to spawn every interval while the character stays inside.' })
     public prefabToSpawn: Prefab | null = null;
 
@@ -160,6 +166,12 @@ export class SpawnZone extends Component {
     private _freeSlots: number[] = [];
     private _nextSlotIndex = 0;
     private _autoCollectEnabled = false;
+    private _collectorAnchors: Map<Node, Node | null> = new Map();
+    private _runtimeCollectors: Map<Node, Node | null> = new Map();
+    private _spawnActiveCollectors: Set<Node> = new Set();
+    private _collectActiveCollectors: Set<Node> = new Set();
+    private _activeCollectorNode: Node | null = null;
+    private _activeCollectorAnchor: Node | null = null;
 
     private getCarryState(anchor: Node | null, autoCreate = false): AnchorCarryState | null {
         if (!anchor) {
@@ -177,6 +189,10 @@ export class SpawnZone extends Component {
             SpawnZone._anchorCarryStates.set(anchor, state);
         }
         return state;
+    }
+
+    protected onLoad (): void {
+        this.rebuildCollectorAnchors();
     }
 
     protected onEnable(): void {
@@ -202,20 +218,28 @@ export class SpawnZone extends Component {
     }
 
     private onTriggerEnter(event: ITriggerEvent): void {
-        if (!this.character || !event.otherCollider) {
+        const otherNode = event.otherCollider?.node ?? null;
+        const binding = this.getCollectorAnchorFor(otherNode);
+        if (!binding) {
             return;
         }
-        if (event.otherCollider.node === this.character) {
+        this._spawnActiveCollectors.add(binding.node);
+        this._activeCollectorNode = binding.node;
+        this._activeCollectorAnchor = binding.anchor;
+        if (!this._isCharacterInside) {
             this._isCharacterInside = true;
             this.startSpawning();
         }
     }
 
     private onTriggerExit(event: ITriggerEvent): void {
-        if (!this.character || !event.otherCollider) {
+        const otherNode = event.otherCollider?.node ?? null;
+        const binding = this.getCollectorAnchorFor(otherNode);
+        if (!binding) {
             return;
         }
-        if (event.otherCollider.node === this.character) {
+        this._spawnActiveCollectors.delete(binding.node);
+        if (!this._autoCollectEnabled && this._spawnActiveCollectors.size === 0) {
             this._isCharacterInside = false;
             this.stopSpawning();
             if (this.resetStackOnExit) {
@@ -250,20 +274,37 @@ export class SpawnZone extends Component {
     }
 
     private onCollectTriggerEnter(event: ITriggerEvent): void {
-        if (!this.character || !event.otherCollider) {
+        const otherNode = event.otherCollider?.node ?? null;
+        const binding = this.getCollectorAnchorFor(otherNode);
+        if (!binding) {
             return;
         }
-        if (event.otherCollider.node === this.character) {
-            this._isCharacterInCollectTrigger = true;
-            this.startCollecting();
-        }
+        this._collectActiveCollectors.add(binding.node);
+        this._activeCollectorNode = binding.node;
+        this._activeCollectorAnchor = binding.anchor;
+        this._isCharacterInCollectTrigger = true;
+        this.startCollecting();
     }
 
     private onCollectTriggerExit(event: ITriggerEvent): void {
-        if (!this.character || !event.otherCollider) {
+        const otherNode = event.otherCollider?.node ?? null;
+        const binding = this.getCollectorAnchorFor(otherNode);
+        if (!binding) {
             return;
         }
-        if (event.otherCollider.node === this.character) {
+        this._collectActiveCollectors.delete(binding.node);
+        if (binding.node === this._activeCollectorNode) {
+            const iterator = this._collectActiveCollectors.values().next();
+            if (!iterator.done) {
+                this._activeCollectorNode = iterator.value;
+                this.updateActiveCollectorAnchor();
+            } else {
+                this._activeCollectorNode = null;
+                this._activeCollectorAnchor = null;
+            }
+        }
+
+        if (this._collectActiveCollectors.size === 0) {
             this._isCharacterInCollectTrigger = false;
             this.stopCollecting();
         }
@@ -313,8 +354,12 @@ export class SpawnZone extends Component {
             this._isCharacterInside = true;
             this.startSpawning();
         } else {
-            this._isCharacterInside = false;
-            this.stopSpawning();
+            if (this._spawnActiveCollectors.size === 0) {
+                this._isCharacterInside = false;
+                this.stopSpawning();
+            } else {
+                this._isCharacterInside = true;
+            }
         }
     }
 
@@ -326,7 +371,11 @@ export class SpawnZone extends Component {
         if (!entry) {
             return;
         }
-        const carried = this.transferItemToCharacter(entry.node);
+        const anchor = this._activeCollectorAnchor ?? this.characterCarryAnchor ?? this.character;
+        if (!anchor) {
+            return;
+        }
+        const carried = this.transferItemToCharacter(entry.node, anchor);
         if (carried) {
             this.releaseSlotIndex(entry.slotIndex);
             return;
@@ -411,8 +460,8 @@ export class SpawnZone extends Component {
         this._availableItems.push(entry);
     }
 
-    private transferItemToCharacter(item: Node): boolean {
-        const anchor = this.characterCarryAnchor ?? this.character;
+    private transferItemToCharacter(item: Node, anchorOverride?: Node | null): boolean {
+        const anchor = anchorOverride ?? this.characterCarryAnchor ?? this.character;
         if (!anchor) {
             console.warn(`[SpawnZone] ${this.node.name} needs characterCarryAnchor or character assigned to move prefabs to the player.`);
             return false;
@@ -578,6 +627,78 @@ export class SpawnZone extends Component {
             Vec3.transformQuat(this._typeOffsetWorld, this._typeOffsetWorld, anchorWorldRot);
             Vec3.add(out, out, this._typeOffsetWorld);
         }
+    }
+
+    public registerCollector (character: Node | null, anchor: Node | null): void {
+        if (!character) {
+            return;
+        }
+        this._runtimeCollectors.set(character, anchor ?? character);
+    }
+
+    public unregisterCollector (character: Node | null): void {
+        if (!character) {
+            return;
+        }
+        this._runtimeCollectors.delete(character);
+        this._spawnActiveCollectors.delete(character);
+        this._collectActiveCollectors.delete(character);
+        if (this._activeCollectorNode === character) {
+            this._activeCollectorNode = null;
+            this._activeCollectorAnchor = null;
+        }
+    }
+
+    private rebuildCollectorAnchors (): void {
+        this._collectorAnchors.clear();
+        if (this.character) {
+            this._collectorAnchors.set(this.character, this.characterCarryAnchor ?? this.character);
+        }
+        if (!this.additionalCollectors) {
+            return;
+        }
+        for (let i = 0; i < this.additionalCollectors.length; i++) {
+            const collector = this.additionalCollectors[i];
+            if (!collector) {
+                continue;
+            }
+            const anchor = (this.additionalCarryAnchors && this.additionalCarryAnchors[i]) ?? null;
+            this._collectorAnchors.set(collector, anchor ?? collector);
+        }
+    }
+
+    private getCollectorAnchorFor (candidate: Node | null): { node: Node, anchor: Node } | null {
+        if (!candidate) {
+            return null;
+        }
+
+        const entries: Array<[Node, Node | null]> = [];
+        this._collectorAnchors.forEach((value, key) => {
+            entries.push([key, value]);
+        });
+        this._runtimeCollectors.forEach((value, key) => {
+            entries.push([key, value]);
+        });
+
+        for (const [collector, anchor] of entries) {
+            let current: Node | null = candidate;
+            while (current) {
+                if (current === collector) {
+                    return { node: collector, anchor: (anchor ?? collector) };
+                }
+                current = current.parent;
+            }
+        }
+        return null;
+    }
+
+    private updateActiveCollectorAnchor (): void {
+        if (!this._activeCollectorNode) {
+            this._activeCollectorAnchor = null;
+            return;
+        }
+        const binding = this.getCollectorAnchorFor(this._activeCollectorNode);
+        this._activeCollectorAnchor = binding?.anchor ?? null;
     }
 
     private relayoutTypeColumn(anchor: Node, state: AnchorCarryState, typeKey: string): void {

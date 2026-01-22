@@ -25,6 +25,12 @@ export class ItemSellTrigger extends Component {
     @property({ type: Node, tooltip: 'Anchor node where collected prefabs are attached (defaults to character).' })
     public characterCarryAnchor: Node | null = null;
 
+    @property({ type: [Node], tooltip: 'Additional characters allowed to sell through this trigger.' })
+    public additionalCharacters: Node[] = [];
+
+    @property({ type: [Node], tooltip: 'Carry anchors paired with additional characters (matching indices).' })
+    public additionalCarryAnchors: Node[] = [];
+
     @property({ type: Node, tooltip: 'Destination node items fly toward when sold.' })
     public sellTarget: Node | null = null;
 
@@ -190,17 +196,91 @@ export class ItemSellTrigger extends Component {
     private _needsMoneyRelayout = false;
     private _moneyStackSpawnLocal: Vec3 = new Vec3();
     private _moneyCarryTargetLocal: Vec3 = new Vec3();
+    private _sellerAnchors: Map<Node, Node | null> = new Map();
+    private _runtimeSellers: Map<Node, Node | null> = new Map();
+    private _activeSellerNode: Node | null = null;
+    private _activeSellerAnchor: Node | null = null;
     private _stagedItems: Node[] = [];
     private _soldFreeSlots: number[] = [];
     private _customerRescanTimer = 0;
     private _isDeliveringToCustomer = false;
     private _customerItem: Node | null = null;
 
+    protected onLoad (): void {
+        this.rebuildSellerAnchors();
+    }
+
     update (deltaTime: number): void {
         this.updateSellingLoop(deltaTime);
         this.updateCustomerServing(deltaTime);
         this.collectMoneyBundles();
         this.updateMoneyCarryLayout();
+    }
+
+    public registerSeller (character: Node | null, anchor: Node | null): void {
+        if (!character) {
+            return;
+        }
+        this._runtimeSellers.set(character, anchor ?? character);
+    }
+
+    public unregisterSeller (character: Node | null): void {
+        if (!character) {
+            return;
+        }
+        this._runtimeSellers.delete(character);
+        if (this._activeSellerNode === character) {
+            this._activeSellerNode = null;
+            this._activeSellerAnchor = null;
+        }
+    }
+
+    private rebuildSellerAnchors (): void {
+        this._sellerAnchors.clear();
+        if (this.character) {
+            this._sellerAnchors.set(this.character, this.characterCarryAnchor ?? this.character);
+        }
+        if (!this.additionalCharacters) {
+            return;
+        }
+        for (let i = 0; i < this.additionalCharacters.length; i++) {
+            const seller = this.additionalCharacters[i];
+            if (!seller) {
+                continue;
+            }
+            const anchor = (this.additionalCarryAnchors && this.additionalCarryAnchors[i]) ?? null;
+            this._sellerAnchors.set(seller, anchor ?? seller);
+        }
+    }
+
+    private resolveSellerBinding (candidate: Node | null): { node: Node, anchor: Node } | null {
+        if (!candidate) {
+            return null;
+        }
+
+        const entries: Array<[Node, Node | null]> = [];
+        this._sellerAnchors.forEach((value, key) => entries.push([key, value]));
+        this._runtimeSellers.forEach((value, key) => entries.push([key, value]));
+
+        for (const [seller, anchor] of entries) {
+            let current: Node | null = candidate;
+            while (current) {
+                if (current === seller) {
+                    return { node: seller, anchor: anchor ?? seller };
+                }
+                current = current.parent;
+            }
+        }
+        return null;
+    }
+
+    private updateActiveSellerAnchor (): void {
+        if (!this._activeSellerNode) {
+            this._activeSellerAnchor = null;
+            return;
+        }
+        const binding = this.resolveSellerBinding(this._activeSellerNode);
+        this._activeSellerAnchor = binding?.anchor ?? null;
     }
 
     protected onEnable (): void {
@@ -270,13 +350,16 @@ export class ItemSellTrigger extends Component {
     private handleTriggerEvent (event: ITriggerEvent, inside: boolean): void {
         const otherCollider = event.otherCollider;
         const otherNode = otherCollider?.node ?? null;
-        if (!otherCollider || !otherNode || !this.isCharacterNode(otherNode)) {
+        const binding = this.resolveSellerBinding(otherNode);
+        if (!otherCollider || !binding) {
             return;
         }
 
         if (inside) {
             const previousInside = this._characterInside;
             this._characterOverlaps.add(otherCollider);
+            this._activeSellerNode = binding.node;
+            this._activeSellerAnchor = binding.anchor;
             if (!previousInside) {
                 this._characterInside = true;
                 this._rescanTimer = 0;
@@ -287,28 +370,14 @@ export class ItemSellTrigger extends Component {
         this._characterOverlaps.delete(otherCollider);
         if (this._characterInside && this._characterOverlaps.size === 0) {
             this._characterInside = false;
+            this._activeSellerNode = null;
+            this._activeSellerAnchor = null;
             this.stopAllSelling(true);
         }
     }
 
     private isCharacterNode (candidate: Node | null): boolean {
-        if (!candidate || !this.character) {
-            return false;
-        }
-
-        if (candidate === this.character) {
-            return true;
-        }
-
-        let current: Node | null = candidate;
-        while (current) {
-            if (current === this.character) {
-                return true;
-            }
-            current = current.parent;
-        }
-
-        return false;
+        return !!this.resolveSellerBinding(candidate);
     }
 
     private findMatchingItems (anchor: Node): Node[] {
@@ -348,7 +417,7 @@ export class ItemSellTrigger extends Component {
     }
 
     private collectMatchesIntoQueue (): void {
-        const anchor = this.characterCarryAnchor ?? this.character;
+        const anchor = this._activeSellerAnchor ?? this.characterCarryAnchor ?? this.character;
         if (!anchor) {
             return;
         }

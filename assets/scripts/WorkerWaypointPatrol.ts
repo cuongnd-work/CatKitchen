@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Vec3, RigidBody, SkeletalAnimation, AnimationClip } from 'cc';
+import { ItemSellTrigger } from './ItemSellTrigger';
 import { SpawnZone } from './SpawnZone';
 
 const { ccclass, property } = _decorator;
@@ -26,17 +27,26 @@ export class WorkerWaypointPatrol extends Component {
     @property({ tooltip: 'Distance threshold (world units) to consider the waypoint reached.' })
     public arrivalThreshold = 0.1;
 
+    @property({ type: [SpawnZone], tooltip: 'Spawn zones this worker interacts with.' })
+    public linkedSpawnZones: SpawnZone[] = [];
+
+    @property({ tooltip: 'Carry direction (local space) applied to linked spawn zones.' })
+    public spawnZoneCarryDirection: Vec3 = new Vec3(0, 1, 0);
+
+    @property({ tooltip: 'Type Z offset spacing applied to linked spawn zones.' })
+    public spawnZoneTypeSpacing = 0;
+
     @property({ type: AnimationClip, tooltip: 'Idle animation clip (optional).' })
     public idleAnimClip: AnimationClip | null = null;
 
     @property({ type: AnimationClip, tooltip: 'Move animation clip (optional).' })
     public moveAnimClip: AnimationClip | null = null;
 
-    @property({ type: [SpawnZone], tooltip: 'Spawn zones that should stack items behind the worker.' })
-    public linkedSpawnZones: SpawnZone[] = [];
+    @property({ type: ItemSellTrigger, tooltip: 'Sell trigger used when the worker reaches the sell point.' })
+    public sellTrigger: ItemSellTrigger | null = null;
 
-    @property({ tooltip: 'Carry direction (local) applied to linked spawn zones.' })
-    public spawnZoneCarryDirection: Vec3 = new Vec3(0, 0, -1);
+    @property({ type: Node, tooltip: 'Carry anchor assigned to spawn/sell systems (defaults to this node).' })
+    public carryAnchor: Node | null = null;
 
     private _waypoints: Node[] = [];
     private _currentIndex = 0;
@@ -73,7 +83,7 @@ export class WorkerWaypointPatrol extends Component {
             this.enabled = false;
         }
 
-        this.applySpawnZoneCarryDirection();
+        this.configureLinkedSystems();
     }
 
     protected update (deltaTime: number): void {
@@ -164,15 +174,34 @@ export class WorkerWaypointPatrol extends Component {
         }
     }
 
-    private applySpawnZoneCarryDirection (): void {
-        if (!this.linkedSpawnZones || this.linkedSpawnZones.length === 0) {
-            return;
+    protected onDestroy (): void {
+        this.unregisterLinkedSystems();
+    }
+
+    private configureLinkedSystems (): void {
+        const anchor = this.carryAnchor ?? this.node;
+        if (this.linkedSpawnZones && this.linkedSpawnZones.length > 0) {
+            this.linkedSpawnZones.forEach((zone) => {
+                if (!zone) {
+                    return;
+                }
+                zone.registerCollector(this.node, anchor);
+                zone.carryStackDirection.set(0, 1, 0);
+                zone.typeZOffsetSpacing = this.spawnZoneTypeSpacing;
+            });
         }
-        this.linkedSpawnZones.forEach((zone) => {
-            if (!zone) {
-                return;
-            }
-            zone.carryStackDirection.set(this.spawnZoneCarryDirection);
-        });
+
+        if (this.sellTrigger) {
+            this.sellTrigger.registerSeller(this.node, anchor);
+        }
+    }
+
+    private unregisterLinkedSystems (): void {
+        if (this.linkedSpawnZones && this.linkedSpawnZones.length > 0) {
+            this.linkedSpawnZones.forEach((zone) => zone?.unregisterCollector(this.node));
+        }
+        if (this.sellTrigger) {
+            this.sellTrigger.unregisterSeller(this.node);
+        }
     }
 }
