@@ -1213,12 +1213,22 @@ export class ItemSellTrigger extends Component {
     }
 
     private resetMoneyCollections (): void {
+        const pending: Node[] = [];
         this._activeMoneyCollections.forEach((node) => {
             if (node && node.isValid) {
                 Tween.stopAllByTarget(node);
+                pending.push(node);
             }
         });
         this._activeMoneyCollections.clear();
+
+        pending.forEach((node) => {
+            if (!node || !node.isValid) {
+                return;
+            }
+            this.onMoneyBundleCollected(node);
+            this.attachCollectedMoney(node);
+        });
     }
 
 }
