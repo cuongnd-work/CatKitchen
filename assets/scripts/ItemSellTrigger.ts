@@ -998,6 +998,45 @@ export class ItemSellTrigger extends Component {
         }
     }
 
+    public withdrawMoneyBundles (count: number): Node[] {
+        const results: Node[] = [];
+        if (count <= 0 || this._carriedMoney.length === 0) {
+            return results;
+        }
+
+        const anchor = this.characterCarryAnchor ?? this.character;
+        const requested = Math.min(Math.floor(count), this._carriedMoney.length);
+        for (let i = 0; i < requested; i++) {
+            const bundle = this._carriedMoney.pop();
+            if (!bundle || !bundle.isValid) {
+                continue;
+            }
+            SpawnZone.releaseCarriedItemInternal(bundle);
+            results.push(bundle);
+        }
+
+        if (results.length > 0 && anchor) {
+            this._moneyTypeOrder = Math.min(this._moneyTypeOrder, this.resolveMoneyTypeOrder(anchor));
+            this.relayoutCarriedMoney(anchor);
+        }
+
+        return results;
+    }
+
+    public recycleMoneyBundle (bundle: Node | null): void {
+        if (!bundle) {
+            return;
+        }
+
+        const index = this._carriedMoney.indexOf(bundle);
+        if (index !== -1) {
+            this._carriedMoney.splice(index, 1);
+        }
+
+        bundle.removeFromParent();
+        object_pool_manager.instance.Recycle(bundle);
+    }
+
     private updateMoneyCarryLayout (): void {
         if (this._carriedMoney.length === 0) {
             this._moneyCarryShift = 0;
