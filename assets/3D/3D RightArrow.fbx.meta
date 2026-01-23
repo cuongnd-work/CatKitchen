@@ -5,31 +5,15 @@
   "uuid": "d036d2a3-cb1a-4ee3-9fe0-4be4275cd3e6",
   "files": [],
   "subMetas": {
-    "99380": {
-      "importer": "gltf-material",
-      "uuid": "d036d2a3-cb1a-4ee3-9fe0-4be4275cd3e6@99380",
-      "displayName": "",
-      "id": "99380",
-      "name": "Material.001.material",
-      "userData": {
-        "gltfIndex": 0
-      },
-      "ver": "1.0.14",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "08c68": {
+    "a5f8b": {
       "importer": "gltf-mesh",
-      "uuid": "d036d2a3-cb1a-4ee3-9fe0-4be4275cd3e6@08c68",
+      "uuid": "d036d2a3-cb1a-4ee3-9fe0-4be4275cd3e6@a5f8b",
       "displayName": "",
-      "id": "08c68",
-      "name": "Plane.mesh",
+      "id": "a5f8b",
+      "name": "Plane.001.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 672
+        "triangleCount": 200
       },
       "ver": "1.1.1",
       "imported": true,
@@ -81,13 +65,11 @@
     },
     "assetFinder": {
       "meshes": [
-        "d036d2a3-cb1a-4ee3-9fe0-4be4275cd3e6@08c68"
+        "d036d2a3-cb1a-4ee3-9fe0-4be4275cd3e6@a5f8b"
       ],
       "skeletons": [],
       "textures": [],
-      "materials": [
-        "d036d2a3-cb1a-4ee3-9fe0-4be4275cd3e6@99380"
-      ],
+      "materials": [],
       "scenes": [
         "d036d2a3-cb1a-4ee3-9fe0-4be4275cd3e6@51e2d"
       ]
