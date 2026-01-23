@@ -29,6 +29,7 @@ export class UI_Joystick extends Component {
     private _ctrlRoot: UITransform = null;
     private _ctrlPointer: Node = null;
     private _checkerCamera: UITransform = null;
+    private _checkerMovement: UITransform = null;
     private _buttons: Node = null;
 
     private _cameraSensitivity: number = 0.1;
@@ -39,6 +40,8 @@ export class UI_Joystick extends Component {
     private _cameraTouchB: Touch = null;
 
     private _scene: Scene = null;
+    private _eventsBound = false;
+    private _initialized = false;
 
     private _key2buttonMap = {};
 
@@ -46,21 +49,22 @@ export class UI_Joystick extends Component {
         UI_Joystick._inst = this;
     }
 
+    protected onEnable(): void {
+        if (this._initialized) {
+            this.bindInputEvents();
+        }
+    }
+
+    protected onDisable(): void {
+        this.unbindInputEvents();
+        this.resetMovementState();
+    }
+
     start() {
         let checkerCamera = this.node.getChildByName('checker_camera').getComponent(UITransform);
-        checkerCamera.node.on(Input.EventType.TOUCH_START, this.onTouchStart_CameraCtrl, this);
-        checkerCamera.node.on(Input.EventType.TOUCH_MOVE, this.onTouchMove_CameraCtrl, this);
-        checkerCamera.node.on(Input.EventType.TOUCH_END, this.onTouchUp_CameraCtrl, this);
-        checkerCamera.node.on(Input.EventType.TOUCH_CANCEL, this.onTouchUp_CameraCtrl, this);
-
-        let checkerMovement = this.node.getChildByName('checker_movement').getComponent(UITransform);
-        checkerMovement.node.on(Input.EventType.TOUCH_START, this.onTouchStart_Movement, this);
-        checkerMovement.node.on(Input.EventType.TOUCH_MOVE, this.onTouchMove_Movement, this);
-        checkerMovement.node.on(Input.EventType.TOUCH_END, this.onTouchUp_Movement, this);
-        checkerMovement.node.on(Input.EventType.TOUCH_CANCEL, this.onTouchUp_Movement, this);
-
-
         this._checkerCamera = checkerCamera;
+        let checkerMovement = this.node.getChildByName('checker_movement').getComponent(UITransform);
+        this._checkerMovement = checkerMovement;
 
         this._ctrlRoot = this.node.getChildByName('ctrl').getComponent(UITransform);
         this._ctrlRoot.node.active = false;
@@ -74,19 +78,85 @@ export class UI_Joystick extends Component {
         this._key2buttonMap[KeyCode.KEY_U] = 'btn_slot_3';
         this._key2buttonMap[KeyCode.KEY_I] = 'btn_slot_4';
 
-        input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
-        input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
-        input.on(Input.EventType.MOUSE_WHEEL,this.onMouseWheel, this);
-
         this._scene = director.getScene();
+        this._initialized = true;
+
+        if (this.enabled) {
+            this.bindInputEvents();
+        }
     }
 
     onDestroy() {
+        this.unbindInputEvents();
+        UI_Joystick._inst = null;
+    }
+
+    private bindInputEvents(): void {
+        if (this._eventsBound || !this._checkerCamera || !this._checkerMovement) {
+            return;
+        }
+
+        let checkerCameraNode = this._checkerCamera.node;
+        checkerCameraNode.on(Input.EventType.TOUCH_START, this.onTouchStart_CameraCtrl, this);
+        checkerCameraNode.on(Input.EventType.TOUCH_MOVE, this.onTouchMove_CameraCtrl, this);
+        checkerCameraNode.on(Input.EventType.TOUCH_END, this.onTouchUp_CameraCtrl, this);
+        checkerCameraNode.on(Input.EventType.TOUCH_CANCEL, this.onTouchUp_CameraCtrl, this);
+
+        let checkerMovementNode = this._checkerMovement.node;
+        checkerMovementNode.on(Input.EventType.TOUCH_START, this.onTouchStart_Movement, this);
+        checkerMovementNode.on(Input.EventType.TOUCH_MOVE, this.onTouchMove_Movement, this);
+        checkerMovementNode.on(Input.EventType.TOUCH_END, this.onTouchUp_Movement, this);
+        checkerMovementNode.on(Input.EventType.TOUCH_CANCEL, this.onTouchUp_Movement, this);
+
+        input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
+        input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
+        input.on(Input.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
+
+        this._eventsBound = true;
+    }
+
+    private unbindInputEvents(): void {
+        if (!this._eventsBound) {
+            return;
+        }
+
+        let checkerCameraNode = this._checkerCamera?.node;
+        checkerCameraNode?.off(Input.EventType.TOUCH_START, this.onTouchStart_CameraCtrl, this);
+        checkerCameraNode?.off(Input.EventType.TOUCH_MOVE, this.onTouchMove_CameraCtrl, this);
+        checkerCameraNode?.off(Input.EventType.TOUCH_END, this.onTouchUp_CameraCtrl, this);
+        checkerCameraNode?.off(Input.EventType.TOUCH_CANCEL, this.onTouchUp_CameraCtrl, this);
+
+        let checkerMovementNode = this._checkerMovement?.node;
+        checkerMovementNode?.off(Input.EventType.TOUCH_START, this.onTouchStart_Movement, this);
+        checkerMovementNode?.off(Input.EventType.TOUCH_MOVE, this.onTouchMove_Movement, this);
+        checkerMovementNode?.off(Input.EventType.TOUCH_END, this.onTouchUp_Movement, this);
+        checkerMovementNode?.off(Input.EventType.TOUCH_CANCEL, this.onTouchUp_Movement, this);
+
         input.off(Input.EventType.KEY_DOWN, this.onKeyDown, this);
         input.off(Input.EventType.KEY_UP, this.onKeyUp, this);
-        input.off(Input.EventType.MOUSE_WHEEL,this.onMouseWheel, this);
+        input.off(Input.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
 
-        UI_Joystick._inst = null;
+        this._eventsBound = false;
+    }
+
+    private resetMovementState(): void {
+        this._movementTouch = null;
+        this._cameraTouchA = null;
+        this._cameraTouchB = null;
+        this._distanceOfTwoTouchPoint = 0;
+        this._keys.length = 0;
+
+        if (this._ctrlPointer) {
+            this._ctrlPointer.setPosition(0, 0, 0);
+        }
+        if (this._ctrlRoot) {
+            this._ctrlRoot.node.active = false;
+        }
+
+        let scene = this._scene || director.getScene();
+        if (scene) {
+            scene.emit(EasyControllerEvent.MOVEMENT_STOP);
+        }
     }
 
     bindKeyToButton(keyCode:KeyCode, btnName:string){

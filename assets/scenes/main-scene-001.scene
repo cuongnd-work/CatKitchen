@@ -55104,8 +55104,8 @@
       "__id__": 1566
     },
     "moveSpeed": 5,
-    "pauseDurationA": 1.8,
-    "pauseDurationB": 1,
+    "pauseDurationA": 1.5,
+    "pauseDurationB": 1.5,
     "pauseDuration": 1.5,
     "arrivalThreshold": 0.1,
     "linkedSpawnZones": [
