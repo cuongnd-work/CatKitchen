@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, Tween, TweenEasing, Label, SpriteRenderer, Material } from 'cc';
+import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, Tween, TweenEasing, Label, SpriteRenderer, Material, AudioSource } from 'cc';
 import { ItemSellTrigger } from './ItemSellTrigger';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 
@@ -56,6 +56,9 @@ export abstract class MoneyPaymentZone extends Component {
 
     @property({ type: Material, tooltip: 'Optional base material used when the sprite has no shared material assigned.' })
     public progressBaseMaterial: Material | null = null;
+
+    @property({ type: AudioSource, tooltip: 'Audio source played each time the payment completes.' })
+    public completionAudio: AudioSource | null = null;
 
     private _isCharacterInside = false;
     private _consumeTimer = 0;
@@ -200,6 +203,7 @@ export abstract class MoneyPaymentZone extends Component {
         }
 
         while (this._currentValue >= requirement) {
+            this.playCompletionSound();
             this.onPaymentSatisfied(requirement);
             if (this.loopPayments) {
                 this._currentValue -= requirement;
@@ -336,4 +340,12 @@ export abstract class MoneyPaymentZone extends Component {
     }
 
     protected abstract onPaymentSatisfied (amount: number): void;
+
+    protected playCompletionSound (): void {
+        if (!this.completionAudio) {
+            return;
+        }
+        this.completionAudio.stop();
+        this.completionAudio.play();
+    }
 }
