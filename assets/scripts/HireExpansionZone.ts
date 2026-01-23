@@ -24,6 +24,15 @@ export class HireExpansionZone extends MoneyPaymentZone {
     @property({ type: Node, tooltip: 'Node activated when this payment succeeds (optional).' })
     public nodeToActivateOnComplete2: Node | null = null;
 
+    @property({ type: Node, tooltip: 'Node activated when this payment succeeds (optional).' })
+    public nodeToActivateOn1: Node | null = null;
+
+    @property({ type: Node, tooltip: 'Node activated when this payment succeeds (optional).' })
+    public nodeToActivateOn2: Node | null = null;
+
+    @property({ type: Node, tooltip: 'Node activated when this payment succeeds (optional).' })
+    public nodeToActivateOn3: Node | null = null;
+
     private _originalCameraTarget: Node | null = null;
     private _cameraFocusActive = false;
     private _pendingDisableAfterFocus = false;
@@ -35,6 +44,9 @@ export class HireExpansionZone extends MoneyPaymentZone {
 
         console.log(`[HireExpansionZone] ${this.node.name}: ${this.expansionMessage}`);
         this.nodeToActivateOnComplete2.active = true;
+        this.nodeToActivateOn1.active = false;
+        this.nodeToActivateOn2.active = false;
+        this.nodeToActivateOn3.active = false;
         this.focusCameraOnExpansion();
     }
 

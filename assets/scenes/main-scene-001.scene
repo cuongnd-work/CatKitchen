@@ -56414,7 +56414,7 @@
         "__id__": 1429
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 1431
@@ -56887,6 +56887,15 @@
     "cameraFocusDuration": 2,
     "nodeToActivateOnComplete2": {
       "__id__": 1435
+    },
+    "nodeToActivateOn1": {
+      "__id__": 1424
+    },
+    "nodeToActivateOn2": {
+      "__id__": 1426
+    },
+    "nodeToActivateOn3": {
+      "__id__": 1429
     },
     "_id": "1c9uKrkvlMOrwyNpmjML62"
   },
