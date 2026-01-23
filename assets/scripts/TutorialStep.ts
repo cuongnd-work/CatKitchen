@@ -24,6 +24,14 @@ export class TutorialStep extends Component {
 
     private _collider: Collider | null = null;
     private _isActive = false;
+    private _waitingForCollider = false;
+    private _loggedMissingCollider = false;
+
+    update (): void {
+        if (this._isActive && this._waitingForCollider) {
+            this.registerTrigger();
+        }
+    }
 
     protected onEnable (): void {
         if (this._isActive) {
@@ -58,10 +66,16 @@ export class TutorialStep extends Component {
             return;
         }
         const collider = node.getComponent(Collider);
-        if (!collider) {
-            console.warn(`[TutorialStep] ${node.name} is missing a Collider.`);
+        if (!collider || !collider.enabledInHierarchy || !node.activeInHierarchy) {
+            if (!this._loggedMissingCollider) {
+                console.warn(`[TutorialStep] ${node.name} is missing an enabled Collider. Waiting for activation...`);
+                this._loggedMissingCollider = true;
+            }
+            this._waitingForCollider = true;
             return;
         }
+        this._waitingForCollider = false;
+        this._loggedMissingCollider = false;
         this._collider = collider;
         collider.on('onTriggerEnter', this.onTriggerEnter, this);
     }
@@ -72,6 +86,7 @@ export class TutorialStep extends Component {
         }
         this._collider.off('onTriggerEnter', this.onTriggerEnter, this);
         this._collider = null;
+        this._waitingForCollider = false;
     }
 
     private onTriggerEnter (event: ITriggerEvent): void {
