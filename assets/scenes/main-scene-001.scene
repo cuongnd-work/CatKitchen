@@ -55359,7 +55359,7 @@
       "y": 0,
       "z": -0.8
     },
-    "moneyCarryAttachDuration": 0.15,
+    "moneyCarryAttachDuration": 0.1,
     "moneyCarryAttachEasing": "quadOut",
     "moneyCarryOffset": {
       "__type__": "cc.Vec3",
@@ -55877,14 +55877,14 @@
       "y": 0.25,
       "z": 0
     },
-    "consumeInterval": 0.2,
+    "consumeInterval": 0.13,
     "consumeStartScale": {
       "__type__": "cc.Vec3",
       "x": 1,
       "y": 1,
       "z": 1
     },
-    "consumeDuration": 0.25,
+    "consumeDuration": 0.1,
     "consumeEasing": "quadOut",
     "moneyValuePerBundle": 20,
     "requiredAmount": 200,
@@ -56366,14 +56366,14 @@
       "y": 0.25,
       "z": 0
     },
-    "consumeInterval": 0.2,
+    "consumeInterval": 0.13,
     "consumeStartScale": {
       "__type__": "cc.Vec3",
       "x": 1,
       "y": 1,
       "z": 1
     },
-    "consumeDuration": 0.25,
+    "consumeDuration": 0.1,
     "consumeEasing": "quadOut",
     "moneyValuePerBundle": 20,
     "requiredAmount": 300,
@@ -56850,14 +56850,14 @@
       "y": 0.25,
       "z": 0
     },
-    "consumeInterval": 0.2,
+    "consumeInterval": 0.13,
     "consumeStartScale": {
       "__type__": "cc.Vec3",
       "x": 0.6,
       "y": 0.6,
       "z": 0.6
     },
-    "consumeDuration": 0.25,
+    "consumeDuration": 0.1,
     "consumeEasing": "quadOut",
     "moneyValuePerBundle": 20,
     "requiredAmount": 1000,
