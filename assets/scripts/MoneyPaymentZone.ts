@@ -270,18 +270,21 @@ export abstract class MoneyPaymentZone extends Component {
         if (!this.requiredAmountLabel) {
             return;
         }
-        this.requiredAmountLabel.string = `${this.requiredAmount}`;
+        const requirement = Math.max(0, Math.floor(this.requiredAmount));
+        const paidValue = Math.max(0, this._currentValue + this._pendingDepositTotal);
+        const remaining = Math.max(0, Math.ceil(requirement - paidValue));
+        this.requiredAmountLabel.string = `${remaining}`;
     }
 
     protected updateProgressSprite (): void {
         const material = this.ensureProgressMaterial();
-        if (!material) {
-            return;
+        if (material) {
+            const requirement = Math.max(1, Math.floor(this.requiredAmount));
+            const paidValue = this._currentValue + this._pendingDepositTotal;
+            const ratio = Math.min(1, Math.max(0, requirement > 0 ? paidValue / requirement : 0));
+            material.setProperty('fillAmount', ratio);
         }
-        const requirement = Math.max(1, Math.floor(this.requiredAmount));
-        const paidValue = this._currentValue + this._pendingDepositTotal;
-        const ratio = Math.min(1, Math.max(0, requirement > 0 ? paidValue / requirement : 0));
-        material.setProperty('fillAmount', ratio);
+        this.updateRequiredAmountLabel();
     }
 
     private ensureProgressMaterial (): Material | null {
