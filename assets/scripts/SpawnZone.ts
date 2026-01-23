@@ -162,6 +162,10 @@ export class SpawnZone extends Component {
     private _typeOffsetWorld: Vec3 = new Vec3();
     private _moneyCarryLocal: Vec3 = new Vec3();
     private _moneyCarryWorld: Vec3 = new Vec3();
+
+    @property
+    public isActiveAutoSpawn : boolean = false;
+
     @property({ tooltip: 'Maximum number of items that can exist in the spawn zone at once (0 disables the cap).', min: 0, step: 1 })
     public maxSpawnedItems = 500;
 
@@ -196,6 +200,16 @@ export class SpawnZone extends Component {
 
     protected onLoad (): void {
         this.rebuildCollectorAnchors();
+    }
+
+    start() {
+        if(this.isActiveAutoSpawn){
+            this._spawnActiveCollectors.add(this.node);
+            if (!this._isCharacterInside) {
+                this._isCharacterInside = true;
+                this.startSpawning();
+            }
+        }
     }
 
     protected onEnable(): void {
