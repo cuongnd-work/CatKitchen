@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Collider, ITriggerEvent } from 'cc';
+import type { TutorialManager } from './TutorialManager';
 
 const { ccclass, property } = _decorator;
 
@@ -13,8 +14,13 @@ export class TutorialStep extends Component {
     @property({ type: Node, tooltip: 'Arrow or visual that highlights this step.' })
     public highlightArrow: Node | null = null;
 
+    @property({ type: Node, tooltip: 'Node the main character arrow should point toward (defaults to highlight arrow).' })
+    public navigationTarget: Node | null = null;
+
     @property({ type: TutorialStep, tooltip: 'Step activated once this one completes.' })
     public nextStep: TutorialStep | null = null;
+
+    public manager: TutorialManager | null = null;
 
     private _collider: Collider | null = null;
     private _isActive = false;
@@ -39,6 +45,7 @@ export class TutorialStep extends Component {
         this.toggleHighlight(state);
         if (state) {
             this.registerTrigger();
+            this.manager?.onStepActivated(this);
         } else {
             this.unregisterTrigger();
         }
@@ -81,8 +88,11 @@ export class TutorialStep extends Component {
     private completeStep (): void {
         this.setStepActive(false);
         this.toggleHighlight(false);
+        this.manager?.onStepCompleted(this);
         if (this.nextStep) {
             this.nextStep.setStepActive(true);
+        } else {
+            this.manager?.completeTutorial();
         }
     }
 
