@@ -19,16 +19,23 @@ export class TriggerActivator extends Component {
     @property({ tooltip: 'Allow the trigger to fire again while enabled.' })
     public repeatable = false;
 
+    @property({ tooltip: 'Seconds to wait when no trigger occurs (only if repeatable).' })
+    public idleTimeout = 4;
+
     private _triggerCollider: Collider | null = null;
     private _hasTriggered = false;
+    private _idleTimerScheduled = false;
+    private _idleCallback: (() => void) | null = null;
 
     protected onEnable(): void {
         this._hasTriggered = false;
         this.registerTriggerCollider();
+        this.startIdleTimer();
     }
 
     protected onDisable(): void {
         this.unregisterTriggerCollider();
+        this.clearIdleTimer();
     }
 
     private registerTriggerCollider(): void {
@@ -74,11 +81,13 @@ export class TriggerActivator extends Component {
         this._hasTriggered = true;
         this.setNodesActive(this.nodesToDisable, false);
         this.setNodesActive(this.nodesToActivate, true);
+        this.clearIdleTimer();
 
         if (!this.repeatable) {
             this.unregisterTriggerCollider();
         } else {
             this._hasTriggered = false;
+            this.startIdleTimer();
         }
     }
 
@@ -91,5 +100,32 @@ export class TriggerActivator extends Component {
                 node.active = active;
             }
         });
+    }
+
+    private startIdleTimer(): void {
+        if (this.idleTimeout <= 0 || this._idleTimerScheduled) {
+            return;
+        }
+        this._idleTimerScheduled = true;
+        this._idleCallback = () => {
+            this._idleTimerScheduled = false;
+            this._idleCallback = null;
+            if (this._hasTriggered) {
+                return;
+            }
+            this.applyActivation();
+        };
+        this.scheduleOnce(this._idleCallback, this.idleTimeout);
+    }
+
+    private clearIdleTimer(): void {
+        if (!this._idleTimerScheduled) {
+            return;
+        }
+        if (this._idleCallback) {
+            this.unschedule(this._idleCallback);
+            this._idleCallback = null;
+        }
+        this._idleTimerScheduled = false;
     }
 }

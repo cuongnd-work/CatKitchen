@@ -59560,6 +59560,7 @@
       }
     ],
     "repeatable": false,
+    "idleTimeout": 4,
     "_id": "1ebOOQe9BGH5rYpdfYBXnJ"
   },
   {
