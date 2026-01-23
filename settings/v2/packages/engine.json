@@ -100,7 +100,7 @@
             "_value": false
           },
           "primitive": {
-            "_value": false
+            "_value": true
           },
           "profiler": {
             "_value": false
@@ -109,7 +109,7 @@
             "_value": false
           },
           "geometry-renderer": {
-            "_value": true
+            "_value": false
           },
           "debug-renderer": {
             "_value": false
@@ -200,10 +200,10 @@
           "audio",
           "base",
           "custom-pipeline",
-          "geometry-renderer",
           "gfx-webgl",
           "graphics",
           "physics-ammo",
+          "primitive",
           "skeletal-animation",
           "tween",
           "ui"
