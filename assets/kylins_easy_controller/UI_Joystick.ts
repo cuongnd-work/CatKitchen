@@ -1,4 +1,4 @@
-import { _decorator, Node, EventTouch, Touch, Component, UITransform, Input, EventKeyboard, KeyCode, v2, Vec3, input, Scene, director, EventMouse, macro, view, screen } from 'cc';
+import { _decorator, Node, EventTouch, Touch, Component, UITransform, Input, EventKeyboard, KeyCode, input, Scene, director, EventMouse } from 'cc';
 import { EasyControllerEvent } from './EasyController';
 const { ccclass, property } = _decorator;
 
@@ -31,6 +31,7 @@ export class UI_Joystick extends Component {
     private _checkerCamera: UITransform = null;
     private _checkerMovement: UITransform = null;
     private _buttons: Node = null;
+    private _joystickUsageNode: Node | null = null;
 
     private _cameraSensitivity: number = 0.1;
     private _distanceOfTwoTouchPoint: number = 0;
@@ -58,6 +59,8 @@ export class UI_Joystick extends Component {
     protected onDisable(): void {
         this.unbindInputEvents();
         this.resetMovementState();
+        this.unschedule(this.enableUsageNode);
+        this.enableUsageNode();
     }
 
     start() {
@@ -71,6 +74,8 @@ export class UI_Joystick extends Component {
         this._ctrlPointer = this._ctrlRoot.node.getChildByName('pointer');
 
         this._buttons = this.node.getChildByName('buttons');
+        this._joystickUsageNode = this.node.getChildByName('joystick_usage');
+        this.enableUsageNode();
 
         this._key2buttonMap[KeyCode.KEY_J] = 'btn_slot_0';
         this._key2buttonMap[KeyCode.KEY_K] = 'btn_slot_1';
@@ -88,6 +93,8 @@ export class UI_Joystick extends Component {
 
     onDestroy() {
         this.unbindInputEvents();
+        this.unschedule(this.enableUsageNode);
+        this.enableUsageNode();
         UI_Joystick._inst = null;
     }
 
@@ -157,6 +164,7 @@ export class UI_Joystick extends Component {
         if (scene) {
             scene.emit(EasyControllerEvent.MOVEMENT_STOP);
         }
+        this.scheduleJoystickUsageReset();
     }
 
     bindKeyToButton(keyCode:KeyCode, btnName:string){
@@ -175,6 +183,7 @@ export class UI_Joystick extends Component {
     }
 
     onTouchStart_Movement(event: EventTouch) {
+        this.handleJoystickEngaged();
         let touches = event.getTouches();
         for (let i = 0; i < touches.length; ++i) {
             let touch = touches[i];
@@ -197,6 +206,7 @@ export class UI_Joystick extends Component {
     }
 
     onTouchMove_Movement(event: EventTouch) {
+        this.handleJoystickEngaged();
         let touches = event.getTouches();
         for (let i = 0; i < touches.length; ++i) {
             let touch = touches[i];
@@ -248,6 +258,7 @@ export class UI_Joystick extends Component {
                 this._scene.emit(EasyControllerEvent.MOVEMENT_STOP);
                 this._movementTouch = null;
                 this._ctrlRoot.node.active = false;
+                this.scheduleJoystickUsageReset();
             }
         }
     }
@@ -352,6 +363,7 @@ export class UI_Joystick extends Component {
             if (this._keys.indexOf(keyCode) == -1) {
                 this._keys.push(keyCode);
                 this.updateDirection();
+                this.handleJoystickEngaged();
             }
         }
         else{
@@ -369,6 +381,7 @@ export class UI_Joystick extends Component {
             if (index != -1) {
                 this._keys.splice(index, 1);
                 this.updateDirection();
+                this.scheduleJoystickUsageReset();
             }
         }
     }
@@ -385,6 +398,7 @@ export class UI_Joystick extends Component {
     }
 
     private _key2dirMap = null;
+    private _joystickActive = false;
 
     updateDirection() {
         if (this._key2dirMap == null) {
@@ -410,9 +424,46 @@ export class UI_Joystick extends Component {
         this._degree = this._key2dirMap[keyCode1 * 1000 + keyCode0];
         if (this._degree == null || this._degree < 0) {
             this._scene.emit(EasyControllerEvent.MOVEMENT_STOP);
+            this.scheduleJoystickUsageReset();
         }
         else {
             this._scene.emit(EasyControllerEvent.MOVEMENT, this._degree, 1.0);
+            this.handleJoystickEngaged();
         }
+    }
+
+    private handleJoystickEngaged(): void {
+        if (!this._joystickActive) {
+            this._joystickActive = true;
+            this.toggleUsageNode(false);
+        }
+        this.unschedule(this.enableUsageNode);
+    }
+
+    private scheduleJoystickUsageReset(): void {
+        if (!this._joystickActive) {
+            this.toggleUsageNode(true);
+            return;
+        }
+        if (this.isUsingMovementInput()) {
+            return;
+        }
+        this.unschedule(this.enableUsageNode);
+        this.scheduleOnce(this.enableUsageNode, 2);
+    }
+
+    private enableUsageNode(): void {
+        this._joystickActive = false;
+        this.toggleUsageNode(true);
+    }
+
+    private toggleUsageNode(active: boolean): void {
+        if (this._joystickUsageNode) {
+            this._joystickUsageNode.active = active;
+        }
+    }
+
+    private isUsingMovementInput(): boolean {
+        return !!this._movementTouch || this._keys.length > 0;
     }
 }
