@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween, Prefab } from 'cc';
+import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween, Prefab, AudioSource } from 'cc';
 import { CollectibleItem } from './CollectibleItem';
 import { SpawnZone } from './SpawnZone';
 import { clearMoneyCarryShift, setMoneyCarryShift } from './MoneyCarryRegistry';
@@ -180,6 +180,9 @@ export class ItemSellTrigger extends Component {
 
     @property({ tooltip: 'Local axis used to push money behind other carried item types.' })
     public moneyCarryTypeAxis: Vec3 = new Vec3(0, 0, 1);
+
+    @property({ type: AudioSource, tooltip: 'Sound played when an item moves from the character to the sell area.' })
+    public sellAudio: AudioSource | null = null;
 
     private _sellQueue: Node[] = [];
     private _queuedItems: Set<Node> = new Set();
@@ -473,6 +476,7 @@ export class ItemSellTrigger extends Component {
 
         this._isSelling = true;
         this._activeItem = item;
+        this.playSellSound();
         tween(item)
             .to(
                 Math.max(0, this.sellDuration),
@@ -1387,4 +1391,11 @@ export class ItemSellTrigger extends Component {
         });
     }
 
+    private playSellSound (): void {
+        if (!this.sellAudio) {
+            return;
+        }
+        this.sellAudio.stop();
+        this.sellAudio.play();
+    }
 }

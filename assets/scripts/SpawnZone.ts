@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, Quat, macro, tween, Tween, TweenEasing } from 'cc';
+import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, Quat, macro, tween, Tween, TweenEasing, AudioSource } from 'cc';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 import { CollectibleItem } from './CollectibleItem';
 import { getMoneyCarryShift } from './MoneyCarryRegistry';
@@ -140,6 +140,12 @@ export class SpawnZone extends Component {
 
     @property({ tooltip: 'Easing for the scale tween.' })
     public scaleEasing: TweenEasing = 'quadOut';
+
+    @property({ type: AudioSource, tooltip: 'Sound played each time an item spawns.' })
+    public spawnAudio: AudioSource | null = null;
+
+    @property({ type: AudioSource, tooltip: 'Sound played when an item begins moving toward the character.' })
+    public collectAudio: AudioSource | null = null;
 
     private _isCharacterInside = false;
     private _isSpawning = false;
@@ -393,6 +399,7 @@ export class SpawnZone extends Component {
         const carried = this.transferItemToCharacter(entry.node, anchor);
         if (carried) {
             this.releaseSlotIndex(entry.slotIndex);
+            this.playCollectSound();
             return;
         }
         this.queueSpawnEntry(entry);
@@ -434,6 +441,8 @@ export class SpawnZone extends Component {
         tween(spawned)
             .to(this.scaleDuration, { scale: finalScale }, { easing: this.scaleEasing })
             .start();
+
+        this.playSpawnSound();
     }
 
     private getNextQueuedEntry(): SpawnedSlotEntry | null {
@@ -912,6 +921,22 @@ export class SpawnZone extends Component {
         this._nodeSlotIndex.clear();
         this._freeSlots.length = 0;
         this._nextSlotIndex = 0;
+    }
+
+    private playSpawnSound (): void {
+        if (!this.spawnAudio) {
+            return;
+        }
+        this.spawnAudio.stop();
+        this.spawnAudio.play();
+    }
+
+    private playCollectSound (): void {
+        if (!this.collectAudio) {
+            return;
+        }
+        this.collectAudio.stop();
+        this.collectAudio.play();
     }
 }
 

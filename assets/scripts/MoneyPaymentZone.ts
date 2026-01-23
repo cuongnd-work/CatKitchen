@@ -60,6 +60,9 @@ export abstract class MoneyPaymentZone extends Component {
     @property({ type: AudioSource, tooltip: 'Audio source played each time the payment completes.' })
     public completionAudio: AudioSource | null = null;
 
+    @property({ type: AudioSource, tooltip: 'Audio source played when each money bundle begins moving toward the zone.' })
+    public depositAudio: AudioSource | null = null;
+
     private _isCharacterInside = false;
     private _consumeTimer = 0;
     private _currentValue = 0;
@@ -167,6 +170,7 @@ export abstract class MoneyPaymentZone extends Component {
         }
 
         this._activeDeposits.add(bundle);
+        this.playDepositSound();
         this.registerPendingDeposit(bundle, this.moneyValuePerBundle);
         bundle.getWorldPosition(this._worldTemp);
         targetNode.addChild(bundle);
@@ -347,5 +351,13 @@ export abstract class MoneyPaymentZone extends Component {
         }
         this.completionAudio.stop();
         this.completionAudio.play();
+    }
+
+    protected playDepositSound (): void {
+        if (!this.depositAudio) {
+            return;
+        }
+        this.depositAudio.stop();
+        this.depositAudio.play();
     }
 }
