@@ -924,7 +924,7 @@ export class SpawnZone extends Component {
     }
 
     private playSpawnSound (): void {
-        if (!this.spawnAudio) {
+        if (!this.spawnAudio || this.isActiveAutoSpawn || this._autoCollectEnabled) {
             return;
         }
         this.spawnAudio.stop();
