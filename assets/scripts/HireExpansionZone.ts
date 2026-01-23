@@ -21,6 +21,9 @@ export class HireExpansionZone extends MoneyPaymentZone {
     @property({ tooltip: 'Seconds to keep the camera focused on the expansion before returning to the character.' })
     public cameraFocusDuration = 1;
 
+    @property({ type: Node, tooltip: 'Node activated when this payment succeeds (optional).' })
+    public nodeToActivateOnComplete2: Node | null = null;
+
     private _originalCameraTarget: Node | null = null;
     private _cameraFocusActive = false;
     private _pendingDisableAfterFocus = false;
@@ -31,6 +34,7 @@ export class HireExpansionZone extends MoneyPaymentZone {
         }
 
         console.log(`[HireExpansionZone] ${this.node.name}: ${this.expansionMessage}`);
+        this.nodeToActivateOnComplete2.active = true;
         this.focusCameraOnExpansion();
     }
 
