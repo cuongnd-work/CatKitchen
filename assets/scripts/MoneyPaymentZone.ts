@@ -61,6 +61,8 @@ export abstract class MoneyPaymentZone extends Component {
     private _consumeTimer = 0;
     private _currentValue = 0;
     private _activeDeposits: Set<Node> = new Set();
+    private _pendingDepositValues: Map<Node, number> = new Map();
+    private _pendingDepositTotal = 0;
     private _worldTemp: Vec3 = new Vec3();
     private _worldTarget: Vec3 = new Vec3();
     private _localTemp: Vec3 = new Vec3();
@@ -162,6 +164,7 @@ export abstract class MoneyPaymentZone extends Component {
         }
 
         this._activeDeposits.add(bundle);
+        this.registerPendingDeposit(bundle, this.moneyValuePerBundle);
         bundle.getWorldPosition(this._worldTemp);
         targetNode.addChild(bundle);
         targetNode.inverseTransformPoint(this._localTemp, this._worldTemp);
@@ -184,10 +187,8 @@ export abstract class MoneyPaymentZone extends Component {
             )
             .call(() => {
                 this._activeDeposits.delete(bundle);
+                this.resolvePendingDeposit(bundle, true);
                 this.recycleBundle(bundle);
-                this._currentValue += this.moneyValuePerBundle;
-                this.updateProgressSprite();
-                this.reportPaymentProgress();
             })
             .start();
     }
@@ -215,11 +216,14 @@ export abstract class MoneyPaymentZone extends Component {
 
     private cleanupDeposits (): void {
         this._activeDeposits.forEach((bundle) => {
-            if (!bundle || !bundle.isValid) {
+            if (!bundle) {
                 return;
             }
             Tween.stopAllByTarget(bundle);
-            this.recycleBundle(bundle);
+            this.resolvePendingDeposit(bundle, false);
+            if (bundle.isValid) {
+                this.recycleBundle(bundle);
+            }
         });
         this._activeDeposits.clear();
     }
@@ -275,7 +279,8 @@ export abstract class MoneyPaymentZone extends Component {
             return;
         }
         const requirement = Math.max(1, Math.floor(this.requiredAmount));
-        const ratio = Math.min(1, Math.max(0, requirement > 0 ? this._currentValue / requirement : 0));
+        const paidValue = this._currentValue + this._pendingDepositTotal;
+        const ratio = Math.min(1, Math.max(0, requirement > 0 ? paidValue / requirement : 0));
         material.setProperty('fillAmount', ratio);
     }
 
@@ -292,6 +297,39 @@ export abstract class MoneyPaymentZone extends Component {
             this._progressMaterial = this.progressSprite.getMaterialInstance(0);
         }
         return this._progressMaterial;
+    }
+
+    private registerPendingDeposit (bundle: Node, value: number): void {
+        const amount = Math.max(0, value);
+        this._pendingDepositValues.set(bundle, amount);
+        if (amount > 0) {
+            this._pendingDepositTotal += amount;
+        }
+        this.updateProgressSprite();
+    }
+
+    private resolvePendingDeposit (bundle: Node, delivered: boolean): void {
+        if (!this._pendingDepositValues.has(bundle)) {
+            return;
+        }
+        const amount = this._pendingDepositValues.get(bundle) ?? 0;
+        if (amount > 0) {
+            this._pendingDepositTotal -= amount;
+            if (this._pendingDepositTotal < 0) {
+                this._pendingDepositTotal = 0;
+            }
+        }
+        this._pendingDepositValues.delete(bundle);
+
+        if (delivered && amount > 0) {
+            this._currentValue += amount;
+        }
+
+        this.updateProgressSprite();
+
+        if (delivered) {
+            this.reportPaymentProgress();
+        }
     }
 
     protected abstract onPaymentSatisfied (amount: number): void;
