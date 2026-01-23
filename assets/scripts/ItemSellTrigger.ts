@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween, Prefab, AudioSource } from 'cc';
+import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 import { CollectibleItem } from './CollectibleItem';
 import { SpawnZone } from './SpawnZone';
 import { clearMoneyCarryShift, setMoneyCarryShift } from './MoneyCarryRegistry';
@@ -201,6 +202,7 @@ export class ItemSellTrigger extends Component {
     private _moneySlotIndex: Map<Node, number> = new Map();
     private _moneyFreeSlots: number[] = [];
     private _moneyNextSlotIndex = 0;
+    private _joystickInteractionActive = false;
     private _activeMoneyCollections: Set<Node> = new Set();
     private _moneyTargetWorld: Vec3 = new Vec3();
     private _moneyTargetLocal: Vec3 = new Vec3();
@@ -383,6 +385,7 @@ export class ItemSellTrigger extends Component {
             if (!previousInside) {
                 this._characterInside = true;
                 this._rescanTimer = 0;
+                this.beginJoystickInteraction();
             }
             return;
         }
@@ -393,6 +396,7 @@ export class ItemSellTrigger extends Component {
             this._activeSellerNode = null;
             this._activeSellerAnchor = null;
             this.stopAllSelling(true);
+            this.endJoystickInteraction();
         }
     }
 
@@ -1397,5 +1401,19 @@ export class ItemSellTrigger extends Component {
         }
         this.sellAudio.stop();
         this.sellAudio.play();
+    }
+
+    private beginJoystickInteraction (): void {
+        if (!this._joystickInteractionActive) {
+            UI_Joystick.beginExternalInteraction();
+            this._joystickInteractionActive = true;
+        }
+    }
+
+    private endJoystickInteraction (): void {
+        if (this._joystickInteractionActive) {
+            UI_Joystick.endExternalInteraction();
+            this._joystickInteractionActive = false;
+        }
     }
 }

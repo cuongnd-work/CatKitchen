@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Collider, ITriggerEvent } from 'cc';
+import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 
 const { ccclass, property } = _decorator;
 
@@ -26,6 +27,7 @@ export class TriggerActivator extends Component {
     private _hasTriggered = false;
     private _idleTimerScheduled = false;
     private _idleCallback: (() => void) | null = null;
+    private _joystickInteractionActive = false;
 
     protected onEnable(): void {
         this._hasTriggered = false;
@@ -36,6 +38,7 @@ export class TriggerActivator extends Component {
     protected onDisable(): void {
         this.unregisterTriggerCollider();
         this.clearIdleTimer();
+        this.endJoystickInteraction();
     }
 
     private registerTriggerCollider(): void {
@@ -52,6 +55,7 @@ export class TriggerActivator extends Component {
         }
         this._triggerCollider = collider;
         collider.on('onTriggerEnter', this.onTriggerEnter, this);
+        collider.on('onTriggerExit', this.onTriggerExit, this);
     }
 
     private unregisterTriggerCollider(): void {
@@ -59,6 +63,7 @@ export class TriggerActivator extends Component {
             return;
         }
         this._triggerCollider.off('onTriggerEnter', this.onTriggerEnter, this);
+        this._triggerCollider.off('onTriggerExit', this.onTriggerExit, this);
         this._triggerCollider = null;
     }
 
@@ -74,7 +79,19 @@ export class TriggerActivator extends Component {
         if (!otherNode || otherNode !== this.character) {
             return;
         }
+        this.beginJoystickInteraction();
         this.applyActivation();
+    }
+
+    private onTriggerExit(event: ITriggerEvent): void {
+        if (!this.character) {
+            return;
+        }
+        const otherNode = event.otherCollider?.node ?? null;
+        if (!otherNode || otherNode !== this.character) {
+            return;
+        }
+        this.endJoystickInteraction();
     }
 
     private applyActivation(): void {
@@ -85,6 +102,7 @@ export class TriggerActivator extends Component {
 
         if (!this.repeatable) {
             this.unregisterTriggerCollider();
+            this.endJoystickInteraction();
         } else {
             this._hasTriggered = false;
             this.startIdleTimer();
@@ -100,6 +118,20 @@ export class TriggerActivator extends Component {
                 node.active = active;
             }
         });
+    }
+
+    private beginJoystickInteraction (): void {
+        if (!this._joystickInteractionActive) {
+            UI_Joystick.beginExternalInteraction();
+            this._joystickInteractionActive = true;
+        }
+    }
+
+    private endJoystickInteraction (): void {
+        if (this._joystickInteractionActive) {
+            UI_Joystick.endExternalInteraction();
+            this._joystickInteractionActive = false;
+        }
     }
 
     private startIdleTimer(): void {

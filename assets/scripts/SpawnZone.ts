@@ -2,6 +2,7 @@ import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, Qua
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 import { CollectibleItem } from './CollectibleItem';
 import { getMoneyCarryShift } from './MoneyCarryRegistry';
+import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 const { ccclass, property } = _decorator;
 
 const EVENT_TRIGGER_ENTER = 'onTriggerEnter';
@@ -185,6 +186,7 @@ export class SpawnZone extends Component {
     private _collectActiveCollectors: Set<Node> = new Set();
     private _activeCollectorNode: Node | null = null;
     private _activeCollectorAnchor: Node | null = null;
+    private _joystickInteractionRefs = 0;
 
     private getCarryState(anchor: Node | null, autoCreate = false): AnchorCarryState | null {
         if (!anchor) {
@@ -238,6 +240,7 @@ export class SpawnZone extends Component {
         this.stopSpawning();
         this.unregisterCollectTriggerCollider();
         this.stopCollecting();
+        this.clearJoystickInteractions();
     }
 
     private onTriggerEnter(event: ITriggerEvent): void {
@@ -246,7 +249,11 @@ export class SpawnZone extends Component {
         if (!binding) {
             return;
         }
+        const wasEmpty = this._spawnActiveCollectors.size === 0;
         this._spawnActiveCollectors.add(binding.node);
+        if (wasEmpty) {
+            this.incrementJoystickInteraction();
+        }
         if (!this._isCharacterInside) {
             this._isCharacterInside = true;
             this.startSpawning();
@@ -260,6 +267,9 @@ export class SpawnZone extends Component {
             return;
         }
         this._spawnActiveCollectors.delete(binding.node);
+        if (this._spawnActiveCollectors.size === 0) {
+            this.decrementJoystickInteraction();
+        }
         if (!this._autoCollectEnabled && this._spawnActiveCollectors.size === 0) {
             this._isCharacterInside = false;
             this.stopSpawning();
@@ -300,11 +310,15 @@ export class SpawnZone extends Component {
         if (!binding) {
             return;
         }
+        const wasEmpty = this._collectActiveCollectors.size === 0;
         this._collectActiveCollectors.add(binding.node);
         this._activeCollectorNode = binding.node;
         this._activeCollectorAnchor = binding.anchor;
         this._isCharacterInCollectTrigger = true;
         this.startCollecting();
+        if (wasEmpty) {
+            this.incrementJoystickInteraction();
+        }
     }
 
     private onCollectTriggerExit(event: ITriggerEvent): void {
@@ -328,6 +342,7 @@ export class SpawnZone extends Component {
         if (this._collectActiveCollectors.size === 0) {
             this._isCharacterInCollectTrigger = false;
             this.stopCollecting();
+            this.decrementJoystickInteraction();
         }
     }
 
@@ -937,6 +952,30 @@ export class SpawnZone extends Component {
         }
         this.collectAudio.stop();
         this.collectAudio.play();
+    }
+
+    private incrementJoystickInteraction (): void {
+        this._joystickInteractionRefs++;
+        if (this._joystickInteractionRefs === 1) {
+            UI_Joystick.beginExternalInteraction();
+        }
+    }
+
+    private decrementJoystickInteraction (): void {
+        if (this._joystickInteractionRefs === 0) {
+            return;
+        }
+        this._joystickInteractionRefs--;
+        if (this._joystickInteractionRefs === 0) {
+            UI_Joystick.endExternalInteraction();
+        }
+    }
+
+    private clearJoystickInteractions (): void {
+        while (this._joystickInteractionRefs > 0) {
+            this._joystickInteractionRefs--;
+            UI_Joystick.endExternalInteraction();
+        }
     }
 }
 

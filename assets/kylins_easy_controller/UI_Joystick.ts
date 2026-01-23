@@ -45,6 +45,15 @@ export class UI_Joystick extends Component {
     private _initialized = false;
 
     private _key2buttonMap = {};
+    private _interactionLockCount = 0;
+
+    public static beginExternalInteraction(): void {
+        this._inst?._addInteractionLock();
+    }
+
+    public static endExternalInteraction(): void {
+        this._inst?._removeInteractionLock();
+    }
 
     protected onLoad(): void {
         UI_Joystick._inst = this;
@@ -441,6 +450,10 @@ export class UI_Joystick extends Component {
     }
 
     private scheduleJoystickUsageReset(): void {
+        if (this._interactionLockCount > 0) {
+            this.toggleUsageNode(false);
+            return;
+        }
         if (!this._joystickActive) {
             this.toggleUsageNode(true);
             return;
@@ -454,6 +467,10 @@ export class UI_Joystick extends Component {
 
     private enableUsageNode(): void {
         this._joystickActive = false;
+        if (this._interactionLockCount > 0) {
+            this.toggleUsageNode(false);
+            return;
+        }
         this.toggleUsageNode(true);
     }
 
@@ -465,5 +482,23 @@ export class UI_Joystick extends Component {
 
     private isUsingMovementInput(): boolean {
         return !!this._movementTouch || this._keys.length > 0;
+    }
+
+    private _addInteractionLock(): void {
+        this._interactionLockCount++;
+        if (this._interactionLockCount === 1) {
+            this.toggleUsageNode(false);
+            this.unschedule(this.enableUsageNode);
+        }
+    }
+
+    private _removeInteractionLock(): void {
+        if (this._interactionLockCount === 0) {
+            return;
+        }
+        this._interactionLockCount--;
+        if (this._interactionLockCount === 0 && !this._joystickActive) {
+            this.scheduleJoystickUsageReset();
+        }
     }
 }

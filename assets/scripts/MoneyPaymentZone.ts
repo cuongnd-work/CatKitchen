@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, Tween, TweenEasing, Label, SpriteRenderer, Material, AudioSource } from 'cc';
+import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 import { ItemSellTrigger } from './ItemSellTrigger';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 
@@ -73,6 +74,7 @@ export abstract class MoneyPaymentZone extends Component {
     private _worldTarget: Vec3 = new Vec3();
     private _localTemp: Vec3 = new Vec3();
     private _progressMaterial: Material | null = null;
+    private _joystickInteractionActive = false;
 
     protected onLoad (): void {
         this.updateRequiredAmountLabel();
@@ -91,6 +93,7 @@ export abstract class MoneyPaymentZone extends Component {
         this.unregisterColliderEvents();
         this._isCharacterInside = false;
         this.cleanupDeposits();
+        this.endJoystickInteraction();
     }
 
     private registerColliderEvents (): void {
@@ -128,6 +131,7 @@ export abstract class MoneyPaymentZone extends Component {
         }
         this._isCharacterInside = true;
         this._consumeTimer = 0;
+        this.beginJoystickInteraction();
     }
 
     private onTriggerStay (event: ITriggerEvent): void {
@@ -142,6 +146,7 @@ export abstract class MoneyPaymentZone extends Component {
             return;
         }
         this._isCharacterInside = false;
+        this.endJoystickInteraction();
     }
 
     private processConsumption (deltaTime: number): void {
@@ -250,6 +255,7 @@ export abstract class MoneyPaymentZone extends Component {
 
     protected disablePaymentZone (): void {
         this._isCharacterInside = false;
+        this.endJoystickInteraction();
         this.cleanupDeposits();
         const collider = this.getTriggerCollider();
         if (collider) {
@@ -359,5 +365,19 @@ export abstract class MoneyPaymentZone extends Component {
         }
         this.depositAudio.stop();
         this.depositAudio.play();
+    }
+
+    protected beginJoystickInteraction (): void {
+        if (!this._joystickInteractionActive) {
+            UI_Joystick.beginExternalInteraction();
+            this._joystickInteractionActive = true;
+        }
+    }
+
+    protected endJoystickInteraction (): void {
+        if (this._joystickInteractionActive) {
+            UI_Joystick.endExternalInteraction();
+            this._joystickInteractionActive = false;
+        }
     }
 }
