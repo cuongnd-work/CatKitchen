@@ -235,7 +235,7 @@ export class UI_Joystick extends Component {
                     degree += 360;
                 }
 
-                this._scene.emit(EasyControllerEvent.MOVEMENT, degree, len / radius);
+                this._scene.emit(EasyControllerEvent.MOVEMENT, degree, 1.0);
             }
         }
     }

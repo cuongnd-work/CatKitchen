@@ -70436,7 +70436,7 @@
     "mainCamera": {
       "__id__": 6
     },
-    "velocity": 3,
+    "velocity": 4.5,
     "jumpVelocity": 1,
     "maxJumpTimes": 0,
     "idleAnimClip": {
