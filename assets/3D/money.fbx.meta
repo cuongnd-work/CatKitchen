@@ -125,6 +125,20 @@
       "scenes": [
         "b95de664-6c99-4d50-9185-f33b7c336921@42efd"
       ]
+    },
+    "promoteSingleRootNode": true,
+    "meshOptimize": {
+      "vertexCache": true,
+      "vertexFetch": true,
+      "enable": true
+    },
+    "meshCompress": {
+      "compress": true,
+      "enable": true
+    },
+    "meshSimplify": {
+      "enable": true,
+      "targetRatio": 0.7
     }
   }
 }

@@ -151,6 +151,21 @@
           {}
         ]
       }
+    },
+    "promoteSingleRootNode": true,
+    "meshOptimize": {
+      "enable": true,
+      "vertexFetch": true,
+      "vertexCache": true
+    },
+    "meshCompress": {
+      "enable": true,
+      "quantize": true,
+      "compress": true
+    },
+    "meshSimplify": {
+      "enable": true,
+      "targetRatio": 0.15
     }
   }
 }

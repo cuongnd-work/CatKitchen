@@ -966,6 +966,20 @@
           {}
         ]
       }
-    }
+    },
+    "meshOptimize": {
+      "enable": true,
+      "vertexFetch": true,
+      "vertexCache": true
+    },
+    "meshSimplify": {
+      "enable": true,
+      "targetRatio": 0.75
+    },
+    "meshCompress": {
+      "enable": true,
+      "compress": true
+    },
+    "promoteSingleRootNode": true
   }
 }
