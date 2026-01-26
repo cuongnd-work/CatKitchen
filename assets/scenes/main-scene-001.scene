@@ -1373,7 +1373,7 @@
     "__prefab": null,
     "_materials": [
       {
-        "__uuid__": "122da3ce-c43b-4199-a230-1842d08c1fde",
+        "__uuid__": "655185cf-62a0-4dc8-9ca9-f6994372c671",
         "__expectedType__": "cc.Material"
       },
       {
@@ -1389,7 +1389,7 @@
         "__expectedType__": "cc.Material"
       },
       {
-        "__uuid__": "074f7a73-097b-4b6f-a55c-5474d12c05fa",
+        "__uuid__": "bd86a5be-114f-4d37-b43d-5729c4390dd8",
         "__expectedType__": "cc.Material"
       },
       {
@@ -1409,7 +1409,7 @@
         "__expectedType__": "cc.Material"
       },
       {
-        "__uuid__": "de8187df-5a25-463b-847f-c591a44a8706",
+        "__uuid__": "bd86a5be-114f-4d37-b43d-5729c4390dd8",
         "__expectedType__": "cc.Material"
       }
     ],
