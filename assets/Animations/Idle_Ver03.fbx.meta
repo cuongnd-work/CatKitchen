@@ -38,7 +38,7 @@
           "to": 3.200000047683716
         },
         "events": [],
-        "speed": 0.5
+        "speed": 1
       },
       "ver": "1.0.18",
       "imported": true,
@@ -65,7 +65,7 @@
             "to": 3.200000047683716,
             "wrapMode": 2,
             "previousId": "73b7f",
-            "speed": 0.5
+            "speed": 1
           }
         ]
       }

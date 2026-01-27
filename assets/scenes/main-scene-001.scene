@@ -6955,7 +6955,7 @@
         "__id__": 165
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 168
@@ -75090,10 +75090,6 @@
       {
         "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
         "__expectedType__": "cc.AnimationClip"
-      },
-      {
-        "__uuid__": "a6a62d29-42a3-4e5e-b652-63f7de37639d@73b7f",
-        "__expectedType__": "cc.AnimationClip"
       }
     ],
     "_defaultClip": null,
@@ -75264,7 +75260,7 @@
     "node": {
       "__id__": 1831
     },
-    "_enabled": false,
+    "_enabled": true,
     "__prefab": null,
     "canvasNode": {
       "__id__": 269
@@ -75279,7 +75275,7 @@
     "node": {
       "__id__": 1831
     },
-    "_enabled": false,
+    "_enabled": true,
     "__prefab": null,
     "_id": "79eG2ma0hA451w7PJYQ9At"
   },
