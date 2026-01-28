@@ -59,7 +59,7 @@
     "_globals": {
       "__id__": 8
     },
-    "_id": "9656de0e-5fd1-4d0f-9f77-fdc3b25e0f8c"
+    "_id": "c65be83b-7764-452f-a68c-a4d6b3534efc"
   },
   {
     "__type__": "cc.Node",
@@ -252,7 +252,7 @@
     "__type__": "cc.PrefabInfo",
     "root": null,
     "asset": null,
-    "fileId": "9656de0e-5fd1-4d0f-9f77-fdc3b25e0f8c",
+    "fileId": "c65be83b-7764-452f-a68c-a4d6b3534efc",
     "instance": null,
     "targetOverrides": null
   },
