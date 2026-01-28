@@ -23,6 +23,46 @@
       ],
       "subMetas": {}
     },
+    "5e49e": {
+      "importer": "gltf-embeded-image",
+      "uuid": "e553b388-ec12-45e8-a00d-b2f34edfff2e@5e49e",
+      "displayName": "",
+      "id": "5e49e",
+      "name": "base_color_texture-0.image",
+      "userData": {
+        "gltfIndex": 0,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": true,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".json",
+        ".png"
+      ],
+      "subMetas": {}
+    },
+    "ef396": {
+      "importer": "gltf-embeded-image",
+      "uuid": "e553b388-ec12-45e8-a00d-b2f34edfff2e@ef396",
+      "displayName": "",
+      "id": "ef396",
+      "name": "base_color_texture-1.image",
+      "userData": {
+        "gltfIndex": 1,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": true,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".json",
+        ".png"
+      ],
+      "subMetas": {}
+    },
     "0a1ef": {
       "importer": "texture",
       "uuid": "e553b388-ec12-45e8-a00d-b2f34edfff2e@0a1ef",
@@ -36,8 +76,8 @@
         "magfilter": "linear",
         "mipfilter": "none",
         "anisotropy": 0,
-        "isUuid": false,
-        "imageUuidOrDatabaseUri": "db://assets/3D/textures/KitchenGradient.png"
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "e553b388-ec12-45e8-a00d-b2f34edfff2e@5e49e"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -59,8 +99,8 @@
         "magfilter": "linear",
         "mipfilter": "none",
         "anisotropy": 0,
-        "isUuid": false,
-        "imageUuidOrDatabaseUri": "db://assets/3D/textures/KitchenGradient.png"
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "e553b388-ec12-45e8-a00d-b2f34edfff2e@ef396"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -122,11 +162,11 @@
     "imageMetas": [
       {
         "name": "base_color_texture",
-        "uri": "db://assets/3D/textures/KitchenGradient.png"
+        "uri": "e553b388-ec12-45e8-a00d-b2f34edfff2e@5e49e"
       },
       {
         "name": "base_color_texture",
-        "uri": "db://assets/3D/textures/KitchenGradient.png"
+        "uri": "e553b388-ec12-45e8-a00d-b2f34edfff2e@ef396"
       }
     ],
     "fbx": {

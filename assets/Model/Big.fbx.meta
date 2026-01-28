@@ -13,7 +13,7 @@
       "name": "Scene.001.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 1123
+        "triangleCount": 1784
       },
       "ver": "1.1.1",
       "imported": true,
@@ -290,7 +290,7 @@
       "uuid": "75013c92-b25b-4b13-a85d-90e91859c8f4@3b21b",
       "displayName": "",
       "id": "3b21b",
-      "name": "shop.prefab",
+      "name": "Big.prefab",
       "userData": {
         "gltfIndex": 0
       },

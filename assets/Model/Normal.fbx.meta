@@ -1,0 +1,212 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f",
+  "files": [],
+  "subMetas": {
+    "99593": {
+      "importer": "gltf-material",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@99593",
+      "displayName": "",
+      "id": "99593",
+      "name": "L_MidSat_Yellow.material",
+      "userData": {
+        "gltfIndex": 5
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "a62fe": {
+      "importer": "gltf-mesh",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@a62fe",
+      "displayName": "",
+      "id": "a62fe",
+      "name": "Scene.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 1338
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "1ef48": {
+      "importer": "gltf-material",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@1ef48",
+      "displayName": "",
+      "id": "1ef48",
+      "name": "PavementBoder_3_Variant.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "f80c6": {
+      "importer": "gltf-material",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@f80c6",
+      "displayName": "",
+      "id": "f80c6",
+      "name": "WoodPillar_0011.material",
+      "userData": {
+        "gltfIndex": 1
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "63ff8": {
+      "importer": "gltf-material",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@63ff8",
+      "displayName": "",
+      "id": "63ff8",
+      "name": "WoodWall_0011_Variant.material",
+      "userData": {
+        "gltfIndex": 2
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "aa1b2": {
+      "importer": "gltf-material",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@aa1b2",
+      "displayName": "",
+      "id": "aa1b2",
+      "name": "WoodWall_0011.material",
+      "userData": {
+        "gltfIndex": 3
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "0b31c": {
+      "importer": "gltf-material",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@0b31c",
+      "displayName": "",
+      "id": "0b31c",
+      "name": "M_MidSat_Green.material",
+      "userData": {
+        "gltfIndex": 4
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "06dd0": {
+      "importer": "gltf-material",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@06dd0",
+      "displayName": "",
+      "id": "06dd0",
+      "name": "Matress0011_Variant.material",
+      "userData": {
+        "gltfIndex": 6
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "0fa7f": {
+      "importer": "gltf-scene",
+      "uuid": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@0fa7f",
+      "displayName": "",
+      "id": "0fa7f",
+      "name": "Normal.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@a62fe"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@1ef48",
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@f80c6",
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@63ff8",
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@aa1b2",
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@0b31c",
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@99593",
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@06dd0"
+      ],
+      "scenes": [
+        "1ac41950-d1a9-4121-933f-cfe5084e8b8f@0fa7f"
+      ]
+    },
+    "meshOptimize": {
+      "enable": true,
+      "vertexCache": true,
+      "vertexFetch": true
+    },
+    "promoteSingleRootNode": true,
+    "meshCompress": {
+      "enable": true,
+      "compress": true
+    },
+    "meshSimplify": {
+      "enable": true,
+      "targetRatio": 0.75
+    }
+  }
+}
