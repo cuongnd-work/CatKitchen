@@ -640,6 +640,7 @@
               "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@7d6ab",
               "__expectedType__": "cc.Texture2D"
             },
+            "albedoScale": 3.6,
             "shininessExponent": 25,
             "specularFactor": 0.25,
             "transparencyMap": {
