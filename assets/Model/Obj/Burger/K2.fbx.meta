@@ -220,6 +220,76 @@
       "enable": true,
       "targetRatio": 0.15
     },
-    "promoteSingleRootNode": true
+    "promoteSingleRootNode": true,
+    "materials": {
+      "e553b388-ec12-45e8-a00d-b2f34edfff2e@ce83f": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "431e5f0f-0343-40bf-88d4-e4468eb58d94",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "albedoMap": {
+              "__uuid__": "e3ffff82-8a9b-4227-96a2-a863f71595b7@6c48a",
+              "__expectedType__": "cc.Texture2D"
+            }
+          }
+        ]
+      },
+      "e553b388-ec12-45e8-a00d-b2f34edfff2e@0320c": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "431e5f0f-0343-40bf-88d4-e4468eb58d94",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "albedoMap": {
+              "__uuid__": "e3ffff82-8a9b-4227-96a2-a863f71595b7@6c48a",
+              "__expectedType__": "cc.Texture2D"
+            }
+          }
+        ]
+      }
+    }
   }
 }

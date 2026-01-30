@@ -145,24 +145,6 @@
       ],
       "subMetas": {}
     },
-    "60dcb": {
-      "importer": "gltf-mesh",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@60dcb",
-      "displayName": "",
-      "id": "60dcb",
-      "name": "B14.mesh",
-      "userData": {
-        "gltfIndex": 5,
-        "triangleCount": 448
-      },
-      "ver": "1.1.1",
-      "imported": true,
-      "files": [
-        ".bin",
-        ".json"
-      ],
-      "subMetas": {}
-    },
     "f6e40": {
       "importer": "gltf-mesh",
       "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@f6e40",
@@ -170,44 +152,8 @@
       "id": "f6e40",
       "name": "B10.mesh",
       "userData": {
-        "gltfIndex": 6,
+        "gltfIndex": 5,
         "triangleCount": 1468
-      },
-      "ver": "1.1.1",
-      "imported": true,
-      "files": [
-        ".bin",
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "caa79": {
-      "importer": "gltf-mesh",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@caa79",
-      "displayName": "",
-      "id": "caa79",
-      "name": "B74.mesh",
-      "userData": {
-        "gltfIndex": 7,
-        "triangleCount": 1698
-      },
-      "ver": "1.1.1",
-      "imported": true,
-      "files": [
-        ".bin",
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "aad7f": {
-      "importer": "gltf-mesh",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@aad7f",
-      "displayName": "",
-      "id": "aad7f",
-      "name": "B46.mesh",
-      "userData": {
-        "gltfIndex": 8,
-        "triangleCount": 1148
       },
       "ver": "1.1.1",
       "imported": true,
@@ -224,26 +170,8 @@
       "id": "76c90",
       "name": "H20.mesh",
       "userData": {
-        "gltfIndex": 9,
+        "gltfIndex": 6,
         "triangleCount": 295
-      },
-      "ver": "1.1.1",
-      "imported": true,
-      "files": [
-        ".bin",
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "5fbf0": {
-      "importer": "gltf-mesh",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@5fbf0",
-      "displayName": "",
-      "id": "5fbf0",
-      "name": "H29.mesh",
-      "userData": {
-        "gltfIndex": 10,
-        "triangleCount": 906
       },
       "ver": "1.1.1",
       "imported": true,
@@ -260,7 +188,7 @@
       "id": "040fb",
       "name": "Head.mesh",
       "userData": {
-        "gltfIndex": 11,
+        "gltfIndex": 7,
         "triangleCount": 1234
       },
       "ver": "1.1.1",
@@ -278,7 +206,7 @@
       "id": "5eac3",
       "name": "Eyes_brows.mesh",
       "userData": {
-        "gltfIndex": 12,
+        "gltfIndex": 8,
         "triangleCount": 20
       },
       "ver": "1.1.1",
@@ -365,7 +293,7 @@
       "name": "UnnamedSkeleton-6.skeleton",
       "userData": {
         "gltfIndex": 6,
-        "jointsLength": 60
+        "jointsLength": 1
       },
       "ver": "1.0.1",
       "imported": true,
@@ -382,7 +310,7 @@
       "name": "UnnamedSkeleton-7.skeleton",
       "userData": {
         "gltfIndex": 7,
-        "jointsLength": 60
+        "jointsLength": 1
       },
       "ver": "1.0.1",
       "imported": true,
@@ -399,74 +327,6 @@
       "name": "UnnamedSkeleton-8.skeleton",
       "userData": {
         "gltfIndex": 8,
-        "jointsLength": 60
-      },
-      "ver": "1.0.1",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "8feb8": {
-      "importer": "gltf-skeleton",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@8feb8",
-      "displayName": "",
-      "id": "8feb8",
-      "name": "UnnamedSkeleton-9.skeleton",
-      "userData": {
-        "gltfIndex": 9,
-        "jointsLength": 1
-      },
-      "ver": "1.0.1",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "ad32d": {
-      "importer": "gltf-skeleton",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@ad32d",
-      "displayName": "",
-      "id": "ad32d",
-      "name": "UnnamedSkeleton-10.skeleton",
-      "userData": {
-        "gltfIndex": 10,
-        "jointsLength": 1
-      },
-      "ver": "1.0.1",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "df8aa": {
-      "importer": "gltf-skeleton",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@df8aa",
-      "displayName": "",
-      "id": "df8aa",
-      "name": "UnnamedSkeleton-11.skeleton",
-      "userData": {
-        "gltfIndex": 11,
-        "jointsLength": 1
-      },
-      "ver": "1.0.1",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "2bf59": {
-      "importer": "gltf-skeleton",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@2bf59",
-      "displayName": "",
-      "id": "2bf59",
-      "name": "UnnamedSkeleton-12.skeleton",
-      "userData": {
-        "gltfIndex": 12,
         "jointsLength": 3
       },
       "ver": "1.0.1",
@@ -840,12 +700,8 @@
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@5de89",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@41afc",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@cbcd6",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@60dcb",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@f6e40",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@caa79",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@aad7f",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@76c90",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@5fbf0",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@040fb",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@5eac3"
       ],
@@ -858,11 +714,7 @@
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@62756",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@7d08b",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@b5902",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@2d5df",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@8feb8",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@ad32d",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@df8aa",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@2bf59"
+        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@2d5df"
       ],
       "textures": [
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@7d6ab",
