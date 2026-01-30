@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.Prefab",
-    "_name": "Hotdog",
+    "_name": "Kitchen2",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Hotdog",
+    "_name": "Kitchen2",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -31,7 +31,7 @@
       "__type__": "cc.Vec3",
       "x": 10.812,
       "y": 0,
-      "z": -14.816
+      "z": 0
     },
     "_lrot": {
       "__type__": "cc.Quat",
@@ -79,11 +79,12 @@
     "fileId": "51x3z7liNUDbtfU29cI+Ml",
     "instance": {
       "__id__": 4
-    }
+    },
+    "targetOverrides": null
   },
   {
     "__type__": "cc.PrefabInstance",
-    "fileId": "8din9q9n9NOr+6LIhExhtA",
+    "fileId": "61Ewg4K8FBso1fKqFWeacU",
     "prefabRootNode": {
       "__id__": 1
     },
@@ -259,7 +260,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "75kjucy15NbLzgPf2TbUF+",
+    "fileId": "f1GaQMx6VBmrOE3La4xyDF",
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": [
       {
