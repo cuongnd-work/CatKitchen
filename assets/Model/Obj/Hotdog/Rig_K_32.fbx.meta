@@ -5,12 +5,12 @@
   "uuid": "e7d9884a-27b7-41d5-9122-8d7cb714bdfb",
   "files": [],
   "subMetas": {
-    "093d1": {
+    "e2349": {
       "importer": "gltf-mesh",
-      "uuid": "e7d9884a-27b7-41d5-9122-8d7cb714bdfb@093d1",
+      "uuid": "e7d9884a-27b7-41d5-9122-8d7cb714bdfb@e2349",
       "displayName": "",
-      "id": "093d1",
-      "name": "K32.mesh",
+      "id": "e2349",
+      "name": "Mesh.mesh",
       "userData": {
         "gltfIndex": 0,
         "triangleCount": 778
@@ -129,7 +129,7 @@
     },
     "assetFinder": {
       "meshes": [
-        "e7d9884a-27b7-41d5-9122-8d7cb714bdfb@093d1"
+        "e7d9884a-27b7-41d5-9122-8d7cb714bdfb@e2349"
       ],
       "skeletons": [],
       "textures": [
