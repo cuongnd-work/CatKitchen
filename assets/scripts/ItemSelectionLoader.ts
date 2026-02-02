@@ -40,11 +40,18 @@ export class ItemSelectionLoader extends Component {
     @property({ tooltip: 'Seconds for the exit tween.' })
     public exitDuration = 0.2;
 
+    @property({ tooltip: 'Delay in seconds before enabling the clicked slot target.' })
+    public enableDelay = 0;
+
+    @property({ type: Node, tooltip: 'Node enabled after enableDelay when a slot is clicked (leave empty to skip).' })
+    public delayedEnableNode: Node | null = null;
+
     private _bindings: Array<{ button: Button; handler: () => void }> = [];
     private _originalPosition = new Vec3();
     private _enterTween: Tween<Node> | null = null;
     private _exitTween: Tween<Node> | null = null;
     private _interactionLocked = false;
+    private _pendingEnableCallbacks: Array<() => void> = [];
 
     protected onEnable(): void {
         this.unregisterBindings();
@@ -53,6 +60,7 @@ export class ItemSelectionLoader extends Component {
         this.cacheOriginalPosition();
         this._interactionLocked = false;
         this.resetButtonInteractivity();
+        this.cancelPendingEnables();
         this.startEnterTween();
     }
 
@@ -61,6 +69,7 @@ export class ItemSelectionLoader extends Component {
         this.stopTweens();
         this._interactionLocked = false;
         this.resetButtonInteractivity();
+        this.cancelPendingEnables();
     }
 
     private refreshSlots(): void {
@@ -111,13 +120,26 @@ export class ItemSelectionLoader extends Component {
             return;
         }
 
-        const target = slot.enableOnClick;
-        if (!target || !target.isValid) {
+        let hasValidTarget = false;
+
+        const immediateTarget = slot.enableOnClick;
+        if (immediateTarget && immediateTarget.isValid) {
+            immediateTarget.active = true;
+            hasValidTarget = true;
+        } else {
             warn(`[ItemSelectionLoader] Slot ${index} has no enableOnClick target.`);
+        }
+
+        const delayedTarget = this.delayedEnableNode;
+        if (delayedTarget && delayedTarget.isValid) {
+            this.scheduleEnableTarget(delayedTarget, index);
+            hasValidTarget = true;
+        }
+
+        if (!hasValidTarget) {
             return;
         }
 
-        target.active = true;
         this.disableOtherButtons(index);
         this._interactionLocked = true;
         this.startExitTween();
@@ -164,7 +186,6 @@ export class ItemSelectionLoader extends Component {
         this._exitTween = tween(this.node)
             .to(Math.max(0, this.exitDuration), { position: origin })
             .call(() => {
-                this.node.active = false;
                 this._interactionLocked = false;
                 this.resetButtonInteractivity();
             })
@@ -180,5 +201,30 @@ export class ItemSelectionLoader extends Component {
             this._exitTween.stop();
             this._exitTween = null;
         }
+    }
+
+    private scheduleEnableTarget(target: Node, slotIndex: number): void {
+        const delay = Math.max(0, this.enableDelay);
+        const callback = () => {
+            const idx = this._pendingEnableCallbacks.indexOf(callback);
+            if (idx !== -1) {
+                this._pendingEnableCallbacks.splice(idx, 1);
+            }
+
+            if (!target || !target.isValid) {
+                warn(`[ItemSelectionLoader] Delayed target for slot ${slotIndex} became invalid before enable.`);
+                return;
+            }
+
+            target.active = true;
+        };
+
+        this._pendingEnableCallbacks.push(callback);
+        this.scheduleOnce(callback, delay);
+    }
+
+    private cancelPendingEnables(): void {
+        this._pendingEnableCallbacks.forEach((callback) => this.unschedule(callback));
+        this._pendingEnableCallbacks.length = 0;
     }
 }
