@@ -2,33 +2,17 @@
   "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
-  "uuid": "38fbaa1f-2cf2-4e0e-b8bb-e914de8e8825",
+  "uuid": "cdd8c987-0672-4730-a35f-010349a33dae",
   "files": [
     "__original-animation-0.bin"
   ],
   "subMetas": {
-    "71053": {
-      "importer": "gltf-scene",
-      "uuid": "38fbaa1f-2cf2-4e0e-b8bb-e914de8e8825@71053",
-      "displayName": "",
-      "id": "71053",
-      "name": "Idle_Ver03.prefab",
-      "userData": {
-        "gltfIndex": 0
-      },
-      "ver": "1.0.14",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
     "73b7f": {
       "importer": "gltf-animation",
-      "uuid": "38fbaa1f-2cf2-4e0e-b8bb-e914de8e8825@73b7f",
+      "uuid": "cdd8c987-0672-4730-a35f-010349a33dae@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Idle_Ver03.animation",
+      "name": "Take 001.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
@@ -37,13 +21,28 @@
           "from": 0,
           "to": 3.200000047683716
         },
-        "events": [],
-        "speed": 1
+        "events": []
       },
       "ver": "1.0.18",
       "imported": true,
       "files": [
         ".bin"
+      ],
+      "subMetas": {}
+    },
+    "eb655": {
+      "importer": "gltf-scene",
+      "uuid": "cdd8c987-0672-4730-a35f-010349a33dae@eb655",
+      "displayName": "",
+      "id": "eb655",
+      "name": "Idle_Ver01.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
       ],
       "subMetas": {}
     }
@@ -60,12 +59,11 @@
         "fps": 30,
         "splits": [
           {
-            "name": "Idle_Ver03",
+            "name": "Take 001",
             "from": 0,
             "to": 3.200000047683716,
             "wrapMode": 2,
-            "previousId": "73b7f",
-            "speed": 1
+            "previousId": "73b7f"
           }
         ]
       }
@@ -94,23 +92,8 @@
       "textures": [],
       "materials": [],
       "scenes": [
-        "38fbaa1f-2cf2-4e0e-b8bb-e914de8e8825@71053"
+        "cdd8c987-0672-4730-a35f-010349a33dae@eb655"
       ]
-    },
-    "promoteSingleRootNode": true,
-    "meshOptimize": {
-      "enable": true,
-      "vertexCache": true,
-      "vertexFetch": true
-    },
-    "meshSimplify": {
-      "enable": true,
-      "targetRatio": 0
-    },
-    "meshCompress": {
-      "enable": true,
-      "compress": true,
-      "quantize": true
     }
   }
 }

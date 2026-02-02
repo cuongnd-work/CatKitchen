@@ -2,27 +2,26 @@
   "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
-  "uuid": "b9a5cd31-3ccd-4984-bcdc-6177ba5fb184",
+  "uuid": "c80372bd-ec7f-422c-8c9e-f8e04fee3a9b",
   "files": [
     "__original-animation-0.bin"
   ],
   "subMetas": {
     "73b7f": {
       "importer": "gltf-animation",
-      "uuid": "b9a5cd31-3ccd-4984-bcdc-6177ba5fb184@73b7f",
+      "uuid": "c80372bd-ec7f-422c-8c9e-f8e04fee3a9b@73b7f",
       "displayName": "",
       "id": "73b7f",
-      "name": "Idle_Ver02.animation",
+      "name": "Walk_New.animation",
       "userData": {
         "gltfIndex": 0,
         "wrapMode": 2,
         "sample": 30,
         "span": {
           "from": 0,
-          "to": 3.200000047683716
+          "to": 0.5333333611488342
         },
-        "events": [],
-        "speed": 1
+        "events": []
       },
       "ver": "1.0.18",
       "imported": true,
@@ -31,12 +30,12 @@
       ],
       "subMetas": {}
     },
-    "5303a": {
+    "baa12": {
       "importer": "gltf-scene",
-      "uuid": "b9a5cd31-3ccd-4984-bcdc-6177ba5fb184@5303a",
+      "uuid": "c80372bd-ec7f-422c-8c9e-f8e04fee3a9b@baa12",
       "displayName": "",
-      "id": "5303a",
-      "name": "Idle_Ver02.prefab",
+      "id": "baa12",
+      "name": "Walk_New.prefab",
       "userData": {
         "gltfIndex": 0
       },
@@ -56,16 +55,15 @@
     "animationImportSettings": [
       {
         "name": "Take 001",
-        "duration": 3.200000047683716,
+        "duration": 0.5333333611488342,
         "fps": 30,
         "splits": [
           {
-            "name": "Idle_Ver02",
+            "name": "Walk_New",
             "from": 0,
-            "to": 3.200000047683716,
+            "to": 0.5333333611488342,
             "wrapMode": 2,
-            "previousId": "73b7f",
-            "speed": 1
+            "previousId": "73b7f"
           }
         ]
       }
@@ -94,23 +92,8 @@
       "textures": [],
       "materials": [],
       "scenes": [
-        "b9a5cd31-3ccd-4984-bcdc-6177ba5fb184@5303a"
+        "c80372bd-ec7f-422c-8c9e-f8e04fee3a9b@baa12"
       ]
-    },
-    "promoteSingleRootNode": true,
-    "meshOptimize": {
-      "enable": true,
-      "vertexCache": true,
-      "vertexFetch": true
-    },
-    "meshSimplify": {
-      "enable": true,
-      "targetRatio": 0
-    },
-    "meshCompress": {
-      "enable": true,
-      "compress": true,
-      "quantize": true
     }
   }
 }

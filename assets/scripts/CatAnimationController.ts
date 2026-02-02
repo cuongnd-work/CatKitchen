@@ -24,15 +24,15 @@ export class CatAnimationController extends Component {
         if (CurrencyView.instance) {
             CurrencyView.instance.addCurrency(50);
         }
-        this.animation.play("Walk_Angry");
+        this.animation.play("Walk_New");
     }
 
     public doBedo(){
-        this.animation.play("Bedo");
+        this.animation.play("Take 001");
     }
 
     public doDoing(){
-        this.animation.play("Doing");
+        this.animation.play("Take 001");
     }
 }
 
