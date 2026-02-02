@@ -93,7 +93,7 @@ export class CharacterPathWorker extends Component {
         const result = this.moveTowardsWaypoint(waypoint, dt);
 
         if (result.arrived) {
-            this.enterWorkingState();
+            this.handleArrival();
             return;
         }
 
@@ -169,7 +169,7 @@ export class CharacterPathWorker extends Component {
     private getWorkDurationForIndex(index: number): number {
         if (index >= 0 && index < this.workDurations.length) {
             const value = this.workDurations[index];
-            if (!Number.isNaN(value) && Number.isFinite(value) && value > 0) {
+            if (!Number.isNaN(value) && Number.isFinite(value) && value >= 0) {
                 return value;
             }
         }
@@ -177,22 +177,33 @@ export class CharacterPathWorker extends Component {
         return Math.max(0, this.defaultWorkDuration);
     }
 
-    private enterWorkingState(): void {
-        if (this._phase === WorkerPhase.Working) {
+    private handleArrival(): void {
+        const waitDuration = this.getWorkDurationForIndex(this._currentNodeIndex);
+        if (waitDuration <= 0) {
+            this.advanceToNextWaypoint();
+            this.enterWalkingState(true);
+            return;
+        }
+
+        this.enterWorkingState(waitDuration);
+    }
+
+    private enterWorkingState(forcedDuration?: number): void {
+        if (this._phase === WorkerPhase.Working && forcedDuration === undefined) {
+            return;
+        }
+
+        const waitDuration = forcedDuration ?? this.getWorkDurationForIndex(this._currentNodeIndex);
+        if (waitDuration <= 0) {
+            this.advanceToNextWaypoint();
+            this.enterWalkingState(true);
             return;
         }
 
         this._phase = WorkerPhase.Working;
         this._waitTimer = 0;
-        this._waitTarget = this.getWorkDurationForIndex(this._currentNodeIndex);
+        this._waitTarget = waitDuration;
         this._walkAnimationPlaying = false;
-
-        if (this._waitTarget <= 0) {
-            this.advanceToNextWaypoint();
-            this.enterWalkingState();
-            return;
-        }
-
         this.playWorkAnimation();
     }
 
