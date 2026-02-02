@@ -50,7 +50,7 @@
             "_value": false
           },
           "ui": {
-            "_value": true
+            "_value": false
           },
           "particle": {
             "_value": false
@@ -201,8 +201,7 @@
           "gfx-webgl",
           "graphics",
           "skeletal-animation",
-          "tween",
-          "ui"
+          "tween"
         ],
         "noDeprecatedFeatures": {
           "value": false,

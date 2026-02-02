@@ -389,7 +389,7 @@
     },
     "meshSimplify": {
       "enable": true,
-      "targetRatio": 0.75
+      "targetRatio": 0.7
     },
     "materials": {
       "50cf4cc0-b409-4402-98bc-e6499b0631b9@89453": {

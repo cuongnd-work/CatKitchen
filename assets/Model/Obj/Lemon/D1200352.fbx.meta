@@ -177,6 +177,19 @@
           }
         ]
       }
+    },
+    "meshOptimize": {
+      "enable": true,
+      "vertexCache": true,
+      "vertexFetch": true
+    },
+    "meshSimplify": {
+      "enable": true,
+      "targetRatio": 0.7
+    },
+    "meshCompress": {
+      "enable": true,
+      "compress": true
     }
   }
 }
