@@ -14,8 +14,11 @@ export class CameraFollowOverride extends Component {
     @property({ type: Vec3, tooltip: 'Offset applied while this component is enabled.' })
     public overrideOffset: Vec3 = new Vec3();
 
-    @property({ tooltip: 'Follow speed applied while this component is enabled. Leave empty to keep current speed.' })
-    public overrideFollowSpeed: number | null = null;
+    @property({ tooltip: 'Also override followSpeed while this component is enabled.' })
+    public overrideFollowSpeedEnabled = false;
+
+    @property({ tooltip: 'Follow speed applied if overrideFollowSpeedEnabled is true.', min: 0, step: 0.1, slide: true })
+    public overrideFollowSpeedValue = 5;
 
     private _previousTarget: Node | null = null;
     private _previousOffset: Vec3 | null = null;
@@ -43,8 +46,8 @@ export class CameraFollowOverride extends Component {
         }
 
         this.cameraFollow.offset.set(this.overrideOffset);
-        if (this.overrideFollowSpeed !== null) {
-            this.cameraFollow.followSpeed = this.overrideFollowSpeed;
+        if (this.overrideFollowSpeedEnabled) {
+            this.cameraFollow.followSpeed = this.overrideFollowSpeedValue;
         }
         this._applied = true;
     }
@@ -58,7 +61,7 @@ export class CameraFollowOverride extends Component {
         if (this._previousOffset) {
             this.cameraFollow.offset.set(this._previousOffset);
         }
-        if (this._previousFollowSpeed !== null) {
+        if (this.overrideFollowSpeedEnabled && this._previousFollowSpeed !== null) {
             this.cameraFollow.followSpeed = this._previousFollowSpeed;
         }
 
