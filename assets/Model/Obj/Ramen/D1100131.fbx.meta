@@ -44,15 +44,15 @@
       ],
       "subMetas": {}
     },
-    "91498": {
+    "db679": {
       "importer": "gltf-mesh",
-      "uuid": "da900bfe-461f-4e83-bde1-ba3aae4639b2@91498",
+      "uuid": "da900bfe-461f-4e83-bde1-ba3aae4639b2@db679",
       "displayName": "",
-      "id": "91498",
-      "name": "D1100131.mesh",
+      "id": "db679",
+      "name": "D1100131.001.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 2002
+        "triangleCount": 999
       },
       "ver": "1.1.1",
       "imported": true,
@@ -381,7 +381,7 @@
     },
     "assetFinder": {
       "meshes": [
-        "da900bfe-461f-4e83-bde1-ba3aae4639b2@91498"
+        "da900bfe-461f-4e83-bde1-ba3aae4639b2@db679"
       ],
       "skeletons": [],
       "textures": [
