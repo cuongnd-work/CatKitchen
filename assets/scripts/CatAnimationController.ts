@@ -20,18 +20,20 @@ export class CatAnimationController extends Component {
         // if (popup) {
         //     popup.sell();
         // }
-
-        if (CurrencyView.instance) {
-            CurrencyView.instance.addCurrency(50);
-        }
         this.animation.play("Walk_New");
     }
 
     public doBedo(){
         this.animation.play("Take 001");
+        if (CurrencyView.instance) {
+            CurrencyView.instance.addCurrency(50);
+        }
     }
 
     public doDoing(){
+        if (CurrencyView.instance) {
+            CurrencyView.instance.addCurrency(50);
+        }
         this.animation.play("Take 001");
     }
 }

@@ -23997,7 +23997,7 @@
     "priceLabel": {
       "__id__": 1500
     },
-    "price": 500,
+    "price": 250,
     "enableOnClick": {
       "__id__": 516
     }
@@ -24017,7 +24017,7 @@
     "priceLabel": {
       "__id__": 1512
     },
-    "price": 500,
+    "price": 300,
     "enableOnClick": {
       "__id__": 784
     }
