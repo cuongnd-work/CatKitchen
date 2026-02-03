@@ -1,4 +1,4 @@
-import { _decorator, CCFloat, Component, Node, Quat, Vec3, warn } from 'cc';
+import { _decorator, CCFloat, Component, Node, Prefab, Quat, Tween, Vec3, instantiate, tween, warn } from 'cc';
 import { CatAnimationController } from 'db://assets/scripts/CatAnimationController';
 
 const { ccclass, property } = _decorator;
@@ -42,6 +42,27 @@ export class CharacterPathWorker extends Component {
     @property({ tooltip: 'Up axis used while rotating to face the path (ignored when faceMovement is false).' })
     public faceUp: Vec3 = new Vec3(0, 1, 0);
 
+    @property({ type: Prefab, tooltip: 'Coin prefab shown above the character while it is working.' })
+    public coinPrefab: Prefab | null = null;
+
+    @property({ type: Node, tooltip: 'Optional node used as the parent for spawned coins (defaults to this node).' })
+    public coinAnchor: Node | null = null;
+
+    @property({ tooltip: 'Local offset from the anchor where the coin row is centered.' })
+    public coinLocalOffset: Vec3 = new Vec3(0, 120, 0);
+
+    @property({ tooltip: 'How many coins to spawn while working.', min: 0, step: 1 })
+    public coinsPerWork = 2;
+
+    @property({ tooltip: 'Horizontal spacing between spawned coins.', min: 0 })
+    public coinHorizontalSpacing = 20;
+
+    @property({ tooltip: 'Seconds it takes each coin to rise to coinLocalOffset.', min: 0 })
+    public coinRiseDuration = 0.35;
+
+    @property({ tooltip: 'Seconds between each coin spawn.', min: 0 })
+    public coinSpawnInterval = 0.1;
+
     private _phase: WorkerPhase = WorkerPhase.Walking;
     private _currentNodeIndex = 0;
     private _waitTimer = 0;
@@ -53,6 +74,7 @@ export class CharacterPathWorker extends Component {
     private _normalizedFaceUp = new Vec3(0, 1, 0);
     private readonly _arrivalThreshold = 0.01;
     private _walkAnimationPlaying = false;
+    private _activeCoins: Array<{ node: Node; tween: Tween<Node> | null }> = [];
 
     protected onLoad(): void {
         if (!this.animationController) {
@@ -68,6 +90,10 @@ export class CharacterPathWorker extends Component {
 
         this._currentNodeIndex = 0;
         this.enterWalkingState(true);
+    }
+
+    protected onDisable(): void {
+        this.hideWorkCoins();
     }
 
     protected update(dt: number): void {
@@ -205,6 +231,7 @@ export class CharacterPathWorker extends Component {
         this._waitTarget = waitDuration;
         this._walkAnimationPlaying = false;
         this.playWorkAnimation();
+        this.showWorkCoins();
     }
 
     private enterWalkingState(force = false): void {
@@ -214,6 +241,7 @@ export class CharacterPathWorker extends Component {
 
         this._phase = WorkerPhase.Walking;
         this._walkAnimationPlaying = false;
+        this.hideWorkCoins();
     }
 
     private playWorkAnimation(): void {
@@ -263,5 +291,84 @@ export class CharacterPathWorker extends Component {
 
         Quat.fromViewUp(this._faceRotation, direction, this._normalizedFaceUp);
         this.node.setWorldRotation(this._faceRotation);
+    }
+
+    private showWorkCoins(): void {
+        if (!this.coinPrefab || this._activeCoins.length) {
+            return;
+        }
+
+        const parent = this.coinAnchor && this.coinAnchor.isValid ? this.coinAnchor : this.node;
+        if (!parent || !parent.isValid) {
+            return;
+        }
+
+        const count = Math.max(0, Math.floor(this.coinsPerWork));
+        if (count <= 0) {
+            return;
+        }
+
+        const spacing = Math.max(0, this.coinHorizontalSpacing);
+        const center = this.coinLocalOffset.clone();
+        const totalWidth = spacing * Math.max(0, count - 1);
+        const riseDuration = Math.max(0, this.coinRiseDuration);
+        const interval = Math.max(0, this.coinSpawnInterval);
+
+        for (let i = 0; i < count; i++) {
+            const coin = instantiate(this.coinPrefab);
+            parent.addChild(coin);
+            coin.setScale(1, 1, 1);
+
+            const xOffset = count === 1 ? 0 : (i * spacing - totalWidth * 0.5);
+            coin.setPosition(center.x + xOffset, 0, center.z);
+
+            const peakPos = new Vec3(center.x + xOffset, center.y, center.z);
+            const landingPos = new Vec3(center.x + xOffset, 0, center.z);
+            const delay = interval * i;
+
+            const rise = tween(coin)
+                .delay(delay)
+                .to(riseDuration, { position: peakPos }, { easing: 'quadOut' });
+
+            const fall = tween(coin)
+                .to(riseDuration, { position: landingPos }, { easing: 'quadIn' })
+                .call(() => this.recycleCoin(coin));
+
+            const sequence = rise.then(fall);
+            sequence.start();
+
+            this._activeCoins.push({ node: coin, tween: sequence });
+        }
+    }
+
+    private hideWorkCoins(): void {
+        if (!this._activeCoins.length) {
+            return;
+        }
+
+        this._activeCoins.forEach(({ node, tween: activeTween }) => {
+            if (activeTween) {
+                activeTween.stop();
+            }
+            if (node && node.isValid) {
+                node.destroy();
+            }
+        });
+        this._activeCoins.length = 0;
+    }
+
+    private recycleCoin(coin: Node): void {
+        const index = this._activeCoins.findIndex((entry) => entry.node === coin);
+        if (index !== -1) {
+            const entry = this._activeCoins[index];
+            if (entry.tween) {
+                entry.tween.stop();
+            }
+            this._activeCoins.splice(index, 1);
+        }
+
+        if (coin && coin.isValid) {
+            coin.destroy();
+        }
     }
 }

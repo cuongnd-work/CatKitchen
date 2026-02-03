@@ -976,9 +976,9 @@
     "value": {
       "__type__": "cc.Quat",
       "x": 0,
-      "y": 0,
+      "y": 0.7071067811865475,
       "z": 0,
-      "w": 1
+      "w": 0.7071067811865476
     }
   },
   {
@@ -992,7 +992,7 @@
     "value": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": 90,
       "z": 0
     }
   },
@@ -2569,9 +2569,9 @@
     "value": {
       "__type__": "cc.Quat",
       "x": 0,
-      "y": 0,
+      "y": 0.7071067811865475,
       "z": 0,
-      "w": 1
+      "w": 0.7071067811865476
     }
   },
   {
@@ -2591,7 +2591,7 @@
     "value": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": 90,
       "z": 0
     }
   },
@@ -2877,6 +2877,18 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": null,
+    "coinAnchor": null,
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 120,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 20,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "f3D11qcSxDQ7hNLYebUCPO"
   },
   {
@@ -4056,6 +4068,23 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": {
+      "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
+      "__expectedType__": "cc.Prefab"
+    },
+    "coinAnchor": {
+      "__id__": 228
+    },
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 5,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 0.5,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "09h6wHvOxMR7/x/x4xKBds"
   },
   {
@@ -4802,6 +4831,23 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": {
+      "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
+      "__expectedType__": "cc.Prefab"
+    },
+    "coinAnchor": {
+      "__id__": 291
+    },
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 5,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 0.5,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "bbGGGGLzdKMow2+6A5dfRs"
   },
   {
@@ -5550,6 +5596,18 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": null,
+    "coinAnchor": null,
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 120,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 20,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "11uwnGAQRLMpM77XVenJdb"
   },
   {
@@ -7095,9 +7153,9 @@
     "value": {
       "__type__": "cc.Quat",
       "x": 0,
-      "y": 0,
+      "y": 0.7071067811865475,
       "z": 0,
-      "w": 1
+      "w": 0.7071067811865476
     }
   },
   {
@@ -7117,7 +7175,7 @@
     "value": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": 90,
       "z": 0
     }
   },
@@ -8745,6 +8803,18 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": null,
+    "coinAnchor": null,
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 120,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 20,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "e9G1ZUdhtEgo6yVIyW2Kwp"
   },
   {
@@ -10229,6 +10299,23 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": {
+      "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
+      "__expectedType__": "cc.Prefab"
+    },
+    "coinAnchor": {
+      "__id__": 667
+    },
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 5,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 0.5,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "0dgNGCzrVDHJEb4ecKu+4R"
   },
   {
@@ -10985,6 +11072,18 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": null,
+    "coinAnchor": null,
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 120,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 20,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "9b3wsApcJFhrKP90Rouaph"
   },
   {
@@ -14692,9 +14791,9 @@
     "value": {
       "__type__": "cc.Quat",
       "x": 0,
-      "y": 0,
+      "y": 0.7071067811865475,
       "z": 0,
-      "w": 1
+      "w": 0.7071067811865476
     }
   },
   {
@@ -14708,7 +14807,7 @@
     "value": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": 90,
       "z": 0
     }
   },
@@ -16801,6 +16900,23 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": {
+      "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
+      "__expectedType__": "cc.Prefab"
+    },
+    "coinAnchor": {
+      "__id__": 1160
+    },
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 5,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 0.5,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "35IlRcxc5KML0PKQ9faRZ1"
   },
   {
@@ -18392,6 +18508,18 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": null,
+    "coinAnchor": null,
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 120,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 20,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "1dvXFzRg1OrpUSAIHAnrv1"
   },
   {
@@ -19098,6 +19226,23 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": {
+      "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
+      "__expectedType__": "cc.Prefab"
+    },
+    "coinAnchor": {
+      "__id__": 1296
+    },
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 5,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 0.5,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "8f1ESNsnNNRa5EVbIALB/d"
   },
   {
@@ -19883,6 +20028,23 @@
       "y": 1,
       "z": 0
     },
+    "coinPrefab": {
+      "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
+      "__expectedType__": "cc.Prefab"
+    },
+    "coinAnchor": {
+      "__id__": 1363
+    },
+    "coinLocalOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 5,
+      "z": 0
+    },
+    "coinsPerWork": 2,
+    "coinHorizontalSpacing": 0.5,
+    "coinRiseDuration": 0.35,
+    "coinSpawnInterval": 0.1,
     "_id": "5deseWig5Ek41iXdeyqQZD"
   },
   {
