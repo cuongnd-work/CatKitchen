@@ -1,4 +1,5 @@
 import { _decorator, Button, CCInteger, Component, Label, Node, Sprite, SpriteFrame, Tween, Vec3, tween, warn } from 'cc';
+import { CurrencyView } from 'db://assets/scripts/CurrencyView';
 
 const { ccclass, property } = _decorator;
 
@@ -120,6 +121,10 @@ export class ItemSelectionLoader extends Component {
             return;
         }
 
+        if (!this.tryConsumeCurrencyForSlot(slot, index)) {
+            return;
+        }
+
         let hasValidTarget = false;
 
         const immediateTarget = slot.enableOnClick;
@@ -190,6 +195,26 @@ export class ItemSelectionLoader extends Component {
                 this.resetButtonInteractivity();
             })
             .start();
+    }
+
+    private tryConsumeCurrencyForSlot(slot: ItemSlotConfig, slotIndex: number): boolean {
+        const cost = slot?.price ?? 0;
+        if (cost <= 0) {
+            return true;
+        }
+
+        const currency = CurrencyView.instance;
+        if (!currency) {
+            warn('[ItemSelectionLoader] CurrencyView instance not found.');
+            return false;
+        }
+
+        if (!currency.trySubtractCurrency(cost)) {
+            warn(`[ItemSelectionLoader] Not enough currency for slot ${slotIndex}. Cost: ${cost}`);
+            return false;
+        }
+
+        return true;
     }
 
     private stopTweens(): void {
