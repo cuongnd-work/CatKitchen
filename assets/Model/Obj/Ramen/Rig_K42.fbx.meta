@@ -5,15 +5,15 @@
   "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df",
   "files": [],
   "subMetas": {
-    "e2349": {
+    "b7142": {
       "importer": "gltf-mesh",
-      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@e2349",
+      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@b7142",
       "displayName": "",
-      "id": "e2349",
-      "name": "Mesh.mesh",
+      "id": "b7142",
+      "name": "Mesh.002.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 212
+        "triangleCount": 105
       },
       "ver": "1.1.1",
       "imported": true,
@@ -23,15 +23,15 @@
       ],
       "subMetas": {}
     },
-    "80c75": {
+    "b05e6": {
       "importer": "gltf-mesh",
-      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@80c75",
+      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@b05e6",
       "displayName": "",
-      "id": "80c75",
-      "name": "Mesh.001.mesh",
+      "id": "b05e6",
+      "name": "Mesh.003.mesh",
       "userData": {
         "gltfIndex": 1,
-        "triangleCount": 1491
+        "triangleCount": 744
       },
       "ver": "1.1.1",
       "imported": true,
@@ -127,12 +127,12 @@
       ],
       "subMetas": {}
     },
-    "ce6dd": {
+    "6e84a": {
       "importer": "gltf-material",
-      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@ce6dd",
+      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@6e84a",
       "displayName": "",
-      "id": "ce6dd",
-      "name": "CustomColor-0.material",
+      "id": "6e84a",
+      "name": "CustomColor.001-0.material",
       "userData": {
         "gltfIndex": 0
       },
@@ -143,12 +143,12 @@
       ],
       "subMetas": {}
     },
-    "28f57": {
+    "eff6f": {
       "importer": "gltf-material",
-      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@28f57",
+      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@eff6f",
       "displayName": "",
-      "id": "28f57",
-      "name": "streetFood-1.material",
+      "id": "eff6f",
+      "name": "streetFood.002-1.material",
       "userData": {
         "gltfIndex": 1
       },
@@ -159,12 +159,12 @@
       ],
       "subMetas": {}
     },
-    "67d30": {
+    "872b4": {
       "importer": "gltf-material",
-      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@67d30",
+      "uuid": "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@872b4",
       "displayName": "",
-      "id": "67d30",
-      "name": "streetFood-2.material",
+      "id": "872b4",
+      "name": "streetFood.002-2.material",
       "userData": {
         "gltfIndex": 2
       },
@@ -226,8 +226,8 @@
     },
     "assetFinder": {
       "meshes": [
-        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@e2349",
-        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@80c75"
+        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@b7142",
+        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@b05e6"
       ],
       "skeletons": [],
       "textures": [
@@ -235,9 +235,9 @@
         "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@05da8"
       ],
       "materials": [
-        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@ce6dd",
-        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@28f57",
-        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@67d30"
+        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@6e84a",
+        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@eff6f",
+        "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@872b4"
       ],
       "scenes": [
         "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@3d391"
@@ -313,6 +313,108 @@
         ]
       },
       "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@ce6dd": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "431e5f0f-0343-40bf-88d4-e4468eb58d94",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "albedoMap": {
+              "__uuid__": "e3ffff82-8a9b-4227-96a2-a863f71595b7@6c48a",
+              "__expectedType__": "cc.Texture2D"
+            }
+          }
+        ]
+      },
+      "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@eff6f": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "431e5f0f-0343-40bf-88d4-e4468eb58d94",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "albedoMap": {
+              "__uuid__": "ac9d1ab0-4dfc-478a-8bc2-c98fcd05bcd0@6c48a",
+              "__expectedType__": "cc.Texture2D"
+            }
+          }
+        ]
+      },
+      "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@872b4": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "431e5f0f-0343-40bf-88d4-e4468eb58d94",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "albedoMap": {
+              "__uuid__": "ac9d1ab0-4dfc-478a-8bc2-c98fcd05bcd0@6c48a",
+              "__expectedType__": "cc.Texture2D"
+            }
+          }
+        ]
+      },
+      "36eebfbd-45d5-4edb-8ee0-dfaf939e46df@6e84a": {
         "__type__": "cc.Material",
         "_name": "",
         "_objFlags": 0,
