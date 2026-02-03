@@ -1,0 +1,126 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "5e797a43-2b68-4e14-8955-bbcc27fdec19",
+  "files": [],
+  "subMetas": {
+    "e2349": {
+      "importer": "gltf-mesh",
+      "uuid": "5e797a43-2b68-4e14-8955-bbcc27fdec19@e2349",
+      "displayName": "",
+      "id": "e2349",
+      "name": "Mesh.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 312
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "7d6ab": {
+      "importer": "texture",
+      "uuid": "5e797a43-2b68-4e14-8955-bbcc27fdec19@7d6ab",
+      "displayName": "",
+      "id": "7d6ab",
+      "name": "base_color_texture.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/KitchenGradient.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "ce83f": {
+      "importer": "gltf-material",
+      "uuid": "5e797a43-2b68-4e14-8955-bbcc27fdec19@ce83f",
+      "displayName": "",
+      "id": "ce83f",
+      "name": "KichenGradiant.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "78af6": {
+      "importer": "gltf-scene",
+      "uuid": "5e797a43-2b68-4e14-8955-bbcc27fdec19@78af6",
+      "displayName": "",
+      "id": "78af6",
+      "name": "F1.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/3D/textures/KitchenGradient.png"
+      }
+    ],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "5e797a43-2b68-4e14-8955-bbcc27fdec19@e2349"
+      ],
+      "skeletons": [],
+      "textures": [
+        "5e797a43-2b68-4e14-8955-bbcc27fdec19@7d6ab"
+      ],
+      "materials": [
+        "5e797a43-2b68-4e14-8955-bbcc27fdec19@ce83f"
+      ],
+      "scenes": [
+        "5e797a43-2b68-4e14-8955-bbcc27fdec19@78af6"
+      ]
+    }
+  }
+}

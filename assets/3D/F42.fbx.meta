@@ -1,0 +1,171 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4",
+  "files": [],
+  "subMetas": {
+    "51464": {
+      "importer": "gltf-material",
+      "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@51464",
+      "displayName": "",
+      "id": "51464",
+      "name": "streetFood.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "ed341": {
+      "importer": "gltf-mesh",
+      "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@ed341",
+      "displayName": "",
+      "id": "ed341",
+      "name": "Sphere.001.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 2439
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "0a1ef": {
+      "importer": "texture",
+      "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@0a1ef",
+      "displayName": "",
+      "id": "0a1ef",
+      "name": "base_color_texture-0.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/StreetFood.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "05da8": {
+      "importer": "texture",
+      "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@05da8",
+      "displayName": "",
+      "id": "05da8",
+      "name": "base_color_texture-1.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/3D/textures/KitchenGradient.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "ce83f": {
+      "importer": "gltf-material",
+      "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@ce83f",
+      "displayName": "",
+      "id": "ce83f",
+      "name": "KichenGradiant.material",
+      "userData": {
+        "gltfIndex": 1
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "abe03": {
+      "importer": "gltf-scene",
+      "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@abe03",
+      "displayName": "",
+      "id": "abe03",
+      "name": "F42.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/3D/textures/StreetFood.png"
+      },
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/3D/textures/KitchenGradient.png"
+      }
+    ],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@ed341"
+      ],
+      "skeletons": [],
+      "textures": [
+        "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@0a1ef",
+        "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@05da8"
+      ],
+      "materials": [
+        "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@51464",
+        "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@ce83f"
+      ],
+      "scenes": [
+        "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@abe03"
+      ]
+    }
+  }
+}
