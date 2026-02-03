@@ -26,7 +26,7 @@
             "_value": true
           },
           "meshopt": {
-            "_value": false
+            "_value": true
           },
           "2d": {
             "_value": true
@@ -41,7 +41,7 @@
             "_value": false
           },
           "graphics": {
-            "_value": true
+            "_value": false
           },
           "ui-skew": {
             "_value": false
@@ -50,7 +50,7 @@
             "_value": false
           },
           "ui": {
-            "_value": false
+            "_value": true
           },
           "particle": {
             "_value": false
@@ -199,9 +199,10 @@
           "base",
           "custom-pipeline",
           "gfx-webgl",
-          "graphics",
+          "meshopt",
           "skeletal-animation",
-          "tween"
+          "tween",
+          "ui"
         ],
         "noDeprecatedFeatures": {
           "value": false,
