@@ -21,15 +21,15 @@
       ],
       "subMetas": {}
     },
-    "9e253": {
+    "f37c9": {
       "importer": "gltf-mesh",
-      "uuid": "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@9e253",
+      "uuid": "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@f37c9",
       "displayName": "",
-      "id": "9e253",
-      "name": "F11.mesh",
+      "id": "f37c9",
+      "name": "F11.001.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 655
+        "triangleCount": 326
       },
       "ver": "1.1.1",
       "imported": true,
@@ -109,7 +109,7 @@
     },
     "assetFinder": {
       "meshes": [
-        "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@9e253"
+        "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@f37c9"
       ],
       "skeletons": [],
       "textures": [

@@ -21,15 +21,15 @@
       ],
       "subMetas": {}
     },
-    "ed341": {
+    "597d3": {
       "importer": "gltf-mesh",
-      "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@ed341",
+      "uuid": "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@597d3",
       "displayName": "",
-      "id": "ed341",
-      "name": "Sphere.001.mesh",
+      "id": "597d3",
+      "name": "Sphere.002.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 2439
+        "triangleCount": 1218
       },
       "ver": "1.1.1",
       "imported": true,
@@ -152,7 +152,7 @@
     },
     "assetFinder": {
       "meshes": [
-        "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@ed341"
+        "6fd095ab-06d8-4fbe-be44-8b84cc9688a4@597d3"
       ],
       "skeletons": [],
       "textures": [
