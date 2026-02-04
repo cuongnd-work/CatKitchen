@@ -63,6 +63,9 @@ export class CharacterPathWorker extends Component {
     @property({ tooltip: 'World-space offset applied on top of the drop marker position when the prefab is released.' })
     public finalSegmentDropOffset: Vec3 = new Vec3();
 
+    @property({ tooltip: 'Seconds to wait after the final segment enters the drop container before it gets recycled.', min: 0 })
+    public finalSegmentRecycleDelay = 0.3;
+
     @property({ type: CharacterPathWorker, tooltip: 'Worker whose drop container will be recycled once this worker reaches waypoint 0 (defaults to this worker).' })
     public firstWaypointRecycleWorker: CharacterPathWorker | null = null;
 
@@ -286,6 +289,7 @@ export class CharacterPathWorker extends Component {
         }
 
         this.positionCarriedFinalSegmentAtDrop(carried);
+        this.recycleDroppedFinalSegmentNode(carried);
         this._carriedFinalSegmentNode = null;
     }
 
@@ -375,9 +379,11 @@ export class CharacterPathWorker extends Component {
             target = container.children.find((child) => child && child.isValid) ?? null;
         }
 
-        if (target) {
-            target.destroy();
+        if (!target) {
+            return;
         }
+
+        this.scheduleFinalSegmentNodeRecycle(target, sourceWorker, true);
     }
 
     private disposeCarriedFinalSegmentNode(): void {
@@ -385,6 +391,30 @@ export class CharacterPathWorker extends Component {
             this._carriedFinalSegmentNode.destroy();
         }
         this._carriedFinalSegmentNode = null;
+    }
+
+    private recycleDroppedFinalSegmentNode(nodeToRecycle: Node): void {
+        this.scheduleFinalSegmentNodeRecycle(nodeToRecycle, this, true);
+    }
+
+    private scheduleFinalSegmentNodeRecycle(nodeToRecycle: Node, host: CharacterPathWorker, hideImmediately = false): void {
+        if (hideImmediately && nodeToRecycle && nodeToRecycle.isValid) {
+            nodeToRecycle.active = false;
+        }
+
+        const recycleDelay = Math.max(0, host.finalSegmentRecycleDelay ?? 0);
+        if (recycleDelay <= 0) {
+            if (nodeToRecycle && nodeToRecycle.isValid) {
+                nodeToRecycle.destroy();
+            }
+            return;
+        }
+
+        host.scheduleOnce(() => {
+            if (nodeToRecycle && nodeToRecycle.isValid) {
+                nodeToRecycle.destroy();
+            }
+        }, recycleDelay);
     }
 
     private getWorkDurationForIndex(index: number): number {
