@@ -5,31 +5,15 @@
   "uuid": "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c",
   "files": [],
   "subMetas": {
-    "51464": {
-      "importer": "gltf-material",
-      "uuid": "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@51464",
-      "displayName": "",
-      "id": "51464",
-      "name": "streetFood.material",
-      "userData": {
-        "gltfIndex": 0
-      },
-      "ver": "1.0.14",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "f37c9": {
+    "c581d": {
       "importer": "gltf-mesh",
-      "uuid": "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@f37c9",
+      "uuid": "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@c581d",
       "displayName": "",
-      "id": "f37c9",
-      "name": "F11.001.mesh",
+      "id": "c581d",
+      "name": "F11.002.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 326
+        "triangleCount": 163
       },
       "ver": "1.1.1",
       "imported": true,
@@ -56,6 +40,22 @@
         "imageUuidOrDatabaseUri": "db://assets/3D/textures/StreetFood.png"
       },
       "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "4b932": {
+      "importer": "gltf-material",
+      "uuid": "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@4b932",
+      "displayName": "",
+      "id": "4b932",
+      "name": "streetFood.001.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
       "imported": true,
       "files": [
         ".json"
@@ -109,14 +109,14 @@
     },
     "assetFinder": {
       "meshes": [
-        "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@f37c9"
+        "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@c581d"
       ],
       "skeletons": [],
       "textures": [
         "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@7d6ab"
       ],
       "materials": [
-        "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@51464"
+        "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@4b932"
       ],
       "scenes": [
         "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@ca602"
@@ -139,6 +139,40 @@
     "promoteSingleRootNode": true,
     "materials": {
       "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@51464": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "431e5f0f-0343-40bf-88d4-e4468eb58d94",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "albedoMap": {
+              "__uuid__": "ac9d1ab0-4dfc-478a-8bc2-c98fcd05bcd0@6c48a",
+              "__expectedType__": "cc.Texture2D"
+            }
+          }
+        ]
+      },
+      "bb00ffca-dab3-4f8d-98e1-c63fba2dc20c@4b932": {
         "__type__": "cc.Material",
         "_name": "",
         "_objFlags": 0,

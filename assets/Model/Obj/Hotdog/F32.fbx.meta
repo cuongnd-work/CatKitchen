@@ -5,15 +5,15 @@
   "uuid": "3b73d245-240b-4ce2-b689-20600416d348",
   "files": [],
   "subMetas": {
-    "ff8ed": {
+    "80c75": {
       "importer": "gltf-mesh",
-      "uuid": "3b73d245-240b-4ce2-b689-20600416d348@ff8ed",
+      "uuid": "3b73d245-240b-4ce2-b689-20600416d348@80c75",
       "displayName": "",
-      "id": "ff8ed",
-      "name": "Mesh.008.mesh",
+      "id": "80c75",
+      "name": "Mesh.001.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 836
+        "triangleCount": 333
       },
       "ver": "1.1.1",
       "imported": true,
@@ -192,7 +192,7 @@
     },
     "assetFinder": {
       "meshes": [
-        "3b73d245-240b-4ce2-b689-20600416d348@ff8ed"
+        "3b73d245-240b-4ce2-b689-20600416d348@80c75"
       ],
       "skeletons": [],
       "textures": [
