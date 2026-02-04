@@ -4425,10 +4425,9 @@
     "moveSpeed": 3,
     "defaultWorkDuration": 1.5,
     "workDurations": [
-      2,
-      2,
-      2,
-      2
+      0.3,
+      0.3,
+      1.5
     ],
     "workAnimationPool": "doDoing",
     "walkAnimationMethod": "doWalk",
@@ -8675,10 +8674,9 @@
     "moveSpeed": 3,
     "defaultWorkDuration": 1.5,
     "workDurations": [
-      2,
-      2,
-      2,
-      2
+      0.3,
+      0.3,
+      1.5
     ],
     "workAnimationPool": "doDoing",
     "walkAnimationMethod": "doWalk",
@@ -11099,7 +11097,7 @@
         "__expectedType__": "cc.Material"
       },
       {
-        "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@b4351",
+        "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@2665e",
         "__expectedType__": "cc.Material"
       },
       {
@@ -11124,7 +11122,7 @@
       "__id__": 536
     },
     "_mesh": {
-      "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@39452",
+      "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@a62fe",
       "__expectedType__": "cc.Mesh"
     },
     "_shadowCastingMode": 0,
@@ -12865,9 +12863,9 @@
     "moveSpeed": 3,
     "defaultWorkDuration": 1.5,
     "workDurations": [
-      1.5,
-      1.5,
-      1.5
+      0.3,
+      0.3,
+      1
     ],
     "workAnimationPool": "doDoing",
     "walkAnimationMethod": "doWalk",
@@ -15214,7 +15212,7 @@
         "__expectedType__": "cc.Material"
       },
       {
-        "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@b4351",
+        "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@2665e",
         "__expectedType__": "cc.Material"
       },
       {
@@ -15239,7 +15237,7 @@
       "__id__": 735
     },
     "_mesh": {
-      "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@39452",
+      "__uuid__": "1ac41950-d1a9-4121-933f-cfe5084e8b8f@a62fe",
       "__expectedType__": "cc.Mesh"
     },
     "_shadowCastingMode": 0,
@@ -17025,8 +17023,8 @@
     "moveSpeed": 3,
     "defaultWorkDuration": 1.5,
     "workDurations": [
-      1.5,
-      1.5,
+      0.3,
+      0.3,
       1.5
     ],
     "workAnimationPool": "doDoing",
