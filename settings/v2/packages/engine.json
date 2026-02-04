@@ -100,7 +100,7 @@
             "_value": false
           },
           "primitive": {
-            "_value": false
+            "_value": true
           },
           "profiler": {
             "_value": false
@@ -200,6 +200,7 @@
           "custom-pipeline",
           "gfx-webgl",
           "meshopt",
+          "primitive",
           "skeletal-animation",
           "tween",
           "ui"
