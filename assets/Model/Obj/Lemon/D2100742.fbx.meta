@@ -62,6 +62,24 @@
       ],
       "subMetas": {}
     },
+    "41ac8": {
+      "importer": "gltf-mesh",
+      "uuid": "03c7de56-6b32-4ba9-907f-883f2263c93d@41ac8",
+      "displayName": "",
+      "id": "41ac8",
+      "name": "Cube.001.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 626
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
     "5e49e": {
       "importer": "gltf-embeded-image",
       "uuid": "03c7de56-6b32-4ba9-907f-883f2263c93d@5e49e",
@@ -381,7 +399,7 @@
     },
     "assetFinder": {
       "meshes": [
-        "03c7de56-6b32-4ba9-907f-883f2263c93d@f051b"
+        "03c7de56-6b32-4ba9-907f-883f2263c93d@41ac8"
       ],
       "skeletons": [],
       "textures": [
