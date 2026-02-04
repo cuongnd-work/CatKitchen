@@ -33,6 +33,9 @@ export class CharacterPathWorker extends Component {
     @property({ tooltip: 'CatAnimationController method used while the cat walks.' })
     public walkAnimationMethod = 'doWalk';
 
+    @property({ tooltip: 'CatAnimationController method used while carrying the final segment (optional).' })
+    public finalSegmentCarryAnimationMethod = 'doBedo';
+
     @property({ tooltip: 'Optional override. Defaults to CatAnimationController on the same node.' })
     public animationController: CatAnimationController | null = null;
 
@@ -41,6 +44,27 @@ export class CharacterPathWorker extends Component {
 
     @property({ tooltip: 'Up axis used while rotating to face the path (ignored when faceMovement is false).' })
     public faceUp: Vec3 = new Vec3(0, 1, 0);
+
+    @property({ type: Prefab, tooltip: 'Prefab spawned while moving from the second-to-last waypoint to the last waypoint.' })
+    public finalSegmentPrefab: Prefab | null = null;
+
+    @property({ type: Node, tooltip: 'Optional parent used while carrying the spawned prefab (defaults to this node).' })
+    public finalSegmentCarryAnchor: Node | null = null;
+
+    @property({ tooltip: 'Local offset applied to the spawned prefab relative to the carry anchor.' })
+    public finalSegmentCarryOffset: Vec3 = new Vec3();
+
+    @property({ type: Node, tooltip: 'Marker node whose world position is used when dropping the carried prefab at the final waypoint.' })
+    public finalSegmentDropMarker: Node | null = null;
+
+    @property({ type: Node, tooltip: 'Parent assigned to the prefab after it has been dropped (defaults to the drop marker parent or this node parent).' })
+    public finalSegmentDropContainer: Node | null = null;
+
+    @property({ tooltip: 'World-space offset applied on top of the drop marker position when the prefab is released.' })
+    public finalSegmentDropOffset: Vec3 = new Vec3();
+
+    @property({ type: CharacterPathWorker, tooltip: 'Worker whose drop container will be recycled once this worker reaches waypoint 0 (defaults to this worker).' })
+    public firstWaypointRecycleWorker: CharacterPathWorker | null = null;
 
     @property({ type: Prefab, tooltip: 'Coin prefab shown above the character while it is working.' })
     public coinPrefab: Prefab | null = null;
@@ -75,6 +99,10 @@ export class CharacterPathWorker extends Component {
     private readonly _arrivalThreshold = 0.01;
     private _walkAnimationPlaying = false;
     private _activeCoins: Array<{ node: Node; tween: Tween<Node> | null }> = [];
+    private _finalSegmentSpawnedForLap = false;
+    private _carriedFinalSegmentNode: Node | null = null;
+    private _finalSegmentDropWorldPos = new Vec3();
+    private _consumedFirstWaypoint = false;
 
     protected onLoad(): void {
         if (!this.animationController) {
@@ -89,11 +117,13 @@ export class CharacterPathWorker extends Component {
         }
 
         this._currentNodeIndex = 0;
+        this._consumedFirstWaypoint = false;
         this.enterWalkingState(true);
     }
 
     protected onDisable(): void {
         this.hideWorkCoins();
+        this.disposeCarriedFinalSegmentNode();
     }
 
     protected update(dt: number): void {
@@ -109,6 +139,7 @@ export class CharacterPathWorker extends Component {
     }
 
     private updateWalking(dt: number): void {
+        this.trySpawnFinalSegmentNode();
         const waypoint = this.pathNodes[this._currentNodeIndex];
         if (!waypoint || !waypoint.isValid) {
             warn(`[CharacterPathWorker] Missing waypoint at index ${this._currentNodeIndex}, skipping.`);
@@ -137,11 +168,25 @@ export class CharacterPathWorker extends Component {
     }
 
     private advanceToNextWaypoint(): void {
+        const previousIndex = this._currentNodeIndex;
         this._currentNodeIndex = (this._currentNodeIndex + 1) % this.pathNodes.length;
+
+        if (this.pathNodes.length > 0 && previousIndex === this.pathNodes.length - 1) {
+            this._finalSegmentSpawnedForLap = false;
+            this.disposeCarriedFinalSegmentNode();
+        }
     }
 
     private playWalkAnimation(): void {
-        this.callAnimationMethod(this.walkAnimationMethod);
+        this.callAnimationMethod(this.getActiveWalkAnimationMethod());
+    }
+
+    private getActiveWalkAnimationMethod(): string {
+        if (this.finalSegmentCarryAnimationMethod && this.isOnFinalWaypoint()) {
+            return this.finalSegmentCarryAnimationMethod;
+        }
+
+        return this.walkAnimationMethod;
     }
 
     private callAnimationMethod(methodName: string): void {
@@ -192,6 +237,156 @@ export class CharacterPathWorker extends Component {
         return result;
     }
 
+    private trySpawnFinalSegmentNode(): void {
+        if (this._finalSegmentSpawnedForLap) {
+            return;
+        }
+
+        if (!this.finalSegmentPrefab) {
+            return;
+        }
+
+        if (this.pathNodes.length < 2) {
+            return;
+        }
+
+        if (this._currentNodeIndex !== this.pathNodes.length - 1) {
+            return;
+        }
+
+        const parent = this.finalSegmentCarryAnchor && this.finalSegmentCarryAnchor.isValid
+            ? this.finalSegmentCarryAnchor
+            : this.node;
+
+        if (!parent || !parent.isValid) {
+            return;
+        }
+
+        const spawned = instantiate(this.finalSegmentPrefab);
+        parent.addChild(spawned);
+        spawned.setPosition(this.finalSegmentCarryOffset);
+        this._carriedFinalSegmentNode = spawned;
+        this._finalSegmentSpawnedForLap = true;
+        this._walkAnimationPlaying = false;
+    }
+
+    private isOnFinalWaypoint(): boolean {
+        return this.pathNodes.length > 0 && this._currentNodeIndex === this.pathNodes.length - 1;
+    }
+
+    private isOnFirstWaypoint(): boolean {
+        return this.pathNodes.length > 0 && this._currentNodeIndex === 0;
+    }
+
+    private handleFinalSegmentArrival(): void {
+        const carried = this._carriedFinalSegmentNode;
+        if (!carried || !carried.isValid) {
+            this._carriedFinalSegmentNode = null;
+            return;
+        }
+
+        this.positionCarriedFinalSegmentAtDrop(carried);
+        this._carriedFinalSegmentNode = null;
+    }
+
+    private positionCarriedFinalSegmentAtDrop(nodeToPlace: Node): void {
+        const dropParent = this.getFinalSegmentDropParent();
+        if (dropParent && dropParent.isValid && nodeToPlace.parent !== dropParent) {
+            nodeToPlace.removeFromParent();
+            dropParent.addChild(nodeToPlace);
+        }
+
+        const dropPos = this._finalSegmentDropWorldPos;
+        dropPos.set(0, 0, 0);
+
+        const marker = this.finalSegmentDropMarker;
+        if (marker && marker.isValid) {
+            marker.getWorldPosition(dropPos);
+        } else {
+            this.node.getWorldPosition(dropPos);
+        }
+
+        dropPos.x += this.finalSegmentDropOffset.x;
+        dropPos.y += this.finalSegmentDropOffset.y;
+        dropPos.z += this.finalSegmentDropOffset.z;
+
+        nodeToPlace.setWorldPosition(dropPos);
+    }
+
+    private getFinalSegmentDropParent(): Node | null {
+        if (this.finalSegmentDropContainer && this.finalSegmentDropContainer.isValid) {
+            return this.finalSegmentDropContainer;
+        }
+
+        if (this.finalSegmentDropMarker && this.finalSegmentDropMarker.isValid) {
+            const markerParent = this.finalSegmentDropMarker.parent;
+            if (markerParent && markerParent.isValid) {
+                return markerParent;
+            }
+        }
+
+        const defaultParent = this.node.parent;
+        if (defaultParent && defaultParent.isValid) {
+            return defaultParent;
+        }
+
+        return null;
+    }
+
+    private getFirstWaypointRecycleWorker(): CharacterPathWorker | null {
+        const target = this.firstWaypointRecycleWorker;
+        if (target && target.isValid) {
+            return target;
+        }
+        return this;
+    }
+
+    private recycleOneNodeFromDropContainer(): void {
+        const sourceWorker = this.getFirstWaypointRecycleWorker();
+        if (!sourceWorker) {
+            return;
+        }
+
+        const prefab = sourceWorker.finalSegmentPrefab;
+        if (!prefab) {
+            return;
+        }
+
+        const container = sourceWorker.getFinalSegmentDropParent();
+        if (!container || !container.isValid) {
+            return;
+        }
+
+        const prefabRoot = prefab.data;
+        const targetName = prefabRoot ? prefabRoot.name : '';
+
+        let target: Node | null = null;
+        for (const child of container.children) {
+            if (!child || !child.isValid) {
+                continue;
+            }
+            if (!targetName || child.name === targetName) {
+                target = child;
+                break;
+            }
+        }
+
+        if (!target) {
+            target = container.children.find((child) => child && child.isValid) ?? null;
+        }
+
+        if (target) {
+            target.destroy();
+        }
+    }
+
+    private disposeCarriedFinalSegmentNode(): void {
+        if (this._carriedFinalSegmentNode && this._carriedFinalSegmentNode.isValid) {
+            this._carriedFinalSegmentNode.destroy();
+        }
+        this._carriedFinalSegmentNode = null;
+    }
+
     private getWorkDurationForIndex(index: number): number {
         if (index >= 0 && index < this.workDurations.length) {
             const value = this.workDurations[index];
@@ -204,6 +399,15 @@ export class CharacterPathWorker extends Component {
     }
 
     private handleArrival(): void {
+        if (this.isOnFinalWaypoint()) {
+            this.handleFinalSegmentArrival();
+        }
+
+        if (!this._consumedFirstWaypoint && this.isOnFirstWaypoint()) {
+            this._consumedFirstWaypoint = true;
+            this.recycleOneNodeFromDropContainer();
+        }
+
         const waitDuration = this.getWorkDurationForIndex(this._currentNodeIndex);
         if (waitDuration <= 0) {
             this.advanceToNextWaypoint();

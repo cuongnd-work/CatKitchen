@@ -24,7 +24,7 @@ export class CatAnimationController extends Component {
     }
 
     public doBedo(){
-        this.animation.play("Take 001");
+        this.animation.play("beDo");
         if (CurrencyView.instance) {
             CurrencyView.instance.addCurrency(50);
         }
