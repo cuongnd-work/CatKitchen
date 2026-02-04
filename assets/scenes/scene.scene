@@ -193,10 +193,10 @@
     },
     "_lrot": {
       "__type__": "cc.Quat",
-      "x": 0.184219995883955,
-      "y": -0.7991935677608194,
-      "z": -0.3035851575213282,
-      "w": -0.48496256195607346
+      "x": -0.1647942100409807,
+      "y": 0.8280675930307373,
+      "z": 0.31455337080963414,
+      "w": 0.4338238197950258
     },
     "_lscale": {
       "__type__": "cc.Vec3",
@@ -209,7 +209,7 @@
     "_euler": {
       "__type__": "cc.Vec3",
       "x": -41.6,
-      "y": -242.5,
+      "y": 124.7,
       "z": 0
     },
     "_id": "c9DMICJLFO5IeO07EPon7U"
@@ -276,15 +276,15 @@
     "followSpeed": 2,
     "offset": {
       "__type__": "cc.Vec3",
-      "x": 26.4,
+      "x": 25.9,
       "y": 20.6,
-      "z": -0.9
+      "z": -3.8
     },
     "_id": "54WxwR6E5IFZc6/lWnTDY9"
   },
   {
     "__type__": "cc.Node",
-    "_name": "Target_2",
+    "_name": "Target_1",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -296,9 +296,9 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 4.594,
+      "x": -10.034,
       "y": 0,
-      "z": 14.675
+      "z": -13.038
     },
     "_lrot": {
       "__type__": "cc.Quat",
@@ -321,7 +321,7 @@
       "y": 0,
       "z": 0
     },
-    "_id": "c8fLgG51xFPqsHnyAK9tLe"
+    "_id": "30BegKrt9CbKGBP8tdWsVp"
   },
   {
     "__type__": "cc.Node",
@@ -342,10 +342,10 @@
         "__id__": 1076
       },
       {
-        "__id__": 1095
+        "__id__": 8
       },
       {
-        "__id__": 8
+        "__id__": 1095
       },
       {
         "__id__": 1096
@@ -11386,9 +11386,9 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 8.23,
+      "x": 21.021,
       "y": 0.381,
-      "z": 10.953
+      "z": -4.455
     },
     "_lrot": {
       "__type__": "cc.Quat",
@@ -20796,7 +20796,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Target_1",
+    "_name": "Target_2",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -20808,9 +20808,9 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -10.034,
+      "x": 17.385,
       "y": 0,
-      "z": -13.038
+      "z": -0.733
     },
     "_lrot": {
       "__type__": "cc.Quat",
@@ -20833,7 +20833,7 @@
       "y": 0,
       "z": 0
     },
-    "_id": "30BegKrt9CbKGBP8tdWsVp"
+    "_id": "c8fLgG51xFPqsHnyAK9tLe"
   },
   {
     "__type__": "cc.Node",
@@ -22999,13 +22999,13 @@
       "__id__": 7
     },
     "overrideTarget": {
-      "__id__": 8
+      "__id__": 1095
     },
     "overrideOffset": {
       "__type__": "cc.Vec3",
-      "x": 20.5,
-      "y": 18.6,
-      "z": -10.5
+      "x": 19.8,
+      "y": 20.6,
+      "z": -13.2
     },
     "overrideFollowSpeedEnabled": true,
     "overrideFollowSpeedValue": 2,
