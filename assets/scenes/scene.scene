@@ -3302,7 +3302,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": null,
     "coinAnchor": null,
@@ -4467,7 +4466,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": {
       "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
@@ -5122,7 +5120,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": {
       "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
@@ -5793,7 +5790,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": null,
     "coinAnchor": null,
@@ -7556,7 +7552,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": null,
     "coinAnchor": null,
@@ -8721,7 +8716,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": {
       "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
@@ -9373,7 +9367,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": {
       "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
@@ -10028,7 +10021,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": null,
     "coinAnchor": null,
@@ -11544,7 +11536,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": null,
     "coinAnchor": null,
@@ -12914,7 +12905,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": {
       "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
@@ -13611,7 +13601,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": null,
     "coinAnchor": null,
@@ -15707,7 +15696,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": null,
     "coinAnchor": null,
@@ -17077,7 +17065,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": {
       "__uuid__": "8b35d13a-77ce-498e-b34a-75dba7246d99",
@@ -17768,7 +17755,6 @@
       "y": 0,
       "z": 0
     },
-    "finalSegmentRecycleDelay": 0.3,
     "firstWaypointRecycleWorker": null,
     "coinPrefab": null,
     "coinAnchor": null,
