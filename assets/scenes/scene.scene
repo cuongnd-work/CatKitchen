@@ -18701,7 +18701,7 @@
       "z": 0
     },
     "finalSegmentPrefab": {
-      "__uuid__": "8a192582-cb90-4b25-a399-3e9f68eb7c30",
+      "__uuid__": "1671599c-d3de-4265-81d2-7a1e87189b68",
       "__expectedType__": "cc.Prefab"
     },
     "finalSegmentCarryAnchor": {
@@ -26205,7 +26205,7 @@
       "y": 126.4,
       "z": 0
     },
-    "duration": 1,
+    "duration": 1.5,
     "startDelay": 0,
     "loop": true,
     "pingPong": false,
