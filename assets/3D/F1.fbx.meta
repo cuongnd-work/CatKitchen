@@ -129,7 +129,7 @@
     },
     "meshSimplify": {
       "enable": true,
-      "targetRatio": 0.7
+      "targetRatio": 0.3
     },
     "meshCompress": {
       "enable": true,
