@@ -2,12 +2,12 @@
   "ver": "1.1.50",
   "importer": "prefab",
   "imported": true,
-  "uuid": "004d631f-83f2-45b7-a3f6-8eb34c0bbe29",
+  "uuid": "4a77d40a-fd3d-4429-baa6-262a01b54b35",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "item"
+    "syncNodeName": "ramen"
   }
 }
