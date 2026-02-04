@@ -29,7 +29,7 @@
       "id": "51464",
       "name": "streetFood.material",
       "userData": {
-        "gltfIndex": 5
+        "gltfIndex": 4
       },
       "ver": "1.0.14",
       "imported": true,
@@ -46,7 +46,7 @@
       "name": "UnnamedSkeleton-5.skeleton",
       "userData": {
         "gltfIndex": 5,
-        "jointsLength": 60
+        "jointsLength": 1
       },
       "ver": "1.0.1",
       "imported": true,
@@ -127,24 +127,6 @@
       ],
       "subMetas": {}
     },
-    "cbcd6": {
-      "importer": "gltf-mesh",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@cbcd6",
-      "displayName": "",
-      "id": "cbcd6",
-      "name": "Body.mesh",
-      "userData": {
-        "gltfIndex": 4,
-        "triangleCount": 4638
-      },
-      "ver": "1.1.1",
-      "imported": true,
-      "files": [
-        ".bin",
-        ".json"
-      ],
-      "subMetas": {}
-    },
     "f6e40": {
       "importer": "gltf-mesh",
       "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@f6e40",
@@ -152,7 +134,7 @@
       "id": "f6e40",
       "name": "B10.mesh",
       "userData": {
-        "gltfIndex": 5,
+        "gltfIndex": 4,
         "triangleCount": 1468
       },
       "ver": "1.1.1",
@@ -170,26 +152,8 @@
       "id": "76c90",
       "name": "H20.mesh",
       "userData": {
-        "gltfIndex": 6,
+        "gltfIndex": 5,
         "triangleCount": 295
-      },
-      "ver": "1.1.1",
-      "imported": true,
-      "files": [
-        ".bin",
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "040fb": {
-      "importer": "gltf-mesh",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@040fb",
-      "displayName": "",
-      "id": "040fb",
-      "name": "Head.mesh",
-      "userData": {
-        "gltfIndex": 7,
-        "triangleCount": 1234
       },
       "ver": "1.1.1",
       "imported": true,
@@ -206,8 +170,44 @@
       "id": "5eac3",
       "name": "Eyes_brows.mesh",
       "userData": {
-        "gltfIndex": 8,
+        "gltfIndex": 6,
         "triangleCount": 20
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "cbcd6": {
+      "importer": "gltf-mesh",
+      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@cbcd6",
+      "displayName": "",
+      "id": "cbcd6",
+      "name": "Body.mesh",
+      "userData": {
+        "gltfIndex": 7,
+        "triangleCount": 2220
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "040fb": {
+      "importer": "gltf-mesh",
+      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@040fb",
+      "displayName": "",
+      "id": "040fb",
+      "name": "Head.mesh",
+      "userData": {
+        "gltfIndex": 8,
+        "triangleCount": 356
       },
       "ver": "1.1.1",
       "imported": true,
@@ -276,7 +276,7 @@
       "name": "UnnamedSkeleton-4.skeleton",
       "userData": {
         "gltfIndex": 4,
-        "jointsLength": 33
+        "jointsLength": 60
       },
       "ver": "1.0.1",
       "imported": true,
@@ -293,7 +293,7 @@
       "name": "UnnamedSkeleton-6.skeleton",
       "userData": {
         "gltfIndex": 6,
-        "jointsLength": 1
+        "jointsLength": 3
       },
       "ver": "1.0.1",
       "imported": true,
@@ -310,7 +310,7 @@
       "name": "UnnamedSkeleton-7.skeleton",
       "userData": {
         "gltfIndex": 7,
-        "jointsLength": 1
+        "jointsLength": 56
       },
       "ver": "1.0.1",
       "imported": true,
@@ -327,7 +327,7 @@
       "name": "UnnamedSkeleton-8.skeleton",
       "userData": {
         "gltfIndex": 8,
-        "jointsLength": 3
+        "jointsLength": 41
       },
       "ver": "1.0.1",
       "imported": true,
@@ -572,6 +572,22 @@
       ],
       "subMetas": {}
     },
+    "79aa0": {
+      "importer": "gltf-material",
+      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@79aa0",
+      "displayName": "",
+      "id": "79aa0",
+      "name": "CharacterGradient1.material",
+      "userData": {
+        "gltfIndex": 5
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
     "2b2c5": {
       "importer": "gltf-material",
       "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@2b2c5",
@@ -579,7 +595,7 @@
       "id": "2b2c5",
       "name": "C001.material",
       "userData": {
-        "gltfIndex": 4
+        "gltfIndex": 6
       },
       "ver": "1.0.14",
       "imported": true,
@@ -595,7 +611,7 @@
       "id": "648fa",
       "name": "CatWhisker.material",
       "userData": {
-        "gltfIndex": 6
+        "gltfIndex": 7
       },
       "ver": "1.0.14",
       "imported": true,
@@ -610,22 +626,6 @@
       "displayName": "",
       "id": "c917c",
       "name": "CatEar.material",
-      "userData": {
-        "gltfIndex": 7
-      },
-      "ver": "1.0.14",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
-    },
-    "79aa0": {
-      "importer": "gltf-material",
-      "uuid": "d5e883be-78a8-4439-99ab-9c71aa55ec0a@79aa0",
-      "displayName": "",
-      "id": "79aa0",
-      "name": "CharacterGradient1.material",
       "userData": {
         "gltfIndex": 8
       },
@@ -699,11 +699,11 @@
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@29a61",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@5de89",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@41afc",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@cbcd6",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@f6e40",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@76c90",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@040fb",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@5eac3"
+        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@5eac3",
+        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@cbcd6",
+        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@040fb"
       ],
       "skeletons": [
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@30732",
@@ -727,11 +727,11 @@
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@999b1",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@4eb46",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@7d614",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@2b2c5",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@51464",
+        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@79aa0",
+        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@2b2c5",
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@648fa",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@c917c",
-        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@79aa0"
+        "d5e883be-78a8-4439-99ab-9c71aa55ec0a@c917c"
       ],
       "scenes": [
         "d5e883be-78a8-4439-99ab-9c71aa55ec0a@73d44"
@@ -750,6 +750,76 @@
       "enable": true,
       "compress": true
     },
-    "promoteSingleRootNode": true
+    "promoteSingleRootNode": true,
+    "materials": {
+      "d5e883be-78a8-4439-99ab-9c71aa55ec0a@51464": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "431e5f0f-0343-40bf-88d4-e4468eb58d94",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "albedoMap": {
+              "__uuid__": "ac9d1ab0-4dfc-478a-8bc2-c98fcd05bcd0@6c48a",
+              "__expectedType__": "cc.Texture2D"
+            }
+          }
+        ]
+      },
+      "d5e883be-78a8-4439-99ab-9c71aa55ec0a@999b1": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "431e5f0f-0343-40bf-88d4-e4468eb58d94",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "albedoMap": {
+              "__uuid__": "ac9d1ab0-4dfc-478a-8bc2-c98fcd05bcd0@6c48a",
+              "__expectedType__": "cc.Texture2D"
+            }
+          }
+        ]
+      }
+    }
   }
 }
