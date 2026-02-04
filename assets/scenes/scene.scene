@@ -2471,7 +2471,7 @@
       "__id__": 66
     },
     "_mesh": {
-      "__uuid__": "50cf4cc0-b409-4402-98bc-e6499b0631b9@a62fe",
+      "__uuid__": "50cf4cc0-b409-4402-98bc-e6499b0631b9@40b15",
       "__expectedType__": "cc.Mesh"
     },
     "_shadowCastingMode": 0,
@@ -6867,7 +6867,7 @@
         "__id__": 356
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 359
@@ -7326,7 +7326,7 @@
       "__type__": "cc.Vec3",
       "x": 0,
       "y": 0,
-      "z": 0
+      "z": -0.101
     },
     "_lrot": {
       "__type__": "cc.Quat",
@@ -7416,7 +7416,7 @@
       "__id__": 349
     },
     "_mesh": {
-      "__uuid__": "50cf4cc0-b409-4402-98bc-e6499b0631b9@a62fe",
+      "__uuid__": "50cf4cc0-b409-4402-98bc-e6499b0631b9@40b15",
       "__expectedType__": "cc.Mesh"
     },
     "_shadowCastingMode": 0,
