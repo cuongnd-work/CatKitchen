@@ -227,6 +227,8 @@ export class ItemSellTrigger extends Component {
     private _customerRescanTimer = 0;
     private _isDeliveringToCustomer = false;
     private _customerItem: Node | null = null;
+    private _currentCustomerNode: Node | null = null;
+    private _currentCustomerManager: CustomersQueueManager | null = null;
 
     protected onLoad (): void {
         this.rebuildSellerAnchors();
@@ -824,6 +826,8 @@ export class ItemSellTrigger extends Component {
         if (!accepted) {
             this.stageSoldItem(item, true, false);
             this._customerItem = null;
+            this._currentCustomerNode = null;
+            this._currentCustomerManager = null;
             this._isDeliveringToCustomer = false;
             this._customerRescanTimer = 0;
             this.tryServeCustomer();
@@ -832,8 +836,12 @@ export class ItemSellTrigger extends Component {
 
         this.releaseSoldSlot(item);
 
+        let activeCustomerNode: Node | null = customerNode;
+        let activeCustomerManager: CustomersQueueManager | null = manager;
         if (this.completeCustomerOnDeliveryStart) {
             manager.completeServingCustomer(customerNode);
+            activeCustomerNode = null;
+            activeCustomerManager = null;
         }
 
         this.computeCustomerTargetPosition(this._worldTarget, customerNode, popup);
@@ -845,6 +853,8 @@ export class ItemSellTrigger extends Component {
 
         this._isDeliveringToCustomer = true;
         this._customerItem = item;
+        this._currentCustomerNode = activeCustomerNode;
+        this._currentCustomerManager = activeCustomerManager;
 
         tween(item)
             .to(
@@ -874,12 +884,18 @@ export class ItemSellTrigger extends Component {
 
         this.spawnMoneyReward();
 
+        if (!soldOut && customerNode && customerNode.isValid) {
+            manager.finishServingCustomer(customerNode);
+        }
+
         if (soldOut && customerNode && customerNode.isValid) {
             manager.completeServingCustomer(customerNode);
         }
 
         this.recycleSoldItem(item);
         this._customerItem = null;
+        this._currentCustomerNode = null;
+        this._currentCustomerManager = null;
         this._isDeliveringToCustomer = false;
         this._customerRescanTimer = 0;
         this.tryServeCustomer();
@@ -1357,14 +1373,26 @@ export class ItemSellTrigger extends Component {
     }
 
     private stopCustomerDelivery (): void {
+        const customerNode = this._currentCustomerNode;
+        const manager = this._currentCustomerManager;
+        this._currentCustomerNode = null;
+        this._currentCustomerManager = null;
+
         if (!this._customerItem) {
             this._isDeliveringToCustomer = false;
+            if (manager && customerNode && customerNode.isValid) {
+                manager.finishServingCustomer(customerNode);
+            }
             return;
         }
 
         const item = this._customerItem;
         this._customerItem = null;
         this._isDeliveringToCustomer = false;
+
+        if (manager && customerNode && customerNode.isValid) {
+            manager.finishServingCustomer(customerNode);
+        }
 
         if (!item || !item.isValid) {
             return;
