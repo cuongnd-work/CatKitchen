@@ -1,0 +1,1114 @@
+{
+  "configurations": [
+    {
+      "id": "b847fdd4-7172-495e-842c-4b7888c2aab6",
+      "name": "默认配置",
+      "description": "自动创建的默认工具配置",
+      "tools": [
+        {
+          "category": "scene",
+          "name": "get_current_scene",
+          "enabled": true,
+          "description": "Get current scene information",
+          "displayDescription": "현재 씬 정보 조회"
+        },
+        {
+          "category": "scene",
+          "name": "get_scene_list",
+          "enabled": true,
+          "description": "Get all scenes in the project",
+          "displayDescription": "프로젝트의 모든 씬 조회"
+        },
+        {
+          "category": "scene",
+          "name": "open_scene",
+          "enabled": true,
+          "description": "Open a scene by path",
+          "displayDescription": "경로로 씬 열기"
+        },
+        {
+          "category": "scene",
+          "name": "save_scene",
+          "enabled": true,
+          "description": "Save current scene",
+          "displayDescription": "현재 씬 저장"
+        },
+        {
+          "category": "scene",
+          "name": "create_scene",
+          "enabled": true,
+          "description": "Create a new scene asset",
+          "displayDescription": "새 씬 에셋 생성"
+        },
+        {
+          "category": "scene",
+          "name": "save_scene_as",
+          "enabled": true,
+          "description": "Save scene as new file",
+          "displayDescription": "씬을 새 파일로 저장"
+        },
+        {
+          "category": "scene",
+          "name": "close_scene",
+          "enabled": true,
+          "description": "Close current scene",
+          "displayDescription": "현재 씬 닫기"
+        },
+        {
+          "category": "scene",
+          "name": "get_scene_hierarchy",
+          "enabled": true,
+          "description": "Get the complete hierarchy of current scene",
+          "displayDescription": "현재 씬의 전체 계층구조 조회"
+        },
+        {
+          "category": "node",
+          "name": "create_node",
+          "enabled": true,
+          "description": "Create a new node in the scene. Supports creating empty nodes, nodes with components, or instantiating from assets (prefabs, etc.). IMPORTANT: You should always provide parentUuid to specify where to create the node.",
+          "displayDescription": "씬에 새 노드 생성"
+        },
+        {
+          "category": "node",
+          "name": "get_node_info",
+          "enabled": true,
+          "description": "Get node information by UUID",
+          "displayDescription": "UUID로 노드 정보 조회"
+        },
+        {
+          "category": "node",
+          "name": "find_nodes",
+          "enabled": true,
+          "description": "Find nodes by name pattern",
+          "displayDescription": "이름 패턴으로 노드 검색"
+        },
+        {
+          "category": "node",
+          "name": "find_node_by_name",
+          "enabled": true,
+          "description": "Find first node by exact name",
+          "displayDescription": "정확한 이름으로 첫 번째 노드 검색"
+        },
+        {
+          "category": "node",
+          "name": "get_all_nodes",
+          "enabled": true,
+          "description": "Get all nodes in the scene with their UUIDs",
+          "displayDescription": "씬의 모든 노드 조회"
+        },
+        {
+          "category": "node",
+          "name": "set_node_property",
+          "enabled": true,
+          "description": "Set node property value (prefer using set_node_transform for active/layer/mobility/position/rotation/scale)",
+          "displayDescription": "노드 속성값 설정"
+        },
+        {
+          "category": "node",
+          "name": "set_node_transform",
+          "enabled": true,
+          "description": "Set node transform properties (position, rotation, scale) with unified interface. Automatically handles 2D/3D node differences.",
+          "displayDescription": "노드 트랜스폼 설정"
+        },
+        {
+          "category": "node",
+          "name": "delete_node",
+          "enabled": true,
+          "description": "Delete a node from scene",
+          "displayDescription": "씬에서 노드 삭제"
+        },
+        {
+          "category": "node",
+          "name": "move_node",
+          "enabled": true,
+          "description": "Move node to new parent",
+          "displayDescription": "노드를 새 부모로 이동"
+        },
+        {
+          "category": "node",
+          "name": "duplicate_node",
+          "enabled": true,
+          "description": "Duplicate a node",
+          "displayDescription": "노드 복제"
+        },
+        {
+          "category": "node",
+          "name": "detect_node_type",
+          "enabled": true,
+          "description": "Detect if a node is 2D or 3D based on its components and properties",
+          "displayDescription": "노드 타입(2D/3D) 감지"
+        },
+        {
+          "category": "component",
+          "name": "add_component",
+          "enabled": true,
+          "description": "Add a component to a specific node. IMPORTANT: You must provide the nodeUuid parameter to specify which node to add the component to.",
+          "displayDescription": "특정 노드에 컴포넌트 추가"
+        },
+        {
+          "category": "component",
+          "name": "remove_component",
+          "enabled": true,
+          "description": "Remove a component from a node. componentType must be the component's classId (cid, i.e. the type field from getComponents), not the script name or class name. Use getComponents to get the correct cid.",
+          "displayDescription": "노드에서 컴포넌트 제거"
+        },
+        {
+          "category": "component",
+          "name": "get_components",
+          "enabled": true,
+          "description": "Get all components of a node",
+          "displayDescription": "노드의 모든 컴포넌트 조회"
+        },
+        {
+          "category": "component",
+          "name": "get_component_info",
+          "enabled": true,
+          "description": "Get specific component information",
+          "displayDescription": "특정 컴포넌트 정보 조회"
+        },
+        {
+          "category": "component",
+          "name": "set_component_property",
+          "enabled": true,
+          "description": "Set component property values for UI components or custom script components. Supports setting properties of built-in UI components (e.g., cc.Label, cc.Sprite) and custom script components. Note: For node basic properties (name, active, layer, etc.), use set_node_property. For node transform properties (position, rotation, scale, etc.), use set_node_transform.",
+          "displayDescription": "컴포넌트 속성 설정"
+        },
+        {
+          "category": "component",
+          "name": "attach_script",
+          "enabled": true,
+          "description": "Attach a script component to a node",
+          "displayDescription": "노드에 스크립트 첨부"
+        },
+        {
+          "category": "component",
+          "name": "get_available_components",
+          "enabled": true,
+          "description": "Get list of available component types",
+          "displayDescription": "사용 가능한 컴포넌트 목록 조회"
+        },
+        {
+          "category": "prefab",
+          "name": "get_prefab_list",
+          "enabled": true,
+          "description": "Get all prefabs in the project",
+          "displayDescription": "프로젝트의 모든 프리팹 조회"
+        },
+        {
+          "category": "prefab",
+          "name": "load_prefab",
+          "enabled": true,
+          "description": "Load a prefab by path",
+          "displayDescription": "경로로 프리팹 로드"
+        },
+        {
+          "category": "prefab",
+          "name": "instantiate_prefab",
+          "enabled": true,
+          "description": "Instantiate a prefab in the scene",
+          "displayDescription": "씬에 프리팹 인스턴스 생성"
+        },
+        {
+          "category": "prefab",
+          "name": "create_prefab",
+          "enabled": true,
+          "description": "Create a prefab from a node with all children and components",
+          "displayDescription": "노드에서 모든 자식과 컴포넌트를 포함한 프리팹 생성"
+        },
+        {
+          "category": "prefab",
+          "name": "update_prefab",
+          "enabled": true,
+          "description": "Update an existing prefab",
+          "displayDescription": "기존 프리팹 업데이트"
+        },
+        {
+          "category": "prefab",
+          "name": "revert_prefab",
+          "enabled": true,
+          "description": "Revert prefab instance to original",
+          "displayDescription": "프리팹 인스턴스를 원본으로 되돌리기"
+        },
+        {
+          "category": "prefab",
+          "name": "get_prefab_info",
+          "enabled": true,
+          "description": "Get detailed prefab information",
+          "displayDescription": "프리팹 상세 정보 조회"
+        },
+        {
+          "category": "prefab",
+          "name": "validate_prefab",
+          "enabled": true,
+          "description": "Validate a prefab file format",
+          "displayDescription": "프리팹 파일 형식 검증"
+        },
+        {
+          "category": "prefab",
+          "name": "duplicate_prefab",
+          "enabled": true,
+          "description": "Duplicate an existing prefab",
+          "displayDescription": "기존 프리팹 복제"
+        },
+        {
+          "category": "prefab",
+          "name": "restore_prefab_node",
+          "enabled": true,
+          "description": "Restore prefab node using prefab asset (built-in undo record)",
+          "displayDescription": "프리팹 에셋을 사용하여 프리팹 노드 복원 (내장 실행취소 기록)"
+        },
+        {
+          "category": "project",
+          "name": "run_project",
+          "enabled": true,
+          "description": "Run the project in preview mode",
+          "displayDescription": "프로젝트를 프리뷰 모드로 실행"
+        },
+        {
+          "category": "project",
+          "name": "build_project",
+          "enabled": true,
+          "description": "Build the project",
+          "displayDescription": "프로젝트 빌드"
+        },
+        {
+          "category": "project",
+          "name": "get_project_info",
+          "enabled": true,
+          "description": "Get project information",
+          "displayDescription": "프로젝트 정보 조회"
+        },
+        {
+          "category": "project",
+          "name": "get_project_settings",
+          "enabled": true,
+          "description": "Get project settings",
+          "displayDescription": "프로젝트 설정 조회"
+        },
+        {
+          "category": "project",
+          "name": "refresh_assets",
+          "enabled": true,
+          "description": "Refresh asset database",
+          "displayDescription": "에셋 데이터베이스 새로고침"
+        },
+        {
+          "category": "project",
+          "name": "import_asset",
+          "enabled": true,
+          "description": "Import an asset file",
+          "displayDescription": "에셋 파일 가져오기"
+        },
+        {
+          "category": "project",
+          "name": "get_asset_info",
+          "enabled": true,
+          "description": "Get asset information",
+          "displayDescription": "에셋 정보 조회"
+        },
+        {
+          "category": "project",
+          "name": "get_assets",
+          "enabled": true,
+          "description": "Get assets by type",
+          "displayDescription": "타입별 에셋 목록 조회"
+        },
+        {
+          "category": "project",
+          "name": "get_build_settings",
+          "enabled": true,
+          "description": "Get build settings - shows current limitations",
+          "displayDescription": "빌드 설정 조회"
+        },
+        {
+          "category": "project",
+          "name": "open_build_panel",
+          "enabled": true,
+          "description": "Open the build panel in the editor",
+          "displayDescription": "빌드 패널 열기"
+        },
+        {
+          "category": "project",
+          "name": "check_builder_status",
+          "enabled": true,
+          "description": "Check if builder worker is ready",
+          "displayDescription": "빌더 상태 확인"
+        },
+        {
+          "category": "project",
+          "name": "start_preview_server",
+          "enabled": true,
+          "description": "Start preview server",
+          "displayDescription": "프리뷰 서버 시작"
+        },
+        {
+          "category": "project",
+          "name": "stop_preview_server",
+          "enabled": true,
+          "description": "Stop preview server",
+          "displayDescription": "프리뷰 서버 중지"
+        },
+        {
+          "category": "project",
+          "name": "create_asset",
+          "enabled": true,
+          "description": "Create a new asset file or folder",
+          "displayDescription": "에셋 파일 또는 폴더 생성"
+        },
+        {
+          "category": "project",
+          "name": "copy_asset",
+          "enabled": true,
+          "description": "Copy an asset to another location",
+          "displayDescription": "에셋 복사"
+        },
+        {
+          "category": "project",
+          "name": "move_asset",
+          "enabled": true,
+          "description": "Move an asset to another location",
+          "displayDescription": "에셋 이동"
+        },
+        {
+          "category": "project",
+          "name": "delete_asset",
+          "enabled": true,
+          "description": "Delete an asset",
+          "displayDescription": "에셋 삭제"
+        },
+        {
+          "category": "project",
+          "name": "save_asset",
+          "enabled": true,
+          "description": "Save asset content",
+          "displayDescription": "에셋 내용 저장"
+        },
+        {
+          "category": "project",
+          "name": "reimport_asset",
+          "enabled": true,
+          "description": "Reimport an asset",
+          "displayDescription": "에셋 재가져오기"
+        },
+        {
+          "category": "project",
+          "name": "query_asset_path",
+          "enabled": true,
+          "description": "Get asset disk path",
+          "displayDescription": "에셋 디스크 경로 조회"
+        },
+        {
+          "category": "project",
+          "name": "query_asset_uuid",
+          "enabled": true,
+          "description": "Get asset UUID from URL",
+          "displayDescription": "URL로 에셋 UUID 조회"
+        },
+        {
+          "category": "project",
+          "name": "query_asset_url",
+          "enabled": true,
+          "description": "Get asset URL from UUID",
+          "displayDescription": "UUID로 에셋 URL 조회"
+        },
+        {
+          "category": "project",
+          "name": "find_asset_by_name",
+          "enabled": true,
+          "description": "Find assets by name (supports partial matching and multiple results)",
+          "displayDescription": "이름으로 에셋 검색"
+        },
+        {
+          "category": "project",
+          "name": "get_asset_details",
+          "enabled": true,
+          "description": "Get detailed asset information including spriteFrame sub-assets",
+          "displayDescription": "에셋 상세 정보 조회"
+        },
+        {
+          "category": "debug",
+          "name": "get_console_logs",
+          "enabled": true,
+          "description": "Get editor console logs",
+          "displayDescription": "에디터 콘솔 로그 조회"
+        },
+        {
+          "category": "debug",
+          "name": "clear_console",
+          "enabled": true,
+          "description": "Clear editor console",
+          "displayDescription": "에디터 콘솔 지우기"
+        },
+        {
+          "category": "debug",
+          "name": "execute_script",
+          "enabled": true,
+          "description": "Execute JavaScript in scene context",
+          "displayDescription": "씬 컨텍스트에서 JavaScript 실행"
+        },
+        {
+          "category": "debug",
+          "name": "get_node_tree",
+          "enabled": true,
+          "description": "Get detailed node tree for debugging",
+          "displayDescription": "디버깅용 노드 트리 조회"
+        },
+        {
+          "category": "debug",
+          "name": "get_performance_stats",
+          "enabled": true,
+          "description": "Get performance statistics",
+          "displayDescription": "성능 통계 조회"
+        },
+        {
+          "category": "debug",
+          "name": "validate_scene",
+          "enabled": true,
+          "description": "Validate current scene for issues",
+          "displayDescription": "현재 씬 이슈 검증"
+        },
+        {
+          "category": "debug",
+          "name": "get_editor_info",
+          "enabled": true,
+          "description": "Get editor and environment information",
+          "displayDescription": "에디터 및 환경 정보 조회"
+        },
+        {
+          "category": "debug",
+          "name": "get_project_logs",
+          "enabled": true,
+          "description": "Get project logs from temp/logs/project.log file",
+          "displayDescription": "temp/logs/project.log 파일에서 프로젝트 로그 조회"
+        },
+        {
+          "category": "debug",
+          "name": "get_log_file_info",
+          "enabled": true,
+          "description": "Get information about the project log file",
+          "displayDescription": "프로젝트 로그 파일 정보 조회"
+        },
+        {
+          "category": "debug",
+          "name": "search_project_logs",
+          "enabled": true,
+          "description": "Search for specific patterns or errors in project logs",
+          "displayDescription": "프로젝트 로그에서 특정 패턴이나 에러 검색"
+        },
+        {
+          "category": "preferences",
+          "name": "open_preferences_settings",
+          "enabled": true,
+          "description": "Open preferences settings panel",
+          "displayDescription": "환경설정 패널 열기"
+        },
+        {
+          "category": "preferences",
+          "name": "query_preferences_config",
+          "enabled": true,
+          "description": "Query preferences configuration",
+          "displayDescription": "환경설정 조회"
+        },
+        {
+          "category": "preferences",
+          "name": "set_preferences_config",
+          "enabled": true,
+          "description": "Set preferences configuration",
+          "displayDescription": "환경설정 설정"
+        },
+        {
+          "category": "preferences",
+          "name": "get_all_preferences",
+          "enabled": true,
+          "description": "Get all available preferences categories",
+          "displayDescription": "모든 환경설정 카테고리 조회"
+        },
+        {
+          "category": "preferences",
+          "name": "reset_preferences",
+          "enabled": true,
+          "description": "Reset preferences to default values",
+          "displayDescription": "환경설정 초기화"
+        },
+        {
+          "category": "preferences",
+          "name": "export_preferences",
+          "enabled": true,
+          "description": "Export current preferences configuration",
+          "displayDescription": "환경설정 내보내기"
+        },
+        {
+          "category": "preferences",
+          "name": "import_preferences",
+          "enabled": true,
+          "description": "Import preferences configuration from file",
+          "displayDescription": "환경설정 가져오기"
+        },
+        {
+          "category": "server",
+          "name": "query_server_ip_list",
+          "enabled": true,
+          "description": "Query server IP list",
+          "displayDescription": "서버 IP 목록 조회"
+        },
+        {
+          "category": "server",
+          "name": "query_sorted_server_ip_list",
+          "enabled": true,
+          "description": "Get sorted server IP list",
+          "displayDescription": "정렬된 서버 IP 목록 조회"
+        },
+        {
+          "category": "server",
+          "name": "query_server_port",
+          "enabled": true,
+          "description": "Query editor server current port",
+          "displayDescription": "에디터 서버 현재 포트 조회"
+        },
+        {
+          "category": "server",
+          "name": "get_server_status",
+          "enabled": true,
+          "description": "Get comprehensive server status information",
+          "displayDescription": "종합 서버 상태 정보 조회"
+        },
+        {
+          "category": "server",
+          "name": "check_server_connectivity",
+          "enabled": true,
+          "description": "Check server connectivity and network status",
+          "displayDescription": "서버 연결 및 네트워크 상태 확인"
+        },
+        {
+          "category": "server",
+          "name": "get_network_interfaces",
+          "enabled": true,
+          "description": "Get available network interfaces",
+          "displayDescription": "사용 가능한 네트워크 인터페이스 조회"
+        },
+        {
+          "category": "broadcast",
+          "name": "get_broadcast_log",
+          "enabled": true,
+          "description": "Get recent broadcast messages log",
+          "displayDescription": "최근 브로드캐스트 메시지 로그 조회"
+        },
+        {
+          "category": "broadcast",
+          "name": "listen_broadcast",
+          "enabled": true,
+          "description": "Start listening for specific broadcast messages",
+          "displayDescription": "특정 브로드캐스트 메시지 수신 시작"
+        },
+        {
+          "category": "broadcast",
+          "name": "stop_listening",
+          "enabled": true,
+          "description": "Stop listening for specific broadcast messages",
+          "displayDescription": "특정 브로드캐스트 메시지 수신 중지"
+        },
+        {
+          "category": "broadcast",
+          "name": "clear_broadcast_log",
+          "enabled": true,
+          "description": "Clear the broadcast messages log",
+          "displayDescription": "브로드캐스트 메시지 로그 초기화"
+        },
+        {
+          "category": "broadcast",
+          "name": "get_active_listeners",
+          "enabled": true,
+          "description": "Get list of active broadcast listeners",
+          "displayDescription": "활성 브로드캐스트 수신기 목록 조회"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "reset_node_property",
+          "enabled": true,
+          "description": "Reset node property to default value",
+          "displayDescription": "노드 속성을 기본값으로 리셋"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "move_array_element",
+          "enabled": true,
+          "description": "Move array element position",
+          "displayDescription": "배열 요소 위치 이동"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "remove_array_element",
+          "enabled": true,
+          "description": "Remove array element at specific index",
+          "displayDescription": "특정 인덱스의 배열 요소 삭제"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "copy_node",
+          "enabled": true,
+          "description": "Copy node for later paste operation",
+          "displayDescription": "노드 복사"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "paste_node",
+          "enabled": true,
+          "description": "Paste previously copied nodes",
+          "displayDescription": "노드 붙여넣기"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "cut_node",
+          "enabled": true,
+          "description": "Cut node (copy + mark for move)",
+          "displayDescription": "노드 잘라내기"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "reset_node_transform",
+          "enabled": true,
+          "description": "Reset node position, rotation and scale",
+          "displayDescription": "노드 트랜스폼 리셋"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "reset_component",
+          "enabled": true,
+          "description": "Reset component to default values",
+          "displayDescription": "컴포넌트를 기본값으로 리셋"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "restore_prefab",
+          "enabled": true,
+          "description": "Restore prefab instance from asset",
+          "displayDescription": "프리팹 인스턴스 복원"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "execute_component_method",
+          "enabled": true,
+          "description": "Execute method on component",
+          "displayDescription": "컴포넌트 메서드 실행"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "execute_scene_script",
+          "enabled": true,
+          "description": "Execute scene script method",
+          "displayDescription": "씬 스크립트 메서드 실행"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "scene_snapshot",
+          "enabled": true,
+          "description": "Create scene state snapshot",
+          "displayDescription": "씬 상태 스냅샷 생성"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "scene_snapshot_abort",
+          "enabled": true,
+          "description": "Abort scene snapshot creation",
+          "displayDescription": "씬 스냅샷 생성 중단"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "begin_undo_recording",
+          "enabled": true,
+          "description": "Begin recording undo data",
+          "displayDescription": "실행취소 데이터 기록 시작"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "end_undo_recording",
+          "enabled": true,
+          "description": "End recording undo data",
+          "displayDescription": "실행취소 데이터 기록 종료"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "cancel_undo_recording",
+          "enabled": true,
+          "description": "Cancel undo recording",
+          "displayDescription": "실행취소 기록 취소"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "soft_reload_scene",
+          "enabled": true,
+          "description": "Soft reload current scene",
+          "displayDescription": "현재 씬 소프트 리로드"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "query_scene_ready",
+          "enabled": true,
+          "description": "Check if scene is ready",
+          "displayDescription": "씬 준비 상태 조회"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "query_scene_dirty",
+          "enabled": true,
+          "description": "Check if scene has unsaved changes",
+          "displayDescription": "씬 미저장 변경사항 조회"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "query_scene_classes",
+          "enabled": true,
+          "description": "Query all registered classes",
+          "displayDescription": "등록된 모든 클래스 조회"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "query_scene_components",
+          "enabled": true,
+          "description": "Query available scene components",
+          "displayDescription": "사용 가능한 씬 컴포넌트 조회"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "query_component_has_script",
+          "enabled": true,
+          "description": "Check if component has script",
+          "displayDescription": "컴포넌트 스크립트 보유 여부 조회"
+        },
+        {
+          "category": "sceneAdvanced",
+          "name": "query_nodes_by_asset_uuid",
+          "enabled": true,
+          "description": "Find nodes that use specific asset UUID",
+          "displayDescription": "특정 애셋을 사용하는 노드 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "change_gizmo_tool",
+          "enabled": true,
+          "description": "Change Gizmo tool",
+          "displayDescription": "기즈모 도구 변경"
+        },
+        {
+          "category": "sceneView",
+          "name": "query_gizmo_tool_name",
+          "enabled": true,
+          "description": "Get current Gizmo tool name",
+          "displayDescription": "현재 기즈모 도구 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "change_gizmo_pivot",
+          "enabled": true,
+          "description": "Change transform pivot point",
+          "displayDescription": "변환 피벗 포인트 변경"
+        },
+        {
+          "category": "sceneView",
+          "name": "query_gizmo_pivot",
+          "enabled": true,
+          "description": "Get current Gizmo pivot point",
+          "displayDescription": "현재 기즈모 피벗 포인트 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "query_gizmo_view_mode",
+          "enabled": true,
+          "description": "Query view mode (view/select)",
+          "displayDescription": "뷰 모드 조회 (view/select)"
+        },
+        {
+          "category": "sceneView",
+          "name": "change_gizmo_coordinate",
+          "enabled": true,
+          "description": "Change coordinate system",
+          "displayDescription": "좌표계 변경"
+        },
+        {
+          "category": "sceneView",
+          "name": "query_gizmo_coordinate",
+          "enabled": true,
+          "description": "Get current coordinate system",
+          "displayDescription": "현재 좌표계 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "change_view_mode_2d_3d",
+          "enabled": true,
+          "description": "Change 2D/3D view mode",
+          "displayDescription": "2D/3D 뷰 모드 변경"
+        },
+        {
+          "category": "sceneView",
+          "name": "query_view_mode_2d_3d",
+          "enabled": true,
+          "description": "Get current view mode",
+          "displayDescription": "현재 뷰 모드 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "set_grid_visible",
+          "enabled": true,
+          "description": "Show/hide grid",
+          "displayDescription": "그리드 표시/숨김"
+        },
+        {
+          "category": "sceneView",
+          "name": "query_grid_visible",
+          "enabled": true,
+          "description": "Query grid visibility status",
+          "displayDescription": "그리드 표시 상태 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "set_icon_gizmo_3d",
+          "enabled": true,
+          "description": "Set IconGizmo to 3D or 2D mode",
+          "displayDescription": "아이콘 기즈모 3D/2D 모드 설정"
+        },
+        {
+          "category": "sceneView",
+          "name": "query_icon_gizmo_3d",
+          "enabled": true,
+          "description": "Query IconGizmo mode",
+          "displayDescription": "아이콘 기즈모 모드 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "set_icon_gizmo_size",
+          "enabled": true,
+          "description": "Set IconGizmo size",
+          "displayDescription": "아이콘 기즈모 크기 설정"
+        },
+        {
+          "category": "sceneView",
+          "name": "query_icon_gizmo_size",
+          "enabled": true,
+          "description": "Query IconGizmo size",
+          "displayDescription": "아이콘 기즈모 크기 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "focus_camera_on_nodes",
+          "enabled": true,
+          "description": "Focus scene camera on nodes",
+          "displayDescription": "노드에 씬 카메라 포커스"
+        },
+        {
+          "category": "sceneView",
+          "name": "align_camera_with_view",
+          "enabled": true,
+          "description": "Apply scene camera position and angle to selected node",
+          "displayDescription": "씬 카메라 위치와 각도를 선택한 노드에 적용"
+        },
+        {
+          "category": "sceneView",
+          "name": "align_view_with_node",
+          "enabled": true,
+          "description": "Apply selected node position and angle to current view",
+          "displayDescription": "선택한 노드 위치와 각도를 현재 뷰에 적용"
+        },
+        {
+          "category": "sceneView",
+          "name": "get_scene_view_status",
+          "enabled": true,
+          "description": "Get comprehensive scene view status",
+          "displayDescription": "종합 씬 뷰 상태 조회"
+        },
+        {
+          "category": "sceneView",
+          "name": "reset_scene_view",
+          "enabled": true,
+          "description": "Reset scene view to default settings",
+          "displayDescription": "씬 뷰 기본 설정으로 리셋"
+        },
+        {
+          "category": "referenceImage",
+          "name": "add_reference_image",
+          "enabled": true,
+          "description": "Add reference image(s) to scene",
+          "displayDescription": "참조 이미지 추가"
+        },
+        {
+          "category": "referenceImage",
+          "name": "remove_reference_image",
+          "enabled": true,
+          "description": "Remove reference image(s)",
+          "displayDescription": "참조 이미지 제거"
+        },
+        {
+          "category": "referenceImage",
+          "name": "switch_reference_image",
+          "enabled": true,
+          "description": "Switch to specific reference image",
+          "displayDescription": "참조 이미지 전환"
+        },
+        {
+          "category": "referenceImage",
+          "name": "set_reference_image_data",
+          "enabled": true,
+          "description": "Set reference image transform and display properties",
+          "displayDescription": "참조 이미지 데이터 설정"
+        },
+        {
+          "category": "referenceImage",
+          "name": "query_reference_image_config",
+          "enabled": true,
+          "description": "Query reference image configuration",
+          "displayDescription": "참조 이미지 설정 조회"
+        },
+        {
+          "category": "referenceImage",
+          "name": "query_current_reference_image",
+          "enabled": true,
+          "description": "Query current reference image data",
+          "displayDescription": "현재 참조 이미지 데이터 조회"
+        },
+        {
+          "category": "referenceImage",
+          "name": "refresh_reference_image",
+          "enabled": true,
+          "description": "Refresh reference image display",
+          "displayDescription": "참조 이미지 새로고침"
+        },
+        {
+          "category": "referenceImage",
+          "name": "set_reference_image_position",
+          "enabled": true,
+          "description": "Set reference image position",
+          "displayDescription": "참조 이미지 위치 설정"
+        },
+        {
+          "category": "referenceImage",
+          "name": "set_reference_image_scale",
+          "enabled": true,
+          "description": "Set reference image scale",
+          "displayDescription": "참조 이미지 스케일 설정"
+        },
+        {
+          "category": "referenceImage",
+          "name": "set_reference_image_opacity",
+          "enabled": true,
+          "description": "Set reference image opacity",
+          "displayDescription": "참조 이미지 투명도 설정"
+        },
+        {
+          "category": "referenceImage",
+          "name": "list_reference_images",
+          "enabled": true,
+          "description": "List all available reference images",
+          "displayDescription": "참조 이미지 목록 조회"
+        },
+        {
+          "category": "referenceImage",
+          "name": "clear_all_reference_images",
+          "enabled": true,
+          "description": "Clear all reference images",
+          "displayDescription": "참조 이미지 모두 제거"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "save_asset_meta",
+          "enabled": true,
+          "description": "Save asset meta information",
+          "displayDescription": "에셋 메타 정보 저장"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "generate_available_url",
+          "enabled": true,
+          "description": "Generate an available URL based on input URL",
+          "displayDescription": "사용 가능한 URL 생성"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "query_asset_db_ready",
+          "enabled": true,
+          "description": "Check if asset database is ready",
+          "displayDescription": "에셋 데이터베이스 준비 상태 조회"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "open_asset_external",
+          "enabled": true,
+          "description": "Open asset with external program",
+          "displayDescription": "외부 프로그램으로 에셋 열기"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "batch_import_assets",
+          "enabled": true,
+          "description": "Import multiple assets in batch",
+          "displayDescription": "에셋 일괄 가져오기"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "batch_delete_assets",
+          "enabled": true,
+          "description": "Delete multiple assets in batch",
+          "displayDescription": "에셋 일괄 삭제"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "validate_asset_references",
+          "enabled": true,
+          "description": "Validate asset references and find broken links",
+          "displayDescription": "에셋 참조 검증 및 깨진 링크 찾기"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "get_asset_dependencies",
+          "enabled": true,
+          "description": "Get asset dependency tree",
+          "displayDescription": "에셋 의존성 트리 조회"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "get_unused_assets",
+          "enabled": true,
+          "description": "Find unused assets in project",
+          "displayDescription": "프로젝트 내 미사용 에셋 찾기"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "compress_textures",
+          "enabled": true,
+          "description": "Batch compress texture assets",
+          "displayDescription": "텍스처 에셋 일괄 압축"
+        },
+        {
+          "category": "assetAdvanced",
+          "name": "export_asset_manifest",
+          "enabled": true,
+          "description": "Export asset manifest/inventory",
+          "displayDescription": "에셋 매니페스트 내보내기"
+        },
+        {
+          "category": "validation",
+          "name": "validate_json_params",
+          "enabled": true,
+          "description": "Validate and fix JSON parameters before sending to other tools",
+          "displayDescription": "JSON 파라미터 검증 및 수정"
+        },
+        {
+          "category": "validation",
+          "name": "safe_string_value",
+          "enabled": true,
+          "description": "Create a safe string value that won't cause JSON parsing issues",
+          "displayDescription": "안전한 문자열 값 생성"
+        },
+        {
+          "category": "validation",
+          "name": "format_mcp_request",
+          "enabled": true,
+          "description": "Format a complete MCP request with proper JSON escaping",
+          "displayDescription": "MCP 요청 포맷"
+        }
+      ],
+      "createdAt": "2026-04-06T10:27:55.723Z",
+      "updatedAt": "2026-04-06T10:27:55.723Z"
+    }
+  ],
+  "currentConfigId": "b847fdd4-7172-495e-842c-4b7888c2aab6",
+  "maxConfigSlots": 5
+}
