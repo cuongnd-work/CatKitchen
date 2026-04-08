@@ -11266,6 +11266,15 @@
     "_enabled": true,
     "__prefab": null,
     "columnSnapThreshold": 0.75,
+    "useSingleLineQueue": true,
+    "singleLineUseSiblingOrder": false,
+    "singleLineAxis": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 0,
+      "z": 0
+    },
+    "singleLineFrontUsesMaxAxis": true,
     "exitTarget": {
       "__id__": 388
     },
@@ -11279,9 +11288,9 @@
     "sideStepDuration": 0.2,
     "exitDuration": 0.35,
     "exitDurationScale": 1.5,
-    "requeueAfterExit": false,
-    "rejoinDelay": 0.1,
-    "rejoinDuration": 0.4,
+    "requeueAfterExit": true,
+    "rejoinDelay": 0,
+    "rejoinDuration": 0,
     "deactivateCustomerOnExit": false,
     "shiftDuration": 0.25,
     "frontAdvanceDelay": 0.3,
@@ -15686,7 +15695,7 @@
         "__id__": 435
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 512
@@ -20902,7 +20911,7 @@
         "__id__": 514
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 523
@@ -21376,7 +21385,7 @@
     "node": {
       "__id__": 388
     },
-    "_enabled": true,
+    "_enabled": false,
     "__prefab": null,
     "animation": {
       "__id__": 512

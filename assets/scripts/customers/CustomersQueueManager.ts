@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Vec3, tween } from 'cc';
+import { _decorator, Component, Node, Tween, Vec3, tween } from 'cc';
 import { CatAnimationController } from 'db://assets/scripts/CatAnimationController';
 import { CustomersQueueEvent, CustomersQueueEvents } from 'db://assets/scripts/customers/CustomersQueueEvents';
 import { OrderPopup } from 'db://assets/scripts/OrderPopup';
@@ -23,10 +23,43 @@ function cloneVec3 (source: Vec3): Vec3 {
 
 }
 
+function projectVec3 (source: Vec3, axis: Vec3): number {
+    return source.x * axis.x + source.y * axis.y + source.z * axis.z;
+
+}
+
 @ccclass('CustomersQueueManager')
 export class CustomersQueueManager extends Component {
     @property({ tooltip: 'Khoảng cách tối đa để gom mèo vào cùng 1 hàng theo trục X', min: 0 })
     columnSnapThreshold = 0.75;
+
+    @property({ tooltip: 'Xử lý toàn bộ customer như một hàng chờ 1 chiều, thay vì từng cột riêng lẻ.' })
+    useSingleLineQueue = false;
+
+    @property({
+        tooltip: 'Nếu bật, hàng 1 chiều sẽ dùng đúng thứ tự node con trong hierarchy để xác định đầu hàng -> cuối hàng.',
+        visible () {
+            return this.useSingleLineQueue;
+        },
+    })
+    singleLineUseSiblingOrder = false;
+
+    @property({
+        type: Vec3,
+        tooltip: 'Trục local dùng để sắp xếp hàng 1 chiều từ đầu hàng tới cuối hàng.',
+        visible () {
+            return this.useSingleLineQueue;
+        },
+    })
+    singleLineAxis: Vec3 = new Vec3(1, 0, 0);
+
+    @property({
+        tooltip: 'Nếu bật, giá trị lớn hơn trên trục single-line sẽ nằm gần quầy hơn.',
+        visible () {
+            return this.useSingleLineQueue;
+        },
+    })
+    singleLineFrontUsesMaxAxis = true;
 
     @property({ type: Node, tooltip: 'Điểm đích để khách đầu hàng chạy tới sau khi được phục vụ xong.' })
     exitTarget: Node | null = null;
@@ -69,6 +102,9 @@ export class CustomersQueueManager extends Component {
     private _columnAdvanceMultipliers = new Map<number, number>();
     private _activeCustomers = new Set<string>();
     private _advancingColumns = new Set<number>();
+    private _singleLineEntries: QueueEntry[] = [];
+    private _singleLineAdvancing = false;
+    private _singleLineAxisScratch: Vec3 = new Vec3(1, 0, 0);
     private _worldScratch: Vec3 = new Vec3();
     private _localScratch: Vec3 = new Vec3();
 
@@ -108,8 +144,10 @@ export class CustomersQueueManager extends Component {
 
         this._columns.forEach((column, index) => {
             column.sortIndex = index;
-            column.entries.sort((a, b) => a.targetPosition.z - b.targetPosition.z);
+            column.entries.sort((a, b) => b.targetPosition.z - a.targetPosition.z);
         });
+
+        this.rebuildSingleLineEntries();
     }
 
     private getOrCreateColumn (x: number): ColumnData {
@@ -138,6 +176,20 @@ export class CustomersQueueManager extends Component {
 
         if (this._activeCustomers.has(entry.node.uuid)) {
             return false;
+        }
+
+        if (this.useSingleLineQueue) {
+            if (this._singleLineAdvancing || this._singleLineEntries.length === 0) {
+                return false;
+            }
+
+            const frontEntry = this._singleLineEntries[0];
+            if (frontEntry !== entry) {
+                return false;
+            }
+
+            this._activeCustomers.add(entry.node.uuid);
+            return true;
         }
 
         const column = entry.column;
@@ -169,6 +221,10 @@ export class CustomersQueueManager extends Component {
             return false;
         }
 
+        if (this.useSingleLineQueue) {
+            return this.completeSingleLineServingCustomer(entry);
+        }
+
         const column = entry.column;
         if (!column || column.entries.length === 0) {
             return false;
@@ -198,6 +254,48 @@ export class CustomersQueueManager extends Component {
                 }, advanceDuration);
             } else {
                 this.setColumnAdvancing(column, false);
+            }
+        };
+
+        const delay = Math.max(0, this.frontAdvanceDelay);
+        if (delay > 0) {
+            this.scheduleOnce(performAdvance, delay);
+        } else {
+            performAdvance();
+        }
+
+        return true;
+    }
+
+    private completeSingleLineServingCustomer (entry: QueueEntry): boolean {
+        if (this._singleLineAdvancing || this._singleLineEntries.length === 0) {
+            return false;
+        }
+
+        const frontEntry = this._singleLineEntries[0];
+        if (frontEntry !== entry) {
+            return false;
+        }
+
+        this._activeCustomers.delete(entry.node.uuid);
+        this._singleLineEntries.shift();
+        this._entryLookup.delete(entry.node.uuid);
+        this.hideCustomerOrder(entry);
+        this._singleLineAdvancing = true;
+
+        const freedSlot = cloneVec3(entry.targetPosition);
+        const performAdvance = () => {
+            const rejoinSlot = this.shiftEntriesForward(this._singleLineEntries, freedSlot, null);
+            const advanceDuration = this._singleLineEntries.length > 0 ? this.shiftDuration : 0;
+
+            this.animateDeparture(entry, this.requeueAfterExit ? rejoinSlot : null);
+
+            if (advanceDuration > 0) {
+                this.scheduleOnce(() => {
+                    this._singleLineAdvancing = false;
+                }, advanceDuration);
+            } else {
+                this._singleLineAdvancing = false;
             }
         };
 
@@ -278,20 +376,23 @@ export class CustomersQueueManager extends Component {
     }
 
     private shiftColumnForward (column: ColumnData, freedSlot: Vec3): Vec3 {
+        return this.shiftEntriesForward(column.entries, freedSlot, column);
+    }
+
+    private shiftEntriesForward (entries: QueueEntry[], freedSlot: Vec3, column: ColumnData | null): Vec3 {
         let nextSlot = cloneVec3(freedSlot);
 
-        if (column.entries.length === 0) {
+        if (entries.length === 0) {
             return nextSlot;
         }
 
-        const advanceDuration = this.getColumnAdvanceDuration(column);
+        const advanceDuration = column ? this.getColumnAdvanceDuration(column) : Math.max(0.01, this.shiftDuration);
 
-        column.entries.forEach((queueEntry) => {
+        entries.forEach((queueEntry) => {
             const previousSlot = cloneVec3(queueEntry.targetPosition);
             queueEntry.targetPosition = cloneVec3(nextSlot);
 
-            tween(queueEntry.node)
-                .stop();
+            Tween.stopAllByTarget(queueEntry.node);
 
             tween(queueEntry.node)
                 .to(advanceDuration, { position: queueEntry.targetPosition }, { easing: 'sineOut' })
@@ -323,6 +424,24 @@ export class CustomersQueueManager extends Component {
     }
 
     public getFrontCustomerNode (columnIndex: number): Node | null {
+        if (this.useSingleLineQueue) {
+            if (this._singleLineAdvancing || this._singleLineEntries.length === 0) {
+                return null;
+            }
+
+            const frontEntry = this._singleLineEntries[0];
+            if (columnIndex >= 0 && frontEntry.column.sortIndex !== columnIndex) {
+                return null;
+            }
+
+            const customerNode = frontEntry.node;
+            if (!customerNode || !customerNode.isValid || !customerNode.activeInHierarchy || this._activeCustomers.has(customerNode.uuid)) {
+                return null;
+            }
+
+            return customerNode;
+        }
+
         const column = this.getColumnByIndex(columnIndex);
         if (!column || column.entries.length === 0 || this.isColumnAdvancing(column)) {
             return null;
@@ -337,6 +456,20 @@ export class CustomersQueueManager extends Component {
     }
 
     public getFrontMostCustomerNode (): Node | null {
+        if (this.useSingleLineQueue) {
+            if (this._singleLineAdvancing || this._singleLineEntries.length === 0) {
+                return null;
+            }
+
+            const frontEntry = this._singleLineEntries[0];
+            const node = frontEntry?.node ?? null;
+            if (!node || !node.isValid || !node.activeInHierarchy || this._activeCustomers.has(node.uuid)) {
+                return null;
+            }
+
+            return node;
+        }
+
         let bestNode: Node | null = null;
         let bestZ = Number.POSITIVE_INFINITY;
         let bestX = Number.POSITIVE_INFINITY;
@@ -371,6 +504,47 @@ export class CustomersQueueManager extends Component {
 
     private getColumnByIndex (columnIndex: number): ColumnData | null {
         return this._columns.find((col) => col.sortIndex === columnIndex) ?? null;
+    }
+
+    private rebuildSingleLineEntries (): void {
+        if (!this.useSingleLineQueue) {
+            this._singleLineEntries.length = 0;
+            return;
+        }
+
+        if (this.singleLineUseSiblingOrder) {
+            this._singleLineEntries = Array.from(this._entryLookup.values());
+            this._singleLineEntries.sort((a, b) => {
+                const siblingDelta = a.node.getSiblingIndex() - b.node.getSiblingIndex();
+                if (siblingDelta !== 0) {
+                    return siblingDelta;
+                }
+
+                return a.node.name.localeCompare(b.node.name);
+            });
+            return;
+        }
+
+        const axis = this.getSingleLineAxis();
+        this._singleLineEntries = Array.from(this._entryLookup.values());
+        this._singleLineEntries.sort((a, b) => {
+            const projectionDelta = projectVec3(a.targetPosition, axis) - projectVec3(b.targetPosition, axis);
+            if (Math.abs(projectionDelta) > 0.0001) {
+                return this.singleLineFrontUsesMaxAxis ? -projectionDelta : projectionDelta;
+            }
+
+            return b.targetPosition.z - a.targetPosition.z;
+        });
+    }
+
+    private getSingleLineAxis (): Vec3 {
+        this._singleLineAxisScratch.set(this.singleLineAxis.x, this.singleLineAxis.y, this.singleLineAxis.z);
+        if (this._singleLineAxisScratch.lengthSqr() < 0.0001) {
+            this._singleLineAxisScratch.set(1, 0, 0);
+        }
+
+        this._singleLineAxisScratch.normalize();
+        return this._singleLineAxisScratch;
     }
 
     private findEntry (startNode: Node | null): QueueEntry | null {
@@ -433,7 +607,11 @@ export class CustomersQueueManager extends Component {
         entry.targetPosition = cloneVec3(slot);
         entry.node.active = false;
         entry.node.setPosition(slot);
-        entry.column.entries.push(entry);
+        if (this.useSingleLineQueue) {
+            this._singleLineEntries.push(entry);
+        } else {
+            entry.column.entries.push(entry);
+        }
         this._entryLookup.set(entry.node.uuid, entry);
         this.resetCustomerOrder(entry);
         entry.node.active = true;
