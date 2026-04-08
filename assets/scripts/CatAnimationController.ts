@@ -1,4 +1,4 @@
-import { _decorator, AnimationClip, Component, Node, SkeletalAnimation } from 'cc';
+import { _decorator, AnimationClip, AnimationState, Component, Node, SkeletalAnimation } from 'cc';
 import { OrderPopup } from 'db://assets/scripts/OrderPopup';
 const { ccclass, property } = _decorator;
 
@@ -41,7 +41,11 @@ export class CatAnimationController extends Component {
         this.playAnimation('Doing');
     }
 
-    public playWalkAngry (speed = 1): void {
+    public playWalkAngry (speed = 1, preferredClip: AnimationClip | null = null): void {
+        if (preferredClip && this.playClip(preferredClip, speed, true)) {
+            return;
+        }
+
         if (this.tryPlayState('Walk_Angry', speed, true)) {
             return;
         }
@@ -53,14 +57,14 @@ export class CatAnimationController extends Component {
         this.playAnimation('Walk_Angry', speed, true, ['walk_angry', 'walk', 'run']);
     }
 
-    public playClip (clip: AnimationClip | null, speed = 1, loop = false): void {
+    public playClip (clip: AnimationClip | null, speed = 1, loop = false): boolean {
         if (!clip) {
-            return;
+            return false;
         }
 
         const anim = this.resolveAnimation();
         if (!anim) {
-            return;
+            return false;
         }
 
         if (!anim.getState(clip.name)) {
@@ -69,18 +73,7 @@ export class CatAnimationController extends Component {
 
         anim.play(clip.name);
         const state = anim.getState(clip.name);
-        if (!state) {
-            return;
-        }
-
-        state.speed = speed;
-        if (loop) {
-            const loopMode = (AnimationClip as unknown as { WrapMode?: { Loop?: number } }).WrapMode?.Loop;
-            if (loopMode !== undefined) {
-                state.wrapMode = loopMode;
-            }
-            state.repeatCount = Number.POSITIVE_INFINITY;
-        }
+        return this.applyStateOptions(state, speed, loop);
     }
 
     public getSkeletalAnimation (): SkeletalAnimation | null {
@@ -105,16 +98,7 @@ export class CatAnimationController extends Component {
         const resolvedClipName = this.resolveClipName(clipName, fallbackKeywords);
         anim.play(resolvedClipName);
         const state = anim.getState(resolvedClipName);
-        if (state) {
-            state.speed = speed;
-            if (loop) {
-                const loopMode = (AnimationClip as unknown as { WrapMode?: { Loop?: number } }).WrapMode?.Loop;
-                if (loopMode !== undefined) {
-                    state.wrapMode = loopMode;
-                }
-                state.repeatCount = Number.POSITIVE_INFINITY;
-            }
-        }
+        this.applyStateOptions(state, speed, loop);
     }
 
     private tryPlayState (stateName: string, speed = 1, loop = false): boolean {
@@ -129,16 +113,19 @@ export class CatAnimationController extends Component {
 
         anim.play(stateName);
         const state = anim.getState(stateName);
+        return this.applyStateOptions(state, speed, loop);
+    }
+
+    private applyStateOptions (state: AnimationState | null, speed = 1, loop = false): boolean {
         if (!state) {
             return false;
         }
 
         state.speed = speed;
         if (loop) {
-            const loopMode = (AnimationClip as unknown as { WrapMode?: { Loop?: number } }).WrapMode?.Loop;
-            if (loopMode !== undefined) {
-                state.wrapMode = loopMode;
-            }
+            // Cocos 3.8.7 runtime can expose WrapMode inconsistently in Preview.
+            // Use numeric loop mode directly to avoid "reading 'Loop'" crashes.
+            (state as unknown as { wrapMode: number }).wrapMode = 2;
             state.repeatCount = Number.POSITIVE_INFINITY;
         }
 

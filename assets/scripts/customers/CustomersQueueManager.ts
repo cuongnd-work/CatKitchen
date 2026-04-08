@@ -639,12 +639,7 @@ export class CustomersQueueManager extends Component {
         controller.setModelVisible(true);
         const skeletal = controller.getSkeletalAnimation();
         this.resolveRandomAnimationPlayer()?.suspendFor(skeletal);
-        if (this.walkAngryClip) {
-            controller.playClip(this.walkAngryClip, speed, true);
-            return;
-        }
-
-        controller.playWalkAngry(speed);
+        controller.playWalkAngry(speed, this.walkAngryClip);
     }
 
     private applyIdleOrRandomAnimation (controller: CatAnimationController | null): void {
@@ -704,6 +699,9 @@ export class CustomersQueueManager extends Component {
 
         if (targets.length > 0) {
             randomPlayer.skeletalAnims = targets;
+            targets.forEach((skeletal) => {
+                randomPlayer.resumeFor(skeletal);
+            });
         }
     }
 

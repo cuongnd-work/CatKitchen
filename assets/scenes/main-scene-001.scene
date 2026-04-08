@@ -27898,7 +27898,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -33667,7 +33672,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -39436,7 +39446,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -45205,7 +45220,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -50974,7 +50994,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -56743,7 +56768,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -62512,7 +62542,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -68281,7 +68316,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -74050,7 +74090,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -79819,7 +79864,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -85588,7 +85638,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -91357,7 +91412,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
@@ -97126,7 +97186,12 @@
     "_enabled": true,
     "__prefab": null,
     "playOnLoad": false,
-    "_clips": [],
+    "_clips": [
+      {
+        "__uuid__": "3d9e94e1-f4ba-4843-a199-99e5741e4e7a@73b7f",
+        "__expectedType__": "cc.AnimationClip"
+      }
+    ],
     "_defaultClip": null,
     "_useBakedAnimation": true,
     "_sockets": [],
