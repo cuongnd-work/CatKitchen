@@ -11288,6 +11288,7 @@
     "sideStepDuration": 0.2,
     "exitDuration": 0.35,
     "exitDurationScale": 1.5,
+    "exitMoveSpeedScale": 0.5,
     "requeueAfterExit": true,
     "rejoinDelay": 0,
     "rejoinDuration": 0,

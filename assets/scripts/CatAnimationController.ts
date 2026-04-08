@@ -1,6 +1,5 @@
-import { _decorator, Component, Node, SkeletalAnimation } from 'cc';
+import { _decorator, AnimationClip, Component, Node, SkeletalAnimation } from 'cc';
 import { OrderPopup } from 'db://assets/scripts/OrderPopup';
-import { CurrencyView } from 'db://assets/scripts/CurrencyView';
 const { ccclass, property } = _decorator;
 
 @ccclass('CatAnimationController')
@@ -12,6 +11,7 @@ export class CatAnimationController extends Component {
     public orderPopup: OrderPopup = null;
 
     protected onLoad (): void {
+        this.resolveAnimation();
         this.resolveOrderPopup();
     }
 
@@ -26,31 +26,92 @@ export class CatAnimationController extends Component {
     }
 
     public doIdle(){
-        this.animation.play("Dung");
+        this.playAnimation('Dung');
     }
 
     public doWalk(){
-        // const popup = this.resolveOrderPopup();
-        // if (popup) {
-        //     popup.sell();
-        // }
-
-        if(this.sellTargetPopup){
-            this.sellTargetPopup.sell();
-        }
-
-        if (CurrencyView.instance) {
-            CurrencyView.instance.addCurrency(50);
-        }
-        this.animation.play("Walk_Angry");
+        this.playAnimation('Walk_Angry');
     }
 
     public doBedo(){
-        this.animation.play("Bedo");
+        this.playAnimation('Bedo');
     }
 
     public doDoing(){
-        this.animation.play("Doing");
+        this.playAnimation('Doing');
+    }
+
+    public playWalkAngry (speed = 1): void {
+        this.playAnimation('Walk_Angry', speed, true, ['walk', 'run']);
+    }
+
+    public setModelVisible (visible: boolean): void {
+        const modelNode = this.resolveAnimation()?.node;
+        if (!modelNode || !modelNode.isValid) {
+            return;
+        }
+
+        modelNode.active = visible;
+    }
+
+    public playAnimation (clipName: string, speed = 1, loop = false, fallbackKeywords: string[] = []): void {
+        const anim = this.resolveAnimation();
+        if (!anim || !clipName) {
+            return;
+        }
+
+        const resolvedClipName = this.resolveClipName(clipName, fallbackKeywords);
+        anim.play(resolvedClipName);
+        const state = anim.getState(resolvedClipName);
+        if (state) {
+            state.speed = speed;
+            if (loop) {
+                const loopMode = (AnimationClip as unknown as { WrapMode?: { Loop?: number } }).WrapMode?.Loop;
+                if (loopMode !== undefined) {
+                    state.wrapMode = loopMode;
+                }
+                state.repeatCount = Number.POSITIVE_INFINITY;
+            }
+        }
+    }
+
+    private resolveAnimation (): SkeletalAnimation | null {
+        if (this.animation && this.animation.isValid) {
+            return this.animation;
+        }
+
+        this.animation = this.getComponent(SkeletalAnimation) ?? this.getComponentInChildren(SkeletalAnimation);
+        return this.animation ?? null;
+    }
+
+    private resolveClipName (preferred: string, fallbackKeywords: string[]): string {
+        const anim = this.animation;
+        if (!anim) {
+            return preferred;
+        }
+
+        if (anim.getState(preferred)) {
+            return preferred;
+        }
+
+        const clips = ((anim as unknown as { clips?: AnimationClip[] }).clips ?? []);
+        const normalizedKeywords = fallbackKeywords.map((keyword) => keyword.toLowerCase());
+        if (normalizedKeywords.length > 0) {
+            const matched = clips.find((clip) => {
+                const clipName = clip?.name?.toLowerCase?.() ?? '';
+                return clipName.length > 0 && normalizedKeywords.some((keyword) => clipName.includes(keyword));
+            });
+            if (matched?.name) {
+                return matched.name;
+            }
+        }
+
+        const firstClip = clips[0];
+        if (firstClip?.name) {
+            return firstClip.name;
+        }
+
+        return preferred;
     }
 }
 

@@ -79,6 +79,9 @@ export class CustomersQueueManager extends Component {
     @property({ tooltip: 'Hệ số làm chậm mèo khi rời hàng (>=1 chậm hơn)', min: 0 })
     exitDurationScale = 1.5;
 
+    @property({ tooltip: 'Tốc độ di chuyển của khách khi đi ra điểm end. 0.5 = chậm còn một nửa.', min: 0.01 })
+    exitMoveSpeedScale = 0.5;
+
     @property({ tooltip: 'Cho khách quay lại cuối hàng sau khi tới điểm đích.' })
     requeueAfterExit = false;
 
@@ -314,25 +317,22 @@ export class CustomersQueueManager extends Component {
     }
 
     private animateDeparture (entry: QueueEntry, rejoinSlot: Vec3 | null): void {
+        const controller = entry.node.getComponent(CatAnimationController);
         const startTarget = cloneVec3(entry.node.getPosition());
-        const sideTarget = cloneVec3(startTarget);
-        sideTarget.x += this.getSideStepDirection(entry.column) * this.sideStepDistance;
-
-        const travelOrigin = this.sideStepDistance > 0 ? sideTarget : startTarget;
-        const finalTarget = this.resolveExitPosition(entry, travelOrigin);
+        const finalTarget = this.resolveExitPosition(entry, startTarget);
+        const exitSpeedScale = Math.max(0.01, this.exitMoveSpeedScale);
 
         const sequence = tween(entry.node);
+        controller?.setModelVisible(true);
+        controller?.playWalkAngry(exitSpeedScale);
 
-        if (this.sideStepDistance > 0 && this.sideStepDuration > 0) {
-            sequence.to(this.sideStepDuration, { position: sideTarget }, { easing: 'sineOut' });
-        }
-
-        const exitOutDuration = Math.max(0.01, this.exitDuration * Math.max(0.01, this.exitDurationScale));
+        const exitOutDuration = Math.max(0.01, this.exitDuration * Math.max(0.01, this.exitDurationScale) / exitSpeedScale);
 
         sequence
             .to(exitOutDuration, { position: finalTarget }, { easing: 'sineIn' })
             .call(() => {
                 entry.targetPosition = cloneVec3(finalTarget);
+                controller?.setModelVisible(false);
                 if (!this.requeueAfterExit && this.deactivateCustomerOnExit) {
                     entry.node.active = false;
                 }
@@ -604,6 +604,7 @@ export class CustomersQueueManager extends Component {
     }
 
     private reinsertEntry (entry: QueueEntry, slot: Vec3): void {
+        const controller = entry.node.getComponent(CatAnimationController);
         entry.targetPosition = cloneVec3(slot);
         entry.node.active = false;
         entry.node.setPosition(slot);
@@ -615,6 +616,8 @@ export class CustomersQueueManager extends Component {
         this._entryLookup.set(entry.node.uuid, entry);
         this.resetCustomerOrder(entry);
         entry.node.active = true;
+        controller?.setModelVisible(true);
+        controller?.doIdle();
     }
 
     private resetCustomerOrder (entry: QueueEntry): void {
