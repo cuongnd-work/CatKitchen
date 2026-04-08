@@ -30,7 +30,7 @@ export class CatAnimationController extends Component {
     }
 
     public doWalk(){
-        this.playAnimation('Walk_Angry');
+        this.playWalkAngry(1);
     }
 
     public doBedo(){
@@ -42,7 +42,49 @@ export class CatAnimationController extends Component {
     }
 
     public playWalkAngry (speed = 1): void {
-        this.playAnimation('Walk_Angry', speed, true, ['walk', 'run']);
+        if (this.tryPlayState('Walk_Angry', speed, true)) {
+            return;
+        }
+
+        if (this.tryPlayState('Walk_Angry.animation', speed, true)) {
+            return;
+        }
+
+        this.playAnimation('Walk_Angry', speed, true, ['walk_angry', 'walk', 'run']);
+    }
+
+    public playClip (clip: AnimationClip | null, speed = 1, loop = false): void {
+        if (!clip) {
+            return;
+        }
+
+        const anim = this.resolveAnimation();
+        if (!anim) {
+            return;
+        }
+
+        if (!anim.getState(clip.name)) {
+            anim.addClip(clip);
+        }
+
+        anim.play(clip.name);
+        const state = anim.getState(clip.name);
+        if (!state) {
+            return;
+        }
+
+        state.speed = speed;
+        if (loop) {
+            const loopMode = (AnimationClip as unknown as { WrapMode?: { Loop?: number } }).WrapMode?.Loop;
+            if (loopMode !== undefined) {
+                state.wrapMode = loopMode;
+            }
+            state.repeatCount = Number.POSITIVE_INFINITY;
+        }
+    }
+
+    public getSkeletalAnimation (): SkeletalAnimation | null {
+        return this.resolveAnimation();
     }
 
     public setModelVisible (visible: boolean): void {
@@ -75,12 +117,48 @@ export class CatAnimationController extends Component {
         }
     }
 
+    private tryPlayState (stateName: string, speed = 1, loop = false): boolean {
+        const anim = this.resolveAnimation();
+        if (!anim || !stateName) {
+            return false;
+        }
+
+        if (!anim.getState(stateName)) {
+            return false;
+        }
+
+        anim.play(stateName);
+        const state = anim.getState(stateName);
+        if (!state) {
+            return false;
+        }
+
+        state.speed = speed;
+        if (loop) {
+            const loopMode = (AnimationClip as unknown as { WrapMode?: { Loop?: number } }).WrapMode?.Loop;
+            if (loopMode !== undefined) {
+                state.wrapMode = loopMode;
+            }
+            state.repeatCount = Number.POSITIVE_INFINITY;
+        }
+
+        return true;
+    }
+
     private resolveAnimation (): SkeletalAnimation | null {
         if (this.animation && this.animation.isValid) {
             return this.animation;
         }
 
-        this.animation = this.getComponent(SkeletalAnimation) ?? this.getComponentInChildren(SkeletalAnimation);
+        const catRoot = this.node.getChildByName('Cat1');
+        if (catRoot && catRoot.isValid) {
+            this.animation = catRoot.getComponent(SkeletalAnimation) ?? catRoot.getComponentInChildren(SkeletalAnimation);
+        }
+
+        if (!this.animation || !this.animation.isValid) {
+            this.animation = this.getComponent(SkeletalAnimation) ?? this.getComponentInChildren(SkeletalAnimation);
+        }
+
         return this.animation ?? null;
     }
 

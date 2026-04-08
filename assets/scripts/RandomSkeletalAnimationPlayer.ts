@@ -21,23 +21,29 @@ export class RandomSkeletalAnimationByClip extends Component {
 
     // mỗi skeletal có lastIndex riêng
     private _lastIndexMap = new Map<SkeletalAnimation, number>();
+    private _scheduledCallbacks = new Map<SkeletalAnimation, () => void>();
 
     start () {
-        if (!this.skeletalAnims.length || !this.clips.length) return;
+        if (!this.skeletalAnims.length || !this.getAvailableClips().length) return;
 
         for (const anim of this.skeletalAnims) {
-            this.playRandomFor(anim);
+            this.resumeFor(anim);
         }
     }
 
     /* ================= CORE ================= */
 
-    private playRandomFor (anim: SkeletalAnimation) {
-        if (!anim) return;
+    private playRandomFor (anim: SkeletalAnimation): boolean {
+        if (!anim) return false;
+
+        const availableClips = this.getAvailableClips();
+        if (!availableClips.length) return false;
+
+        this.clearScheduledFor(anim);
 
         const lastIndex = this._lastIndexMap.get(anim) ?? -1;
-        const index = this.getRandomIndex(lastIndex);
-        const clip = this.clips[index];
+        const index = this.getRandomIndex(lastIndex, availableClips.length);
+        const clip = availableClips[index];
 
         let speed = 1;
         if (this.randomSpeed) {
@@ -56,25 +62,61 @@ export class RandomSkeletalAnimationByClip extends Component {
         this._lastIndexMap.set(anim, index);
 
         // ⏱ schedule RIÊNG cho anim này
-        this.scheduleOnce(() => {
+        const callback = () => {
+            this._scheduledCallbacks.delete(anim);
             this.playRandomFor(anim);
-        }, realDuration);
+        };
+        this._scheduledCallbacks.set(anim, callback);
+        this.scheduleOnce(callback, realDuration);
+        return true;
+    }
+
+    public suspendFor (anim: SkeletalAnimation | null): void {
+        if (!anim) return;
+        this.clearScheduledFor(anim);
+    }
+
+    public resumeFor (anim: SkeletalAnimation | null): boolean {
+        if (!anim) return false;
+        return this.playRandomFor(anim);
+    }
+
+    private clearScheduledFor (anim: SkeletalAnimation): void {
+        const callback = this._scheduledCallbacks.get(anim);
+        if (!callback) return;
+
+        this.unschedule(callback);
+        this._scheduledCallbacks.delete(anim);
     }
 
     /* ================= RANDOM ================= */
 
-    private getRandomIndex (lastIndex: number): number {
-        if (this.clips.length <= 1) return 0;
+    private getRandomIndex (lastIndex: number, count: number): number {
+        if (count <= 1) return 0;
 
         let i = lastIndex;
         while (i === lastIndex) {
-            i = Math.floor(Math.random() * this.clips.length);
+            i = Math.floor(Math.random() * count);
         }
         return i;
+    }
+
+    private getAvailableClips (): AnimationClip[] {
+        const result: AnimationClip[] = [];
+        for (let i = 0; i < this.clips.length; i++) {
+            const clip = this.clips[i];
+            if (!clip || !clip.name) {
+                continue;
+            }
+            result.push(clip);
+        }
+
+        return result;
     }
 
     onDestroy () {
         this.unscheduleAllCallbacks();
         this._lastIndexMap.clear();
+        this._scheduledCallbacks.clear();
     }
 }

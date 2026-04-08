@@ -1,7 +1,8 @@
-import { _decorator, Component, Node, Tween, Vec3, tween } from 'cc';
+import { _decorator, AnimationClip, Component, Node, SkeletalAnimation, Tween, Vec3, tween } from 'cc';
 import { CatAnimationController } from 'db://assets/scripts/CatAnimationController';
 import { CustomersQueueEvent, CustomersQueueEvents } from 'db://assets/scripts/customers/CustomersQueueEvents';
 import { OrderPopup } from 'db://assets/scripts/OrderPopup';
+import { RandomSkeletalAnimationByClip } from 'db://assets/scripts/RandomSkeletalAnimationPlayer';
 
 const { ccclass, property } = _decorator;
 
@@ -100,6 +101,12 @@ export class CustomersQueueManager extends Component {
     @property({ tooltip: 'Delay (seconds) before the next customer advances after a sale completes', min: 0 })
     frontAdvanceDelay = 0.3;
 
+    @property({ type: AnimationClip, tooltip: 'Kéo clip Walk_Angry vào đây để ép customer dùng đúng clip khi di chuyển.' })
+    walkAngryClip: AnimationClip | null = null;
+
+    @property({ type: RandomSkeletalAnimationByClip, tooltip: 'Random animation player for customer idle states (auto-find when empty).' })
+    randomAnimationPlayer: RandomSkeletalAnimationByClip | null = null;
+
     private _columns: ColumnData[] = [];
     private _entryLookup = new Map<string, QueueEntry>();
     private _columnAdvanceMultipliers = new Map<number, number>();
@@ -117,6 +124,7 @@ export class CustomersQueueManager extends Component {
 
     start (): void {
         this.buildQueues();
+        this.syncRandomAnimationPlayerTargets();
     }
 
     onDestroy (): void {
@@ -323,8 +331,7 @@ export class CustomersQueueManager extends Component {
         const exitSpeedScale = Math.max(0.01, this.exitMoveSpeedScale);
 
         const sequence = tween(entry.node);
-        controller?.setModelVisible(true);
-        controller?.playWalkAngry(exitSpeedScale);
+        this.applyMovingAnimation(controller, exitSpeedScale);
 
         const exitOutDuration = Math.max(0.01, this.exitDuration * Math.max(0.01, this.exitDurationScale) / exitSpeedScale);
 
@@ -391,11 +398,16 @@ export class CustomersQueueManager extends Component {
         entries.forEach((queueEntry) => {
             const previousSlot = cloneVec3(queueEntry.targetPosition);
             queueEntry.targetPosition = cloneVec3(nextSlot);
+            const controller = queueEntry.node.getComponent(CatAnimationController);
+            this.applyMovingAnimation(controller, 1);
 
             Tween.stopAllByTarget(queueEntry.node);
 
             tween(queueEntry.node)
                 .to(advanceDuration, { position: queueEntry.targetPosition }, { easing: 'sineOut' })
+                .call(() => {
+                    this.applyIdleOrRandomAnimation(controller);
+                })
                 .start();
 
             nextSlot = previousSlot;
@@ -616,8 +628,83 @@ export class CustomersQueueManager extends Component {
         this._entryLookup.set(entry.node.uuid, entry);
         this.resetCustomerOrder(entry);
         entry.node.active = true;
-        controller?.setModelVisible(true);
-        controller?.doIdle();
+        this.applyIdleOrRandomAnimation(controller);
+    }
+
+    private applyMovingAnimation (controller: CatAnimationController | null, speed = 1): void {
+        if (!controller) {
+            return;
+        }
+
+        controller.setModelVisible(true);
+        const skeletal = controller.getSkeletalAnimation();
+        this.resolveRandomAnimationPlayer()?.suspendFor(skeletal);
+        if (this.walkAngryClip) {
+            controller.playClip(this.walkAngryClip, speed, true);
+            return;
+        }
+
+        controller.playWalkAngry(speed);
+    }
+
+    private applyIdleOrRandomAnimation (controller: CatAnimationController | null): void {
+        if (!controller) {
+            return;
+        }
+
+        controller.setModelVisible(true);
+        const skeletal = controller.getSkeletalAnimation();
+        const randomPlayer = this.resolveRandomAnimationPlayer();
+        if (randomPlayer && skeletal && randomPlayer.resumeFor(skeletal)) {
+            return;
+        }
+
+        controller.doIdle();
+    }
+
+    private resolveRandomAnimationPlayer (): RandomSkeletalAnimationByClip | null {
+        if (this.randomAnimationPlayer && this.randomAnimationPlayer.isValid) {
+            return this.randomAnimationPlayer;
+        }
+
+        let player = this.node.getComponent(RandomSkeletalAnimationByClip)
+            ?? this.node.getComponentInChildren(RandomSkeletalAnimationByClip);
+
+        if (!player) {
+            const scene = this.node.scene;
+            if (scene) {
+                player = scene.getComponentInChildren(RandomSkeletalAnimationByClip);
+            }
+        }
+
+        this.randomAnimationPlayer = player ?? null;
+        return this.randomAnimationPlayer;
+    }
+
+    private syncRandomAnimationPlayerTargets (): void {
+        const randomPlayer = this.resolveRandomAnimationPlayer();
+        if (!randomPlayer) {
+            return;
+        }
+
+        const targets: SkeletalAnimation[] = [];
+        this._entryLookup.forEach((entry) => {
+            const controller = entry.node.getComponent(CatAnimationController);
+            const skeletal = controller?.getSkeletalAnimation();
+            if (!skeletal || !skeletal.isValid) {
+                return;
+            }
+
+            if (targets.indexOf(skeletal) !== -1) {
+                return;
+            }
+
+            targets.push(skeletal);
+        });
+
+        if (targets.length > 0) {
+            randomPlayer.skeletalAnims = targets;
+        }
     }
 
     private resetCustomerOrder (entry: QueueEntry): void {
