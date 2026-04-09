@@ -1,6 +1,6 @@
 // SpriteFill.effect
 // Built on Cocos Creator builtin unlit template
-// Isometric-like fill (diagonal) with always-on-top rendering behavior.
+// Isometric-like fill (diagonal).
 
 CCEffect %{
   techniques:
@@ -9,7 +9,7 @@ CCEffect %{
     - vert: general-vs:vert
       frag: sprite-fill-fs:frag
       depthStencilState:
-        depthTest: false
+        depthTest: true
         depthWrite: false
       blendState:
         targets:
@@ -29,7 +29,7 @@ CCEffect %{
     - vert: general-vs:vert
       frag: sprite-fill-fs:frag
       depthStencilState:
-        depthTest: false
+        depthTest: true
         depthWrite: false
       blendState:
         targets:
