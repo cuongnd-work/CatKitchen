@@ -60,11 +60,21 @@ CCProgram sprite-fill-fs %{
     float alphaThreshold;
   };
 
+  float linearRatioToIsoThreshold (float ratio) {
+    // Keep gameplay ratio linear while matching diagonal/isometric fill area.
+    float p = clamp(ratio, 0.0, 1.0);
+    if (p <= 0.5) {
+      return sqrt(p * 0.5);
+    }
+    return 1.0 - sqrt((1.0 - p) * 0.5);
+  }
+
   vec4 frag () {
     // Isometric-like diagonal fill:
     // 0.0 starts near lower-left, 1.0 reaches upper-right.
+    float fillThreshold = linearRatioToIsoThreshold(fillAmount);
     float isoProgress = clamp((v_uv.x + v_uv.y) * 0.5, 0.0, 1.0);
-    if (isoProgress > fillAmount) {
+    if (isoProgress > fillThreshold) {
       discard;
     }
 
