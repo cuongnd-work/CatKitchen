@@ -130,6 +130,9 @@ export class SpawnZone extends Component {
     @property({ type: Vec3, tooltip: 'Initial scale applied at startPoint before tweening to the prefab scale.' })
     public startScale: Vec3 = new Vec3(0.2, 0.2, 0.2);
 
+    @property({ type: Vec3, tooltip: 'Euler rotation applied to spawned items while they are in the spawn stack.' })
+    public spawnRotation: Vec3 = new Vec3(0, 0, 0);
+
     @property({ tooltip: 'Seconds the prefab takes to travel from the startPoint to the stacked slot.' })
     public moveDuration = 0.35;
 
@@ -439,6 +442,7 @@ export class SpawnZone extends Component {
         spawned.getScale(this._targetScale);
         this._tempStartScale.set(this.startScale);
         spawned.setScale(this._tempStartScale);
+        spawned.setRotationFromEuler(this.spawnRotation.x, this.spawnRotation.y, this.spawnRotation.z);
 
         this.computeStackedPosition(this._spawnPosition, targetParent, slotIndex);
         targetParent.inverseTransformPoint(this._finalLocalPos, this._spawnPosition);

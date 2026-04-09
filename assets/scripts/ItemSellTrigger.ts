@@ -170,6 +170,9 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'Local scale applied to carried money bundles.' })
     public moneyCarryScale: Vec3 = new Vec3(1, 1, 1);
 
+    @property({ type: Vec3, tooltip: 'Euler rotation applied to money bundles while spawning and carrying.' })
+    public moneyItemRotation: Vec3 = new Vec3(0, 0, 0);
+
     @property({ tooltip: 'Local stacking direction for carried money bundles.' })
     public moneyCarryDirection: Vec3 = new Vec3(0, 1, 0);
 
@@ -927,7 +930,7 @@ export class ItemSellTrigger extends Component {
         }
 
         reward.setScale(1, 1, 1);
-        reward.setRotationFromEuler(0, 0, 0);
+        reward.setRotationFromEuler(this.moneyItemRotation.x, this.moneyItemRotation.y, this.moneyItemRotation.z);
         reward.active = true;
 
         const collectible = reward.getComponent(CollectibleItem) ?? reward.addComponent(CollectibleItem);
@@ -1109,7 +1112,7 @@ export class ItemSellTrigger extends Component {
         anchor.inverseTransformPoint(this._localTemp, this._worldTemp);
         bundle.setPosition(this._localTemp);
         bundle.setScale(this.moneyCarryScale.x, this.moneyCarryScale.y, this.moneyCarryScale.z);
-        bundle.setRotationFromEuler(0, 0, 0);
+        bundle.setRotationFromEuler(this.moneyItemRotation.x, this.moneyItemRotation.y, this.moneyItemRotation.z);
 
         this._carriedMoney.push(bundle);
         this._moneyTypeOrder = this.resolveMoneyTypeOrder(anchor);
@@ -1299,7 +1302,7 @@ export class ItemSellTrigger extends Component {
             }
 
             node.setScale(this.moneyCarryScale.x, this.moneyCarryScale.y, this.moneyCarryScale.z);
-            node.setRotationFromEuler(0, 0, 0);
+            node.setRotationFromEuler(this.moneyItemRotation.x, this.moneyItemRotation.y, this.moneyItemRotation.z);
             node.setPosition(
                 basis.baseX + dir.x * i * basis.spacing,
                 basis.baseY + dir.y * i * basis.spacing,
