@@ -7,6 +7,9 @@ const { ccclass, property } = _decorator;
 
 @ccclass('MoneyPaymentZone')
 export abstract class MoneyPaymentZone extends Component {
+    @property({ tooltip: 'Keep progress visuals on top of other children under the same parent.' })
+    public keepProgressOnTop = true;
+
     @property({ type: Node, tooltip: 'Character node required to activate the payment zone.' })
     public character: Node | null = null;
 
@@ -79,6 +82,7 @@ export abstract class MoneyPaymentZone extends Component {
     protected onLoad (): void {
         this.updateRequiredAmountLabel();
         this.updateProgressSprite();
+        this.ensureProgressVisualOnTop();
     }
 
     update (deltaTime: number): void {
@@ -87,6 +91,7 @@ export abstract class MoneyPaymentZone extends Component {
 
     protected onEnable (): void {
         this.registerColliderEvents();
+        this.ensureProgressVisualOnTop();
     }
 
     protected onDisable (): void {
@@ -179,9 +184,11 @@ export abstract class MoneyPaymentZone extends Component {
         this.registerPendingDeposit(bundle, this.moneyValuePerBundle);
         bundle.getWorldPosition(this._worldTemp);
         targetNode.addChild(bundle);
+        bundle.setSiblingIndex(0);
         targetNode.inverseTransformPoint(this._localTemp, this._worldTemp);
         bundle.setPosition(this._localTemp);
         bundle.setScale(this.consumeStartScale.x, this.consumeStartScale.y, this.consumeStartScale.z);
+        this.ensureProgressVisualOnTop();
 
         targetNode.getWorldPosition(this._worldTarget);
         this._worldTarget.x += this.depositOffset.x;
@@ -203,6 +210,10 @@ export abstract class MoneyPaymentZone extends Component {
                 this.recycleBundle(bundle);
             })
             .start();
+    }
+
+    protected lateUpdate (): void {
+        this.ensureProgressVisualOnTop();
     }
 
     private reportPaymentProgress (): void {
@@ -378,6 +389,35 @@ export abstract class MoneyPaymentZone extends Component {
         if (this._joystickInteractionActive) {
             UI_Joystick.endExternalInteraction();
             this._joystickInteractionActive = false;
+        }
+    }
+
+    private ensureProgressVisualOnTop (): void {
+        if (!this.keepProgressOnTop) {
+            return;
+        }
+
+        const progressNode = this.progressSprite?.node;
+        if (!progressNode || !progressNode.isValid) {
+            return;
+        }
+
+        const parent = progressNode.parent;
+        if (!parent || !parent.isValid) {
+            return;
+        }
+
+        const topIndex = parent.children.length - 1;
+        if (progressNode.getSiblingIndex() !== topIndex) {
+            progressNode.setSiblingIndex(topIndex);
+        }
+
+        const labelNode = this.requiredAmountLabel?.node;
+        if (labelNode && labelNode.isValid && labelNode.parent === parent) {
+            const labelTopIndex = parent.children.length - 1;
+            if (labelNode.getSiblingIndex() !== labelTopIndex) {
+                labelNode.setSiblingIndex(labelTopIndex);
+            }
         }
     }
 }
