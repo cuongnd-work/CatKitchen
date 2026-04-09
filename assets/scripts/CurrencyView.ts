@@ -1,111 +1,191 @@
 import { _decorator, Component, Label, Color, tween, EventTarget } from 'cc';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('CurrencyView')
 export class CurrencyView extends Component {
-    private static _instance: CurrencyView = null;
-    public static get instance(): CurrencyView {
+    private static _instance: CurrencyView | null = null;
+    private static _eventTarget: EventTarget = new EventTarget();
+    private static _value = 0;
+
+    public static readonly EVENT_CHANGED = 'currency-changed';
+
+    public static get instance(): CurrencyView | null {
         return this._instance;
     }
 
+    public static get currentValue(): number {
+        return this._value;
+    }
+
     @property(Label)
-    currencyLabel: Label = null;
+    public currencyLabel: Label | null = null;
 
-    public currentValue: number = 0;
+    @property
+    public prefix = 'Money: ';
 
-    private targetValue: number = 0;
+    @property
+    public tweenDuration = 0.25;
 
-    private defaultColor: Color = new Color();
-    private isChanging: boolean = false;
+    @property
+    public animateChanges = true;
 
-    onLoad() {
+    private _displayValue = 0;
+    private _targetValue = 0;
+    private _isChanging = false;
+    private _defaultColor: Color = new Color();
+
+    protected onLoad(): void {
         if (CurrencyView._instance && CurrencyView._instance !== this) {
-            console.warn("Duplicate CurrencyView found. Destroying this one.");
+            console.warn('[CurrencyView] Duplicate instance found. Destroying the new one.');
             this.destroy();
             return;
         }
+
         CurrencyView._instance = this;
+        if (!this.currencyLabel) {
+            this.currencyLabel = this.getComponent(Label);
+        }
 
         if (this.currencyLabel) {
-            this.defaultColor = this.currencyLabel.color.clone();
-            this.currencyLabel.string = this.currentValue.toString();
+            this._defaultColor = this.currencyLabel.color.clone();
         }
-        this.addCurrency(50);
+
+        this._displayValue = CurrencyView._value;
+        this._targetValue = CurrencyView._value;
+        this.updateLabelText(this._displayValue);
     }
 
-    private static _eventTarget: EventTarget = new EventTarget();
-    public static readonly EVENT_CHANGED: string = 'currency-changed';
+    protected onDestroy(): void {
+        if (CurrencyView._instance === this) {
+            CurrencyView._instance = null;
+        }
+    }
 
-    public static onCurrencyChanged(callback: () => void, target?: any) {
+    public static onCurrencyChanged(callback: () => void, target?: unknown): void {
         this._eventTarget.on(this.EVENT_CHANGED, callback, target);
     }
 
-    public static offCurrencyChanged(callback: () => void, target?: any) {
+    public static offCurrencyChanged(callback: () => void, target?: unknown): void {
         this._eventTarget.off(this.EVENT_CHANGED, callback, target);
     }
 
-    private notifyCurrencyChanged() {
-        CurrencyView._eventTarget.emit(CurrencyView.EVENT_CHANGED);
+    public static setCurrentValue(value: number): void {
+        const normalized = this.normalizeValue(value);
+        const previous = this._value;
+        if (normalized === previous) {
+            return;
+        }
+
+        this._value = normalized;
+        this._eventTarget.emit(this.EVENT_CHANGED);
+
+        if (this._instance) {
+            this._instance.applyValue(normalized, normalized - previous);
+        }
     }
 
-    public addCurrency(amount: number) {
-        if (amount <= 0) return;
-        this.targetValue += amount;
-        this.startTween(true);
-        this.notifyCurrencyChanged();
+    public static addCurrency(amount: number): void {
+        if (amount <= 0) {
+            return;
+        }
+        this.setCurrentValue(this._value + amount);
     }
 
-    public subtractCurrency(amount: number) {
-        if (amount <= 0) return;
-        this.targetValue -= amount;
-        this.startTween(false);
-        this.notifyCurrencyChanged();
+    public static subtractCurrency(amount: number): void {
+        if (amount <= 0) {
+            return;
+        }
+        this.setCurrentValue(this._value - amount);
     }
 
-    public trySubtractCurrency(amount: number) {
-        if(this.targetValue < amount) return false;
+    public static trySubtractCurrency(amount: number): boolean {
+        if (amount <= 0) {
+            return true;
+        }
+        if (this._value < amount) {
+            return false;
+        }
         this.subtractCurrency(amount);
-
         return true;
     }
 
-    public canAfford(amount: number): boolean {
-        return this.targetValue >= amount;
+    public static canAfford(amount: number): boolean {
+        if (amount <= 0) {
+            return true;
+        }
+        return this._value >= amount;
     }
 
-    private startTween(isAdd: boolean) {
-        if (!this.currencyLabel) return;
+    private static normalizeValue(value: number): number {
+        if (!Number.isFinite(value)) {
+            return 0;
+        }
+        return Math.max(0, Math.floor(value));
+    }
 
-        this.currencyLabel.color = isAdd ? new Color(255, 215, 0) : new Color(255, 80, 80);
+    private applyValue(value: number, delta: number): void {
+        this._targetValue = value;
 
-        if (this.isChanging) return; // tween đang chạy, targetValue đã cập nhật, tween sẽ tự động tiếp
+        if (!this.currencyLabel) {
+            this._displayValue = value;
+            return;
+        }
 
-        this.isChanging = true;
-        const tmp = { value: this.currentValue };
-        const duration = 0.6;
+        if (!this.animateChanges) {
+            this._displayValue = value;
+            this.updateLabelText(value);
+            this.currencyLabel.color = this._defaultColor;
+            return;
+        }
 
-        const updateTween = () => {
-            tween(tmp)
-                .to(duration, { value: this.targetValue }, {
-                    onUpdate: () => {
-                        this.currentValue = Math.floor(tmp.value);
-                        this.currencyLabel.string = this.currentValue.toString();
-                    }
-                })
-                .call(() => {
-                    this.currentValue = this.targetValue;
-                    this.currencyLabel.string = this.currentValue.toString();
-                    this.currencyLabel.color = this.defaultColor;
-                    this.isChanging = false;
+        if (delta > 0) {
+            this.currencyLabel.color = new Color(255, 215, 0, 255);
+        } else if (delta < 0) {
+            this.currencyLabel.color = new Color(255, 80, 80, 255);
+        }
 
-                    // Nếu targetValue thay đổi trong lúc tween → chạy tiếp
-                    if (this.currentValue !== this.targetValue) {
-                        updateTween();
-                    }
-                })
-                .start();
-        };
+        if (this._isChanging) {
+            return;
+        }
 
-        updateTween();
+        this.startTween();
+    }
+
+    private startTween(): void {
+        if (!this.currencyLabel) {
+            this._displayValue = this._targetValue;
+            return;
+        }
+
+        this._isChanging = true;
+        const proxy = { value: this._displayValue };
+        const duration = Math.max(0.01, this.tweenDuration);
+
+        tween(proxy)
+            .to(duration, { value: this._targetValue }, {
+                onUpdate: () => {
+                    this._displayValue = Math.floor(proxy.value);
+                    this.updateLabelText(this._displayValue);
+                },
+            })
+            .call(() => {
+                this._displayValue = this._targetValue;
+                this.updateLabelText(this._displayValue);
+                this.currencyLabel!.color = this._defaultColor;
+                this._isChanging = false;
+
+                if (this._displayValue !== this._targetValue) {
+                    this.startTween();
+                }
+            })
+            .start();
+    }
+
+    private updateLabelText(value: number): void {
+        if (!this.currencyLabel) {
+            return;
+        }
+        this.currencyLabel.string = `${this.prefix}${value}`;
     }
 }

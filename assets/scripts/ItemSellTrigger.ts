@@ -7,6 +7,7 @@ import { CustomersQueueManager } from 'db://assets/scripts/customers/CustomersQu
 import { OrderPopup } from 'db://assets/scripts/OrderPopup';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 import { MoneyStackItem } from './MoneyStackItem';
+import { CurrencyView } from './CurrencyView';
 
 type MoneyCarryBasis = {
     spacing: number;
@@ -20,6 +21,8 @@ const { ccclass, property } = _decorator;
 
 @ccclass('ItemSellTrigger')
 export class ItemSellTrigger extends Component {
+    private static readonly _currencySources: Set<ItemSellTrigger> = new Set();
+
     @property({ type: Node, tooltip: 'Character root that owns the carried items.' })
     public character: Node | null = null;
 
@@ -185,6 +188,9 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'Local axis used to push money behind other carried item types.' })
     public moneyCarryTypeAxis: Vec3 = new Vec3(0, 0, 1);
 
+    @property({ tooltip: 'Currency value represented by each carried money bundle.' })
+    public moneyValuePerBundle = 20;
+
     @property({ type: AudioSource, tooltip: 'Sound played when an item moves from the character to the sell area.' })
     public sellAudio: AudioSource | null = null;
 
@@ -235,6 +241,11 @@ export class ItemSellTrigger extends Component {
 
     protected onLoad (): void {
         this.rebuildSellerAnchors();
+        this.registerCurrencySource();
+    }
+
+    protected onDestroy (): void {
+        this.unregisterCurrencySource();
     }
 
     update (deltaTime: number): void {
@@ -242,6 +253,47 @@ export class ItemSellTrigger extends Component {
         this.updateCustomerServing(deltaTime);
         this.collectMoneyBundles();
         this.updateMoneyCarryLayout();
+    }
+
+    private static refreshCurrencyView (): void {
+        let totalValue = 0;
+        this._currencySources.forEach((source) => {
+            if (!source || !source.isValid) {
+                return;
+            }
+            totalValue += source.getCarriedMoneyValue();
+        });
+        CurrencyView.setCurrentValue(totalValue);
+    }
+
+    private registerCurrencySource (): void {
+        ItemSellTrigger._currencySources.add(this);
+        this.syncCurrencyView();
+    }
+
+    private unregisterCurrencySource (): void {
+        ItemSellTrigger._currencySources.delete(this);
+        ItemSellTrigger.refreshCurrencyView();
+    }
+
+    private syncCurrencyView (): void {
+        ItemSellTrigger.refreshCurrencyView();
+    }
+
+    private getCarriedMoneyValue (): number {
+        const valuePerBundle = Math.max(0, Math.floor(this.moneyValuePerBundle));
+        return this.getValidCarriedMoneyCount() * valuePerBundle;
+    }
+
+    private getValidCarriedMoneyCount (): number {
+        let count = 0;
+        for (let i = 0; i < this._carriedMoney.length; i++) {
+            const bundle = this._carriedMoney[i];
+            if (bundle && bundle.isValid) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public registerSeller (character: Node | null, anchor: Node | null): void {
@@ -1115,6 +1167,7 @@ export class ItemSellTrigger extends Component {
         bundle.setRotationFromEuler(this.moneyItemRotation.x, this.moneyItemRotation.y, this.moneyItemRotation.z);
 
         this._carriedMoney.push(bundle);
+        this.syncCurrencyView();
         this._moneyTypeOrder = this.resolveMoneyTypeOrder(anchor);
 
         const basis = this.computeMoneyCarryBasis();
@@ -1162,6 +1215,7 @@ export class ItemSellTrigger extends Component {
         if (results.length > 0 && anchor) {
             this._moneyTypeOrder = Math.min(this._moneyTypeOrder, this.resolveMoneyTypeOrder(anchor));
             this.relayoutCarriedMoney(anchor);
+            this.syncCurrencyView();
         }
 
         return results;
@@ -1172,13 +1226,19 @@ export class ItemSellTrigger extends Component {
             return;
         }
 
+        let removed = false;
         const index = this._carriedMoney.indexOf(bundle);
         if (index !== -1) {
             this._carriedMoney.splice(index, 1);
+            removed = true;
         }
 
         bundle.removeFromParent();
         object_pool_manager.instance.Recycle(bundle);
+
+        if (removed) {
+            this.syncCurrencyView();
+        }
     }
 
     private updateMoneyCarryLayout (): void {
@@ -1202,14 +1262,20 @@ export class ItemSellTrigger extends Component {
             this._needsMoneyRelayout = true;
         }
 
+        let removedInvalidBundle = false;
         for (let i = 0; i < this._carriedMoney.length; i++) {
             const node = this._carriedMoney[i];
             if (!node || !node.isValid) {
                 this._carriedMoney.splice(i, 1);
                 i--;
                 this._needsMoneyRelayout = true;
+                removedInvalidBundle = true;
                 continue;
             }
+        }
+
+        if (removedInvalidBundle) {
+            this.syncCurrencyView();
         }
 
         if (!this._needsMoneyRelayout) {
@@ -1288,12 +1354,14 @@ export class ItemSellTrigger extends Component {
 
         const basis = this.computeMoneyCarryBasis();
         const dir = this._moneyCarryDir;
+        let removedInvalidBundle = false;
 
         for (let i = 0; i < this._carriedMoney.length; i++) {
             const node = this._carriedMoney[i];
             if (!node || !node.isValid) {
                 this._carriedMoney.splice(i, 1);
                 i--;
+                removedInvalidBundle = true;
                 continue;
             }
 
@@ -1308,6 +1376,10 @@ export class ItemSellTrigger extends Component {
                 basis.baseY + dir.y * i * basis.spacing,
                 basis.baseZ + dir.z * i * basis.spacing,
             );
+        }
+
+        if (removedInvalidBundle) {
+            this.syncCurrencyView();
         }
 
         if (this._carriedMoney.length === 0 || basis.typeSpacing <= 0) {
