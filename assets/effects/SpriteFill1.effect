@@ -8,6 +8,8 @@ CCEffect %{
     passes:
     - vert: general-vs:vert
       frag: sprite-fill-fs:frag
+      rasterizerState:
+        cullMode: none
       depthStencilState:
         depthTest: true
         depthWrite: false
@@ -28,6 +30,8 @@ CCEffect %{
     passes:
     - vert: general-vs:vert
       frag: sprite-fill-fs:frag
+      rasterizerState:
+        cullMode: none
       depthStencilState:
         depthTest: true
         depthWrite: false
