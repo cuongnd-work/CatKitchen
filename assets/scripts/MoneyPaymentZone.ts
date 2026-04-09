@@ -407,6 +407,17 @@ export abstract class MoneyPaymentZone extends Component {
             return;
         }
 
+        // Keep common background sprites behind the progress sprite.
+        for (let i = 0; i < parent.children.length; i++) {
+            const child = parent.children[i];
+            if (!child || child === progressNode) {
+                continue;
+            }
+            if (child.name === 'Img-001' || child.name === 'Bg' || child.name === 'Background') {
+                child.setSiblingIndex(0);
+            }
+        }
+
         const topIndex = parent.children.length - 1;
         if (progressNode.getSiblingIndex() !== topIndex) {
             progressNode.setSiblingIndex(topIndex);

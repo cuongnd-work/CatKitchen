@@ -1,23 +1,36 @@
 // SpriteFill.effect
 // Built on Cocos Creator builtin unlit template
-// Horizontal sprite fill (left -> right)
+// Isometric-like fill (diagonal) with always-on-top rendering behavior.
 
 CCEffect %{
   techniques:
-  - name: opaque
+  - name: transparent
     passes:
     - vert: general-vs:vert
       frag: sprite-fill-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
       properties: &props
         mainTexture:    { value: white }
         mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
         fillAmount:     { value: 1.0 }
         alphaThreshold: { value: 0.001 }
 
-  - name: transparent
+  - name: transparent_alt
     passes:
     - vert: general-vs:vert
       frag: sprite-fill-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
       blendState:
         targets:
         - blend: true
@@ -48,8 +61,10 @@ CCProgram sprite-fill-fs %{
   };
 
   vec4 frag () {
-    // Horizontal fill
-    if (v_uv.x > fillAmount) {
+    // Isometric-like diagonal fill:
+    // 0.0 starts near lower-left, 1.0 reaches upper-right.
+    float isoProgress = clamp((v_uv.x + v_uv.y) * 0.5, 0.0, 1.0);
+    if (isoProgress > fillAmount) {
       discard;
     }
 
