@@ -6976,7 +6976,7 @@
         "__id__": 166
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 171
@@ -7612,7 +7612,7 @@
         "__id__": 180
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 185
@@ -8246,7 +8246,7 @@
         "__id__": 197
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 199
@@ -8830,6 +8830,12 @@
     "nodesToDisable": [
       {
         "__id__": 189
+      },
+      {
+        "__id__": 197
+      },
+      {
+        "__id__": 192
       }
     ],
     "nodeToActivateOnComplete": null,
