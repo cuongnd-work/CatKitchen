@@ -30,15 +30,12 @@
       },
       {
         "__id__": 278
-      },
-      {
-        "__id__": 2727
       }
     ],
     "_active": true,
     "_components": [],
     "_prefab": {
-      "__id__": 2732
+      "__id__": 2727
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -69,7 +66,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 2733
+      "__id__": 2728
     },
     "_id": "bfd992e4-cf8b-4a3e-95ea-da6c57399ade"
   },
@@ -23968,8 +23965,8 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -252.931,
-      "y": 576.427,
+      "x": -839.026,
+      "y": 467.127,
       "z": 0
     },
     "_lrot": {
@@ -23981,9 +23978,9 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 0.4,
-      "y": 0.4,
-      "z": 0.4
+      "x": 1,
+      "y": 1,
+      "z": 1
     },
     "_mobility": 0,
     "_layer": 33554432,
@@ -24575,9 +24572,9 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 244.931,
-      "y": 576.427,
-      "z": 0
+      "x": 827.944,
+      "y": 473.057,
+      "z": -9.279
     },
     "_lrot": {
       "__type__": "cc.Quat",
@@ -24588,9 +24585,9 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 0.4,
-      "y": 0.4,
-      "z": 0.4
+      "x": 1.2,
+      "y": 1.2,
+      "z": 1.2
     },
     "_mobility": 0,
     "_layer": 33554432,
@@ -112202,7 +112199,7 @@
     "targetCamera": {
       "__id__": 6
     },
-    "portraitOrthoHeight": 8.3,
+    "portraitOrthoHeight": 6.8,
     "landscapeOrthoHeight": 4.5,
     "_id": "a3l8ocbB1AF4x5vj92tA6M"
   },
@@ -112341,225 +112338,6 @@
     "_id": "4cTYb9X4ZJz7yVxzxr9UiU"
   },
   {
-    "__type__": "cc.Node",
-    "_name": "ObjectPools",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "_parent": {
-      "__id__": 1
-    },
-    "_children": [
-      {
-        "__id__": 2728
-      }
-    ],
-    "_active": true,
-    "_components": [],
-    "_prefab": null,
-    "_lpos": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_lrot": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    },
-    "_lscale": {
-      "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
-    },
-    "_mobility": 0,
-    "_layer": 1073741824,
-    "_euler": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_id": "69V1CbhyVKKI0YERrdb3Yq"
-  },
-  {
-    "__type__": "cc.Node",
-    "_name": "Pool_Default",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "_parent": {
-      "__id__": 2727
-    },
-    "_children": [
-      {
-        "__id__": 2729
-      },
-      {
-        "__id__": 2730
-      },
-      {
-        "__id__": 2731
-      }
-    ],
-    "_active": true,
-    "_components": [],
-    "_prefab": null,
-    "_lpos": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_lrot": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    },
-    "_lscale": {
-      "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
-    },
-    "_mobility": 0,
-    "_layer": 1073741824,
-    "_euler": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_id": "45WMhNDvJJWZUoq06NEFW3"
-  },
-  {
-    "__type__": "cc.Node",
-    "_name": "burger_Pool",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "_parent": {
-      "__id__": 2728
-    },
-    "_children": [],
-    "_active": true,
-    "_components": [],
-    "_prefab": null,
-    "_lpos": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_lrot": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    },
-    "_lscale": {
-      "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
-    },
-    "_mobility": 0,
-    "_layer": 1073741824,
-    "_euler": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_id": "93Mn/sN5tFna0tW62nzwwu"
-  },
-  {
-    "__type__": "cc.Node",
-    "_name": "cola_Pool",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "_parent": {
-      "__id__": 2728
-    },
-    "_children": [],
-    "_active": true,
-    "_components": [],
-    "_prefab": null,
-    "_lpos": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_lrot": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    },
-    "_lscale": {
-      "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
-    },
-    "_mobility": 0,
-    "_layer": 1073741824,
-    "_euler": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_id": "6aNv4H3aRMBqfFi28csZNn"
-  },
-  {
-    "__type__": "cc.Node",
-    "_name": "money_Pool",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "_parent": {
-      "__id__": 2728
-    },
-    "_children": [],
-    "_active": true,
-    "_components": [],
-    "_prefab": null,
-    "_lpos": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_lrot": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    },
-    "_lscale": {
-      "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
-    },
-    "_mobility": 0,
-    "_layer": 1073741824,
-    "_euler": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_id": "9ftf7LhehMc7Pjh4+fyt4v"
-  },
-  {
     "__type__": "cc.PrefabInfo",
     "root": null,
     "asset": null,
@@ -112570,28 +112348,28 @@
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 2734
+      "__id__": 2729
     },
     "shadows": {
-      "__id__": 2735
+      "__id__": 2730
     },
     "_skybox": {
-      "__id__": 2736
+      "__id__": 2731
     },
     "fog": {
-      "__id__": 2737
+      "__id__": 2732
     },
     "octree": {
-      "__id__": 2738
+      "__id__": 2733
     },
     "skin": {
-      "__id__": 2739
+      "__id__": 2734
     },
     "lightProbeInfo": {
-      "__id__": 2740
+      "__id__": 2735
     },
     "postSettings": {
-      "__id__": 2741
+      "__id__": 2736
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false
