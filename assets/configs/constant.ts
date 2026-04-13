@@ -14,9 +14,10 @@
     }
 
     static TRACKING = {
-        PLAYABLE_ID: "PA0004",
-        PACKAGE_NAME: "Game05_Test",
-        MAX_TRACKING_DURATION_SEC: 60
+        PLAYABLE_ID: "PA0006",
+        PACKAGE_NAME: "com.archer.cat.kitchen",
+        MAX_TRACKING_DURATION_SEC: 60,
+        ENV: "production"
     }
 
     static EFFECT_NAME = {
