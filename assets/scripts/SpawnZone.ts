@@ -164,8 +164,6 @@ export class SpawnZone extends Component {
     private _stackLocalOffset: Vec3 = new Vec3();
     private _stackWorldOffset: Vec3 = new Vec3();
     private _stackOffsetRotation: Quat = new Quat();
-    private _stackItemBaseRotation: Quat = new Quat();
-    private _stackItemFinalRotation: Quat = new Quat();
     private _tempStartScale: Vec3 = new Vec3();
     private _targetScale: Vec3 = new Vec3();
     private _availableItems: SpawnedSlotEntry[] = [];
@@ -450,15 +448,7 @@ export class SpawnZone extends Component {
         spawned.getScale(this._targetScale);
         this._tempStartScale.set(this.startScale);
         spawned.setScale(this._tempStartScale);
-        const axisRot = this.stackAxisRotationOffset;
-        if (axisRot.x !== 0 || axisRot.y !== 0 || axisRot.z !== 0) {
-            Quat.fromEuler(this._stackOffsetRotation, axisRot.x, axisRot.y, axisRot.z);
-            Quat.fromEuler(this._stackItemBaseRotation, this.spawnRotation.x, this.spawnRotation.y, this.spawnRotation.z);
-            Quat.multiply(this._stackItemFinalRotation, this._stackOffsetRotation, this._stackItemBaseRotation);
-            spawned.setRotation(this._stackItemFinalRotation);
-        } else {
-            spawned.setRotationFromEuler(this.spawnRotation.x, this.spawnRotation.y, this.spawnRotation.z);
-        }
+        spawned.setRotationFromEuler(this.spawnRotation.x, this.spawnRotation.y, this.spawnRotation.z);
 
         this.computeStackedPosition(this._spawnPosition, targetParent, slotIndex);
         targetParent.inverseTransformPoint(this._finalLocalPos, this._spawnPosition);
