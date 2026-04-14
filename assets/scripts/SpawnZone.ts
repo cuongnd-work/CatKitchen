@@ -910,13 +910,16 @@ export class SpawnZone extends Component {
         const columnIndex = cellIndex % columns;
 
         referenceNode.getWorldPosition(this._baseWorldPos);
-        const halfWidth = (columns - 1) * this.horizontalSpacing * 0.5;
-        const halfDepth = (rows - 1) * this.depthSpacing * 0.5;
+        const spacing = Math.max(0.0001, (Math.abs(this.horizontalSpacing) + Math.abs(this.depthSpacing)) * 0.5);
+        const centerCol = (columns - 1) * 0.5;
+        const centerRow = (rows - 1) * 0.5;
+        const colDelta = (columnIndex - centerCol) * spacing;
+        const rowDelta = (rowIndex - centerRow) * spacing;
 
         this._stackLocalOffset.set(
-            columnIndex * this.horizontalSpacing - halfWidth,
+            (colDelta - rowDelta) * Math.SQRT1_2,
             layerIndex * this.verticalSpacing,
-            rowIndex * this.depthSpacing - halfDepth
+            (colDelta + rowDelta) * Math.SQRT1_2,
         );
         this._stackWorldOffset.set(this._stackLocalOffset);
 

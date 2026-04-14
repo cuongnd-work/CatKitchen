@@ -1082,13 +1082,16 @@ export class ItemSellTrigger extends Component {
         const baseY = out.y;
         const baseZ = out.z;
 
-        const halfWidth = (columns - 1) * this.moneyHorizontalSpacing * 0.5;
-        const halfDepth = (rows - 1) * this.moneyDepthSpacing * 0.5;
+        const spacing = Math.max(0.0001, (Math.abs(this.moneyHorizontalSpacing) + Math.abs(this.moneyDepthSpacing)) * 0.5);
+        const centerCol = (columns - 1) * 0.5;
+        const centerRow = (rows - 1) * 0.5;
+        const colDelta = (columnIndex - centerCol) * spacing;
+        const rowDelta = (rowIndex - centerRow) * spacing;
 
         this._stackLocalOffset.set(
-            columnIndex * this.moneyHorizontalSpacing - halfWidth,
+            (colDelta - rowDelta) * Math.SQRT1_2,
             layerIndex * this.moneyVerticalSpacing,
-            rowIndex * this.moneyDepthSpacing - halfDepth,
+            (colDelta + rowDelta) * Math.SQRT1_2,
         );
         this._stackWorldOffset.set(this._stackLocalOffset);
 
