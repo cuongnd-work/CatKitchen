@@ -121,6 +121,9 @@ export class SpawnZone extends Component {
     @property({ tooltip: 'Distance between each stacked layer on the Y axis.' })
     public verticalSpacing = 0.5;
 
+    @property({ type: Vec3, tooltip: 'Euler rotation offset (degrees) applied to the whole burger stack axes.' })
+    public stackAxisRotationOffset: Vec3 = new Vec3(0, 0, 0);
+
     @property({ tooltip: 'Reset the stacking layout when the character leaves the zone.' })
     public resetStackOnExit = false;
 
@@ -158,6 +161,11 @@ export class SpawnZone extends Component {
     private _startLocalPos: Vec3 = new Vec3();
     private _startWorldPos: Vec3 = new Vec3();
     private _baseWorldPos: Vec3 = new Vec3();
+    private _stackLocalOffset: Vec3 = new Vec3();
+    private _stackWorldOffset: Vec3 = new Vec3();
+    private _stackOffsetRotation: Quat = new Quat();
+    private _stackItemBaseRotation: Quat = new Quat();
+    private _stackItemFinalRotation: Quat = new Quat();
     private _tempStartScale: Vec3 = new Vec3();
     private _targetScale: Vec3 = new Vec3();
     private _availableItems: SpawnedSlotEntry[] = [];
@@ -442,7 +450,15 @@ export class SpawnZone extends Component {
         spawned.getScale(this._targetScale);
         this._tempStartScale.set(this.startScale);
         spawned.setScale(this._tempStartScale);
-        spawned.setRotationFromEuler(this.spawnRotation.x, this.spawnRotation.y, this.spawnRotation.z);
+        const axisRot = this.stackAxisRotationOffset;
+        if (axisRot.x !== 0 || axisRot.y !== 0 || axisRot.z !== 0) {
+            Quat.fromEuler(this._stackOffsetRotation, axisRot.x, axisRot.y, axisRot.z);
+            Quat.fromEuler(this._stackItemBaseRotation, this.spawnRotation.x, this.spawnRotation.y, this.spawnRotation.z);
+            Quat.multiply(this._stackItemFinalRotation, this._stackOffsetRotation, this._stackItemBaseRotation);
+            spawned.setRotation(this._stackItemFinalRotation);
+        } else {
+            spawned.setRotationFromEuler(this.spawnRotation.x, this.spawnRotation.y, this.spawnRotation.z);
+        }
 
         this.computeStackedPosition(this._spawnPosition, targetParent, slotIndex);
         targetParent.inverseTransformPoint(this._finalLocalPos, this._spawnPosition);
@@ -897,10 +913,22 @@ export class SpawnZone extends Component {
         const halfWidth = (columns - 1) * this.horizontalSpacing * 0.5;
         const halfDepth = (rows - 1) * this.depthSpacing * 0.5;
 
+        this._stackLocalOffset.set(
+            columnIndex * this.horizontalSpacing - halfWidth,
+            layerIndex * this.verticalSpacing,
+            rowIndex * this.depthSpacing - halfDepth
+        );
+        this._stackWorldOffset.set(this._stackLocalOffset);
+
+        const axisRot = this.stackAxisRotationOffset;
+        if (axisRot.x !== 0 || axisRot.y !== 0 || axisRot.z !== 0) {
+            Quat.fromEuler(this._stackOffsetRotation, axisRot.x, axisRot.y, axisRot.z);
+            Vec3.transformQuat(this._stackWorldOffset, this._stackWorldOffset, this._stackOffsetRotation);
+        }
         out.set(
-            this._baseWorldPos.x + columnIndex * this.horizontalSpacing - halfWidth,
-            this._baseWorldPos.y + layerIndex * this.verticalSpacing,
-            this._baseWorldPos.z + rowIndex * this.depthSpacing - halfDepth
+            this._baseWorldPos.x + this._stackWorldOffset.x,
+            this._baseWorldPos.y + this._stackWorldOffset.y,
+            this._baseWorldPos.z + this._stackWorldOffset.z,
         );
     }
 

@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween, Prefab, AudioSource } from 'cc';
+import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, Quat, tween, TweenEasing, Tween, Prefab, AudioSource } from 'cc';
 import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 import { CollectibleItem } from './CollectibleItem';
 import { SpawnZone } from './SpawnZone';
@@ -143,6 +143,9 @@ export class ItemSellTrigger extends Component {
     @property({ tooltip: 'Money stack vertical spacing.' })
     public moneyVerticalSpacing = 0.25;
 
+    @property({ type: Vec3, tooltip: 'Euler rotation offset (degrees) applied to the whole money stack axes.' })
+    public moneyStackAxisRotationOffset: Vec3 = new Vec3(0, 0, 0);
+
     @property({ tooltip: 'Money bundles collected per trigger check.', min: 1, step: 1 })
     public moneyCollectBatch = 4;
 
@@ -203,6 +206,11 @@ export class ItemSellTrigger extends Component {
     private _worldTarget: Vec3 = new Vec3();
     private _localTemp: Vec3 = new Vec3();
     private _worldTemp: Vec3 = new Vec3();
+    private _stackLocalOffset: Vec3 = new Vec3();
+    private _stackWorldOffset: Vec3 = new Vec3();
+    private _stackOffsetRotation: Quat = new Quat();
+    private _stackItemBaseRotation: Quat = new Quat();
+    private _stackItemFinalRotation: Quat = new Quat();
     private _scaleTemp: Vec3 = new Vec3(1, 1, 1);
     private _soldSlotIndex: Map<Node, number> = new Map();
     private _soldNextSlotIndex = 0;
@@ -982,7 +990,15 @@ export class ItemSellTrigger extends Component {
         }
 
         reward.setScale(1, 1, 1);
-        reward.setRotationFromEuler(this.moneyItemRotation.x, this.moneyItemRotation.y, this.moneyItemRotation.z);
+        const axisRot = this.moneyStackAxisRotationOffset;
+        if (axisRot.x !== 0 || axisRot.y !== 0 || axisRot.z !== 0) {
+            Quat.fromEuler(this._stackOffsetRotation, axisRot.x, axisRot.y, axisRot.z);
+            Quat.fromEuler(this._stackItemBaseRotation, this.moneyItemRotation.x, this.moneyItemRotation.y, this.moneyItemRotation.z);
+            Quat.multiply(this._stackItemFinalRotation, this._stackOffsetRotation, this._stackItemBaseRotation);
+            reward.setRotation(this._stackItemFinalRotation);
+        } else {
+            reward.setRotationFromEuler(this.moneyItemRotation.x, this.moneyItemRotation.y, this.moneyItemRotation.z);
+        }
         reward.active = true;
 
         const collectible = reward.getComponent(CollectibleItem) ?? reward.addComponent(CollectibleItem);
@@ -1069,10 +1085,22 @@ export class ItemSellTrigger extends Component {
         const halfWidth = (columns - 1) * this.moneyHorizontalSpacing * 0.5;
         const halfDepth = (rows - 1) * this.moneyDepthSpacing * 0.5;
 
+        this._stackLocalOffset.set(
+            columnIndex * this.moneyHorizontalSpacing - halfWidth,
+            layerIndex * this.moneyVerticalSpacing,
+            rowIndex * this.moneyDepthSpacing - halfDepth,
+        );
+        this._stackWorldOffset.set(this._stackLocalOffset);
+
+        const axisRot = this.moneyStackAxisRotationOffset;
+        if (axisRot.x !== 0 || axisRot.y !== 0 || axisRot.z !== 0) {
+            Quat.fromEuler(this._stackOffsetRotation, axisRot.x, axisRot.y, axisRot.z);
+            Vec3.transformQuat(this._stackWorldOffset, this._stackWorldOffset, this._stackOffsetRotation);
+        }
         out.set(
-            baseX + columnIndex * this.moneyHorizontalSpacing - halfWidth,
-            baseY + layerIndex * this.moneyVerticalSpacing,
-            baseZ + rowIndex * this.moneyDepthSpacing - halfDepth,
+            baseX + this._stackWorldOffset.x,
+            baseY + this._stackWorldOffset.y,
+            baseZ + this._stackWorldOffset.z,
         );
     }
 

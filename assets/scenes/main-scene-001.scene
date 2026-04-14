@@ -1312,6 +1312,12 @@
     "horizontalSpacing": 0.5,
     "depthSpacing": 0.5,
     "verticalSpacing": 0.5,
+    "stackAxisRotationOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 6.7,
+      "z": 0
+    },
     "resetStackOnExit": false,
     "startPoint": {
       "__id__": 2580
@@ -1325,7 +1331,7 @@
     "spawnRotation": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": -6,
       "z": 0
     },
     "moveDuration": 0.35,
@@ -6866,6 +6872,12 @@
     "moneyHorizontalSpacing": 0.75,
     "moneyDepthSpacing": 0.3,
     "moneyVerticalSpacing": 0.1,
+    "moneyStackAxisRotationOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 4.8,
+      "z": 0
+    },
     "moneyCollectBatch": 4,
     "moneySpawnDuration": 0.15,
     "moneySpawnEasing": "quadOut",
@@ -10066,9 +10078,9 @@
     "_lrot": {
       "__type__": "cc.Quat",
       "x": 0,
-      "y": 0.04972137386865785,
+      "y": 0,
       "z": 0,
-      "w": 0.9987631275635946
+      "w": 1
     },
     "_lscale": {
       "__type__": "cc.Vec3",
@@ -10081,7 +10093,7 @@
     "_euler": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 5.7,
+      "y": 0,
       "z": 0
     },
     "_id": "75KlkOO0hEGK86gg2aB84d"
@@ -100119,6 +100131,12 @@
     "horizontalSpacing": 0.4,
     "depthSpacing": 0.4,
     "verticalSpacing": 0.4,
+    "stackAxisRotationOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
     "resetStackOnExit": false,
     "startPoint": {
       "__id__": 2427
@@ -100584,6 +100602,12 @@
     "moneyHorizontalSpacing": 0.35,
     "moneyDepthSpacing": 0.35,
     "moneyVerticalSpacing": 0.25,
+    "moneyStackAxisRotationOffset": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
     "moneyCollectBatch": 4,
     "moneySpawnDuration": 0.25,
     "moneySpawnEasing": "quadOut",
