@@ -21,6 +21,9 @@ export class CurrencyView extends Component {
     @property(Label)
     public currencyLabel: Label | null = null;
 
+    @property(Label)
+    public currencyLabel1: Label | null = null;
+
     @property
     public prefix = 'Money: ';
 
@@ -136,13 +139,16 @@ export class CurrencyView extends Component {
             this._displayValue = value;
             this.updateLabelText(value);
             this.currencyLabel.color = this._defaultColor;
+            this.currencyLabel1.color = this._defaultColor;
             return;
         }
 
         if (delta > 0) {
             this.currencyLabel.color = new Color(255, 215, 0, 255);
+            this.currencyLabel1.color = new Color(255, 215, 0, 255);
         } else if (delta < 0) {
             this.currencyLabel.color = new Color(255, 80, 80, 255);
+            this.currencyLabel1.color = new Color(255, 80, 80, 255);
         }
 
         if (this._isChanging) {
@@ -173,6 +179,7 @@ export class CurrencyView extends Component {
                 this._displayValue = this._targetValue;
                 this.updateLabelText(this._displayValue);
                 this.currencyLabel!.color = this._defaultColor;
+                this.currencyLabel1!.color = this._defaultColor;
                 this._isChanging = false;
 
                 if (this._displayValue !== this._targetValue) {
@@ -187,5 +194,6 @@ export class CurrencyView extends Component {
             return;
         }
         this.currencyLabel.string = `${this.prefix}${value}`;
+        this.currencyLabel1.string = `${this.prefix}${value}`;
     }
 }
