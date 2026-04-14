@@ -7591,6 +7591,7 @@
       "__uuid__": "e3a960cc-81a6-43bd-8af7-5aa336e7b34b",
       "__expectedType__": "cc.Material"
     },
+    "progressEdgeResponse": 2.4,
     "completionAudio": {
       "__id__": 2447
     },
@@ -8227,6 +8228,7 @@
       "__uuid__": "e3a960cc-81a6-43bd-8af7-5aa336e7b34b",
       "__expectedType__": "cc.Material"
     },
+    "progressEdgeResponse": 2.4,
     "completionAudio": {
       "__id__": 2444
     },
@@ -8862,6 +8864,7 @@
       "__uuid__": "e3a960cc-81a6-43bd-8af7-5aa336e7b34b",
       "__expectedType__": "cc.Material"
     },
+    "progressEdgeResponse": 2.4,
     "completionAudio": null,
     "depositAudio": {
       "__id__": 202
