@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, Quat, tween, TweenEasing, Tween, Prefab, AudioSource } from 'cc';
+import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween, Prefab, AudioSource } from 'cc';
 import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 import { CollectibleItem } from './CollectibleItem';
 import { SpawnZone } from './SpawnZone';
@@ -203,9 +203,6 @@ export class ItemSellTrigger extends Component {
     private _worldTarget: Vec3 = new Vec3();
     private _localTemp: Vec3 = new Vec3();
     private _worldTemp: Vec3 = new Vec3();
-    private _stackLocalOffset: Vec3 = new Vec3();
-    private _stackWorldOffset: Vec3 = new Vec3();
-    private _stackWorldRotation: Quat = new Quat();
     private _scaleTemp: Vec3 = new Vec3(1, 1, 1);
     private _soldSlotIndex: Map<Node, number> = new Map();
     private _soldNextSlotIndex = 0;
@@ -654,18 +651,18 @@ export class ItemSellTrigger extends Component {
         const columnIndex = cellIndex % columns;
 
         reference.getWorldPosition(out);
-        reference.getWorldRotation(this._stackWorldRotation);
+        const baseX = out.x;
+        const baseY = out.y;
+        const baseZ = out.z;
 
         const halfWidth = (columns - 1) * this.soldHorizontalSpacing * 0.5;
         const halfDepth = (rows - 1) * this.soldDepthSpacing * 0.5;
 
-        this._stackLocalOffset.set(
-            columnIndex * this.soldHorizontalSpacing - halfWidth,
-            layerIndex * this.soldVerticalSpacing,
-            rowIndex * this.soldDepthSpacing - halfDepth,
+        out.set(
+            baseX + columnIndex * this.soldHorizontalSpacing - halfWidth,
+            baseY + layerIndex * this.soldVerticalSpacing,
+            baseZ + rowIndex * this.soldDepthSpacing - halfDepth,
         );
-        Vec3.transformQuat(this._stackWorldOffset, this._stackLocalOffset, this._stackWorldRotation);
-        Vec3.add(out, out, this._stackWorldOffset);
     }
 
     private applySoldSlotPosition (item: Node, slotIndex: number): void {
@@ -1065,18 +1062,18 @@ export class ItemSellTrigger extends Component {
         const columnIndex = cellIndex % columns;
 
         reference.getWorldPosition(out);
-        reference.getWorldRotation(this._stackWorldRotation);
+        const baseX = out.x;
+        const baseY = out.y;
+        const baseZ = out.z;
 
         const halfWidth = (columns - 1) * this.moneyHorizontalSpacing * 0.5;
         const halfDepth = (rows - 1) * this.moneyDepthSpacing * 0.5;
 
-        this._stackLocalOffset.set(
-            columnIndex * this.moneyHorizontalSpacing - halfWidth,
-            layerIndex * this.moneyVerticalSpacing,
-            rowIndex * this.moneyDepthSpacing - halfDepth,
+        out.set(
+            baseX + columnIndex * this.moneyHorizontalSpacing - halfWidth,
+            baseY + layerIndex * this.moneyVerticalSpacing,
+            baseZ + rowIndex * this.moneyDepthSpacing - halfDepth,
         );
-        Vec3.transformQuat(this._stackWorldOffset, this._stackLocalOffset, this._stackWorldRotation);
-        Vec3.add(out, out, this._stackWorldOffset);
     }
 
     private collectMoneyBundles (): void {

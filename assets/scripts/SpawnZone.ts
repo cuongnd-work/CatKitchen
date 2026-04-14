@@ -158,8 +158,6 @@ export class SpawnZone extends Component {
     private _startLocalPos: Vec3 = new Vec3();
     private _startWorldPos: Vec3 = new Vec3();
     private _baseWorldPos: Vec3 = new Vec3();
-    private _stackLocalOffset: Vec3 = new Vec3();
-    private _stackWorldOffset: Vec3 = new Vec3();
     private _tempStartScale: Vec3 = new Vec3();
     private _targetScale: Vec3 = new Vec3();
     private _availableItems: SpawnedSlotEntry[] = [];
@@ -896,17 +894,14 @@ export class SpawnZone extends Component {
         const columnIndex = cellIndex % columns;
 
         referenceNode.getWorldPosition(this._baseWorldPos);
-        referenceNode.getWorldRotation(this._anchorWorldRotation);
         const halfWidth = (columns - 1) * this.horizontalSpacing * 0.5;
         const halfDepth = (rows - 1) * this.depthSpacing * 0.5;
 
-        this._stackLocalOffset.set(
-            columnIndex * this.horizontalSpacing - halfWidth,
-            layerIndex * this.verticalSpacing,
-            rowIndex * this.depthSpacing - halfDepth,
+        out.set(
+            this._baseWorldPos.x + columnIndex * this.horizontalSpacing - halfWidth,
+            this._baseWorldPos.y + layerIndex * this.verticalSpacing,
+            this._baseWorldPos.z + rowIndex * this.depthSpacing - halfDepth
         );
-        Vec3.transformQuat(this._stackWorldOffset, this._stackLocalOffset, this._anchorWorldRotation);
-        Vec3.add(out, this._baseWorldPos, this._stackWorldOffset);
     }
 
     private acquireSlotIndex(): number {
