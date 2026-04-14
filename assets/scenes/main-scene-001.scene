@@ -6706,16 +6706,16 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0.7,
+      "x": 1.1,
       "y": -1.7,
       "z": 1.1
     },
     "_lrot": {
       "__type__": "cc.Quat",
-      "x": -0.6721230152402359,
-      "y": 0.251087201872745,
-      "z": 0.26137434581583063,
-      "w": 0.6456696684756343
+      "x": -0.6674590363340569,
+      "y": 0.2623174495541944,
+      "z": 0.2730647012747928,
+      "w": 0.6411892539594709
     },
     "_lscale": {
       "__type__": "cc.Vec3",
@@ -6728,7 +6728,7 @@
     "_euler": {
       "__type__": "cc.Vec3",
       "x": -92.3,
-      "y": 42.50000000000001,
+      "y": 44.5,
       "z": -3.1805546814635168e-15
     },
     "_id": "16p3kHn15BZJbQp/sHCJoa"
@@ -6867,8 +6867,8 @@
     "moneyStackNode": {
       "__id__": 237
     },
-    "moneyColumns": 3,
-    "moneyRows": 3,
+    "moneyColumns": 2,
+    "moneyRows": 2,
     "moneyHorizontalSpacing": 0.75,
     "moneyDepthSpacing": 0.3,
     "moneyVerticalSpacing": 0.1,
@@ -7649,7 +7649,7 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -3.543,
+      "x": -3.343,
       "y": -0.163,
       "z": 1.009
     },
