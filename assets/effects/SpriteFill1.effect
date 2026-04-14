@@ -24,6 +24,7 @@ CCEffect %{
         mainTexture:    { value: white }
         mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
         fillAmount:     { value: 1.0 }
+        edgeResponse:   { value: 2.4 }
         alphaThreshold: { value: 0.001 }
 
   - name: transparent_alt
@@ -61,12 +62,23 @@ CCProgram sprite-fill-fs %{
   uniform Constant {
     vec4  mainColor;
     float fillAmount;
+    float edgeResponse;
     float alphaThreshold;
   };
 
+  float applyEdgeResponse (float ratio, float power) {
+    // Expand visual change near 0% and 100%, compress around the middle.
+    float p = clamp(ratio, 0.0, 1.0);
+    float safePower = power > 0.0001 ? power : 2.4;
+    safePower = max(1.0, safePower);
+    float centered = p * 2.0 - 1.0;
+    float shaped = sign(centered) * pow(abs(centered), safePower);
+    return shaped * 0.5 + 0.5;
+  }
+
   float linearRatioToIsoThreshold (float ratio) {
     // Keep gameplay ratio linear while matching diagonal/isometric fill area.
-    float p = clamp(ratio, 0.0, 1.0);
+    float p = applyEdgeResponse(ratio, edgeResponse);
     if (p <= 0.5) {
       return sqrt(p * 0.5);
     }

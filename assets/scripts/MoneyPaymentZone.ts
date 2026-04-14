@@ -61,6 +61,9 @@ export abstract class MoneyPaymentZone extends Component {
     @property({ type: Material, tooltip: 'Optional base material used when the sprite has no shared material assigned.' })
     public progressBaseMaterial: Material | null = null;
 
+    @property({ tooltip: 'Boost visual sensitivity near 0% and 100% for progress fill (higher = bigger change at edges).' })
+    public progressEdgeResponse = 2.4;
+
     @property({ type: AudioSource, tooltip: 'Audio source played each time the payment completes.' })
     public completionAudio: AudioSource | null = null;
 
@@ -308,6 +311,7 @@ export abstract class MoneyPaymentZone extends Component {
             const paidValue = this._currentValue + this._pendingDepositTotal;
             const ratio = Math.min(1, Math.max(0, requirement > 0 ? paidValue / requirement : 0));
             material.setProperty('fillAmount', ratio);
+            material.setProperty('edgeResponse', Math.max(1, this.progressEdgeResponse));
         }
         this.updateRequiredAmountLabel();
     }
