@@ -1315,7 +1315,7 @@
     "stackAxisRotationOffset": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 48,
+      "y": 6.7,
       "z": 0
     },
     "resetStackOnExit": false,
@@ -1331,7 +1331,7 @@
     "spawnRotation": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": -6,
       "z": 0
     },
     "moveDuration": 0.35,
@@ -6875,7 +6875,7 @@
     "moneyStackAxisRotationOffset": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 44.5,
+      "y": 4.8,
       "z": 0
     },
     "moneyCollectBatch": 4,
