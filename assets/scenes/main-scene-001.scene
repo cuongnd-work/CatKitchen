@@ -6838,7 +6838,7 @@
     "soldHorizontalSpacing": 0.35,
     "soldDepthSpacing": 0.35,
     "soldVerticalSpacing": 0.25,
-    "rescanInterval": 0.1,
+    "rescanInterval": 0,
     "queueManager": {
       "__id__": 2167
     },
@@ -6858,7 +6858,7 @@
       "y": 0.35,
       "z": 0
     },
-    "completeCustomerOnDeliveryStart": false,
+    "completeCustomerOnDeliveryStart": true,
     "serveAbsoluteFrontCustomer": true,
     "moneyPrefab": {
       "__uuid__": "e91b8a06-f340-4f2a-9961-5febf6c1e895",
@@ -14890,7 +14890,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -366.015,
-      "y": -645.2,
+      "y": -644.2,
       "z": 3.878
     },
     "_lrot": {
@@ -95880,7 +95880,7 @@
         "__id__": 2307
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 2337
@@ -97179,9 +97179,9 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 2,
-      "y": 2,
-      "z": 2
+      "x": 1,
+      "y": 1,
+      "z": 1
     },
     "_mobility": 0,
     "_layer": 33554432,
@@ -97253,8 +97253,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 40
+      "width": 215.1,
+      "height": 69.1
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -97286,8 +97286,8 @@
     "_string": "Play now",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 20,
-    "_fontSize": 20,
+    "_actualFontSize": 40,
+    "_fontSize": 40,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 1,
@@ -97340,8 +97340,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 113.6,
-      "height": 47.1
+      "width": 227.2,
+      "height": 94.2
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -98537,9 +98537,9 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 2,
-      "y": 2,
-      "z": 2
+      "x": 1,
+      "y": 1,
+      "z": 1
     },
     "_mobility": 0,
     "_layer": 33554432,
@@ -98611,8 +98611,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 40
+      "width": 215.1,
+      "height": 69.1
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -98644,8 +98644,8 @@
     "_string": "Play now",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 20,
-    "_fontSize": 20,
+    "_actualFontSize": 40,
+    "_fontSize": 40,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 1,
@@ -98698,8 +98698,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 113.6,
-      "height": 47.1
+      "width": 227.2,
+      "height": 94.2
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
