@@ -27,9 +27,9 @@
     {
       "albedoColor": {
         "__type__": "cc.Color",
-        "r": 230,
-        "g": 226,
-        "b": 184,
+        "r": 209,
+        "g": 71,
+        "b": 243,
         "a": 255
       },
       "alphaThreshold": 0.736
