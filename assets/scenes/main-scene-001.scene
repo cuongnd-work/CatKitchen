@@ -95880,7 +95880,7 @@
         "__id__": 2307
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 2337
@@ -95941,7 +95941,7 @@
         "__id__": 2326
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 2335
@@ -97013,7 +97013,7 @@
     "node": {
       "__id__": 2306
     },
-    "_enabled": true,
+    "_enabled": false,
     "__prefab": null,
     "playOnLoad": true,
     "_clips": [
