@@ -27,6 +27,7 @@ type ScenePhase = 'scene1' | 'scene2' | 'ending';
 
 type LaneData = {
     index: number;
+    landId: number;
     x: number;
     barrier: Node | null;
     queueSlots: Vec3[];
@@ -34,6 +35,8 @@ type LaneData = {
     templateCar: Node | null;
     targetQueueSize: number;
     open: boolean;
+    sPoint: Vec3 | null;
+    rPoint: Vec3 | null;
 };
 
 @ccclass('FoodTruckPlayableController')
@@ -245,6 +248,7 @@ export class FoodTruckPlayableController extends Component {
 
         if (laneRoots.length > 0) {
             laneRoots.slice(0, this.laneCount).forEach((laneRoot, index) => {
+                const landId = this.parseLandId(laneRoot.name, index + 1);
                 const laneCars = laneRoot.children
                     .filter((child) => child.active && child.name.startsWith('Car'))
                     .sort((a, b) => a.position.z - b.position.z);
@@ -286,6 +290,7 @@ export class FoodTruckPlayableController extends Component {
 
                 this._lanes.push({
                     index,
+                    landId,
                     x: firstLocal.x,
                     barrier: null,
                     queueSlots,
@@ -293,6 +298,8 @@ export class FoodTruckPlayableController extends Component {
                     templateCar,
                     targetQueueSize,
                     open: false,
+                    sPoint: null,
+                    rPoint: null,
                 });
             });
         }
@@ -304,6 +311,8 @@ export class FoodTruckPlayableController extends Component {
         this._lanes.sort((a, b) => b.x - a.x);
         this._lanes.forEach((lane, index) => {
             lane.index = index;
+            lane.sPoint = this.findLaneRouteMarker(`S${lane.landId}`);
+            lane.rPoint = this.findLaneRouteMarker(`R${lane.landId}`);
             this.buildLaneBarrier(lane);
         });
     }
@@ -358,6 +367,7 @@ export class FoodTruckPlayableController extends Component {
 
             this._lanes.push({
                 index: i,
+                landId: i + 1,
                 x: laneX,
                 barrier: null,
                 queueSlots,
@@ -365,6 +375,8 @@ export class FoodTruckPlayableController extends Component {
                 templateCar,
                 targetQueueSize,
                 open: false,
+                sPoint: null,
+                rPoint: null,
             });
         }
     }
@@ -702,31 +714,16 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private animateCarFlow (lane: LaneData, car: Node): void {
-        const laneUnit = Math.max(0.1, this._laneTemplateSpacing);
-        const laneForward = this.getLaneForwardStep(lane);
         const frontSlot = lane.queueSlots[0] ?? car.position.clone();
-        const barrierLead = lane.barrier ? Vec3.distance(frontSlot, lane.barrier.position) : laneUnit * 0.9;
-        const entryDistance = Math.max(laneUnit * 0.75, barrierLead + laneUnit * 0.2);
-        const exitDistance = Math.max(laneUnit * 12, entryDistance + laneUnit * 10);
-
-        const entryPoint = new Vec3(
-            frontSlot.x + laneForward.x * entryDistance,
-            frontSlot.y + laneForward.y * entryDistance,
-            frontSlot.z + laneForward.z * entryDistance,
-        );
-        const exitPoint = new Vec3(
-            frontSlot.x + laneForward.x * exitDistance,
-            frontSlot.y + laneForward.y * exitDistance,
-            frontSlot.z + laneForward.z * exitDistance,
-        );
+        const route = this.getLaneRouteTargets(lane, frontSlot);
 
         Tween.stopAllByTarget(car);
         tween(car)
-            .to(0.35, { position: entryPoint }, { easing: 'sineOut' })
+            .then(this.tweenCarTo(car, car.position.clone(), route.sPoint, 0.42, 'sineInOut'))
             .call(() => {
                 this.playCatCookingAnim();
             })
-            .to(1.2, { position: exitPoint }, { easing: 'linear' })
+            .then(this.tweenCarTo(car, route.sPoint, route.rPoint, 0.95, 'linear'))
             .call(() => {
                 this.recycleCarToLane(lane, car);
                 this.onCarServed();
@@ -935,8 +932,15 @@ export class FoodTruckPlayableController extends Component {
             if (instant) {
                 car.setPosition(target);
             } else {
+                const targetYaw = this.getTweenYaw(car, car.position.clone(), target);
+                const props: { position: Vec3; eulerAngles?: Vec3 } = {
+                    position: target.clone(),
+                };
+                if (targetYaw !== null) {
+                    props.eulerAngles = new Vec3(0, targetYaw, 0);
+                }
                 tween(car)
-                    .to(0.22, { position: target }, { easing: 'sineOut' })
+                    .to(0.22, props, { easing: 'sineOut' })
                     .start();
             }
         }
@@ -1020,6 +1024,103 @@ export class FoodTruckPlayableController extends Component {
         }
 
         return new Vec3(-backStep.x / length, -backStep.y / length, -backStep.z / length);
+    }
+
+    private getLaneRouteTargets (lane: LaneData, frontSlot: Vec3): { sPoint: Vec3; rPoint: Vec3 } {
+        const sPoint = lane.sPoint
+            ? lane.sPoint.clone()
+            : new Vec3(frontSlot.x + 2, frontSlot.y, frontSlot.z);
+        const rPoint = lane.rPoint
+            ? lane.rPoint.clone()
+            : new Vec3(sPoint.x + 6, sPoint.y, sPoint.z);
+
+        return { sPoint, rPoint };
+    }
+
+    private findLaneRouteMarker (name: string): Vec3 | null {
+        const scene = this.node.scene;
+        if (!scene || !this._worldRoot) {
+            return null;
+        }
+
+        const marker = this.findNodeByName(scene, name);
+        if (!marker) {
+            return null;
+        }
+
+        const worldPos = marker.getWorldPosition(new Vec3());
+        return this._worldRoot.inverseTransformPoint(new Vec3(), worldPos);
+    }
+
+    private parseLandId (name: string, fallback: number): number {
+        const match = name.match(/^Land(\d+)$/i);
+        if (!match) {
+            return fallback;
+        }
+
+        return Number.parseInt(match[1], 10) || fallback;
+    }
+
+    private faceCarAlong (car: Node, from: Vec3, to: Vec3): void {
+        if (!car || !car.isValid) {
+            return;
+        }
+
+        const yaw = this.getTweenYaw(car, from, to);
+        if (yaw === null) {
+            return;
+        }
+
+        car.setRotationFromEuler(0, yaw, 0);
+    }
+
+    private tweenCarTo (
+        car: Node,
+        from: Vec3,
+        to: Vec3,
+        duration: number,
+        easing: string,
+    ): Tween<Node> {
+        const yaw = this.getTweenYaw(car, from, to);
+        const props: { position: Vec3; eulerAngles?: Vec3 } = {
+            position: to.clone(),
+        };
+
+        if (yaw !== null) {
+            props.eulerAngles = new Vec3(0, yaw, 0);
+        }
+
+        return tween(car).to(duration, props, { easing });
+    }
+
+    private getYawDegrees (from: Vec3, to: Vec3): number | null {
+        const dx = to.x - from.x;
+        const dz = to.z - from.z;
+        if (Math.abs(dx) < 0.0001 && Math.abs(dz) < 0.0001) {
+            return null;
+        }
+
+        return Math.atan2(dx, dz) * 180 / Math.PI + 180;
+    }
+
+    private getTweenYaw (car: Node, from: Vec3, to: Vec3): number | null {
+        const targetYaw = this.getYawDegrees(from, to);
+        if (targetYaw === null) {
+            return null;
+        }
+
+        return this.getClosestYaw(car.eulerAngles.y, targetYaw);
+    }
+
+    private getClosestYaw (currentYaw: number, targetYaw: number): number {
+        let delta = (targetYaw - currentYaw) % 360;
+        if (delta > 180) {
+            delta -= 360;
+        } else if (delta < -180) {
+            delta += 360;
+        }
+
+        return currentYaw + delta;
     }
 
     private createButton (
