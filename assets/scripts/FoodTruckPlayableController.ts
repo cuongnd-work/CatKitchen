@@ -84,6 +84,8 @@ export class FoodTruckPlayableController extends Component {
     private _upgradePanel: Node | null = null;
     private _storePopup: Node | null = null;
     private _storeTitleLabel: Label | null = null;
+    private _serviceProgressNode: Node | null = null;
+    private _serviceProgressGraphics: Graphics | null = null;
 
     private _removeBarrierPulse: Tween<Node> | null = null;
     private _lanes: LaneData[] = [];
@@ -126,6 +128,9 @@ export class FoodTruckPlayableController extends Component {
         }
         if (this._catNode) {
             Tween.stopAllByTarget(this._catNode);
+        }
+        if (this._serviceProgressNode) {
+            Tween.stopAllByTarget(this._serviceProgressNode);
         }
     }
 
@@ -716,14 +721,22 @@ export class FoodTruckPlayableController extends Component {
     private animateCarFlow (lane: LaneData, car: Node): void {
         const frontSlot = lane.queueSlots[0] ?? car.position.clone();
         const route = this.getLaneRouteTargets(lane, frontSlot);
+        const drivePath = this.buildDrivePath(lane, car.position.clone(), route.sPoint, route.rPoint);
 
         Tween.stopAllByTarget(car);
-        tween(car)
-            .then(this.tweenCarTo(car, car.position.clone(), route.sPoint, 0.42, 'sineInOut'))
-            .call(() => {
-                this.playCatCookingAnim();
-            })
-            .then(this.tweenCarTo(car, route.sPoint, route.rPoint, 0.95, 'linear'))
+        let sequence = tween(car);
+        for (let i = 0; i < drivePath.length; i++) {
+            const section = drivePath[i];
+            sequence = sequence.then(this.tweenCarAlongPoints(car, section.points, section.speed, section.minSegmentDuration));
+            if (section.pauseAfter > 0) {
+                sequence = sequence.call(() => {
+                    this.playCatCookingAnim();
+                    this.playServiceProgress(car, section.pauseAfter);
+                }).delay(section.pauseAfter);
+            }
+        }
+
+        sequence
             .call(() => {
                 this.recycleCarToLane(lane, car);
                 this.onCarServed();
@@ -932,16 +945,7 @@ export class FoodTruckPlayableController extends Component {
             if (instant) {
                 car.setPosition(target);
             } else {
-                const targetYaw = this.getTweenYaw(car, car.position.clone(), target);
-                const props: { position: Vec3; eulerAngles?: Vec3 } = {
-                    position: target.clone(),
-                };
-                if (targetYaw !== null) {
-                    props.eulerAngles = new Vec3(0, targetYaw, 0);
-                }
-                tween(car)
-                    .to(0.22, props, { easing: 'sineOut' })
-                    .start();
+                this.tweenQueueCarTo(car, target).start();
             }
         }
     }
@@ -969,9 +973,7 @@ export class FoodTruckPlayableController extends Component {
         car.setPosition(recycleFrom);
         lane.queueCars.push(car);
 
-        tween(car)
-            .to(0.28, { position: targetSlot }, { easing: 'sineOut' })
-            .start();
+        this.tweenQueueCarTo(car, targetSlot, 0.32).start();
     }
 
     private playCatCookingAnim (): void {
@@ -992,6 +994,83 @@ export class FoodTruckPlayableController extends Component {
             .to(0.12, { scale: bigger }, { easing: 'sineOut' })
             .to(0.12, { scale: this._catScale }, { easing: 'sineIn' })
             .start();
+    }
+
+    private playServiceProgress (car: Node, duration: number): void {
+        const progressNode = this.ensureServiceProgressNode(car);
+        if (!progressNode || !this._serviceProgressGraphics) {
+            return;
+        }
+
+        Tween.stopAllByTarget(progressNode);
+        progressNode.active = true;
+        this.drawServiceProgress(0);
+
+        const state = { value: 0 };
+        tween(state)
+            .to(duration, { value: 1 }, {
+                easing: 'linear',
+                onUpdate: () => {
+                    this.drawServiceProgress(state.value);
+                },
+            })
+            .call(() => {
+                this.drawServiceProgress(1);
+                if (progressNode.isValid) {
+                    progressNode.active = false;
+                }
+            })
+            .start();
+    }
+
+    private ensureServiceProgressNode (car: Node): Node | null {
+        if (!car || !car.isValid) {
+            return null;
+        }
+
+        let progressNode = car.getChildByName('ServiceProgress');
+        if (!progressNode) {
+            progressNode = new Node('ServiceProgress');
+            car.addChild(progressNode);
+            progressNode.layer = Layers.Enum.UI_2D;
+            progressNode.setPosition(0, 1.9, 0);
+            progressNode.setScale(0.018, 0.018, 0.018);
+            progressNode.addComponent(UITransform).setContentSize(120, 120);
+            this._serviceProgressGraphics = progressNode.addComponent(Graphics);
+        } else if (!this._serviceProgressGraphics || this._serviceProgressNode !== progressNode) {
+            this._serviceProgressGraphics = progressNode.getComponent(Graphics) ?? progressNode.addComponent(Graphics);
+        }
+
+        this._serviceProgressNode = progressNode;
+        return progressNode;
+    }
+
+    private drawServiceProgress (progress: number): void {
+        if (!this._serviceProgressGraphics) {
+            return;
+        }
+
+        const graphics = this._serviceProgressGraphics;
+        const clamped = Math.max(0, Math.min(1, progress));
+        const radius = 34;
+        const startAngle = Math.PI * 0.5;
+        const endAngle = startAngle - Math.PI * 2 * clamped;
+
+        graphics.clear();
+
+        graphics.lineWidth = 10;
+        graphics.strokeColor = new Color(255, 255, 255, 150);
+        graphics.circle(0, 0, radius);
+        graphics.stroke();
+
+        graphics.lineWidth = 12;
+        graphics.strokeColor = new Color(97, 227, 128, 255);
+        graphics.arc(0, 0, radius, startAngle, endAngle, true);
+        graphics.stroke();
+
+        graphics.fillColor = new Color(30, 30, 30, 220);
+        graphics.circle(0, 0, radius - 12);
+        graphics.fill();
     }
 
     private isDepthLane (lane: LaneData): boolean {
@@ -1035,6 +1114,53 @@ export class FoodTruckPlayableController extends Component {
             : new Vec3(sPoint.x + 6, sPoint.y, sPoint.z);
 
         return { sPoint, rPoint };
+    }
+
+    private buildDrivePath (
+        lane: LaneData,
+        start: Vec3,
+        sPoint: Vec3,
+        rPoint: Vec3,
+    ): Array<{ points: Vec3[]; speed: number; minSegmentDuration: number; pauseAfter: number }> {
+        const queueForward = this.normalizeVec3(this.getLaneForwardStep(lane), new Vec3(1, 0, 0));
+        const roadForward = this.normalizeVec3(
+            new Vec3(rPoint.x - sPoint.x, rPoint.y - sPoint.y, rPoint.z - sPoint.z),
+            new Vec3(1, 0, 0),
+        );
+        const radius = Math.max(0.9, Math.min(2.1, Vec3.distance(start, sPoint) * 0.28));
+        const exitPoint = new Vec3(
+            rPoint.x + roadForward.x * 1.6,
+            rPoint.y + roadForward.y * 1.6,
+            rPoint.z + roadForward.z * 1.6,
+        );
+
+        const approachPoints = this.sampleCubicBezierPoints(
+            start,
+            this.addScaled(start, queueForward, radius),
+            this.addScaled(sPoint, roadForward, -radius * 0.65),
+            sPoint,
+            10,
+        );
+        const departurePoints = this.sampleCubicBezierPoints(
+            sPoint,
+            this.addScaled(sPoint, roadForward, radius * 0.45),
+            this.addScaled(rPoint, roadForward, -radius * 0.5),
+            rPoint,
+            12,
+        );
+        const exitPoints = this.sampleCubicBezierPoints(
+            rPoint,
+            this.addScaled(rPoint, roadForward, radius * 0.35),
+            this.addScaled(exitPoint, roadForward, -radius * 0.15),
+            exitPoint,
+            6,
+        );
+
+        return [
+            { points: approachPoints, speed: 6.8, minSegmentDuration: 0.05, pauseAfter: 0.7 },
+            { points: departurePoints, speed: 8.6, minSegmentDuration: 0.045, pauseAfter: 0 },
+            { points: exitPoints, speed: 10.5, minSegmentDuration: 0.04, pauseAfter: 0 },
+        ];
     }
 
     private findLaneRouteMarker (name: string): Vec3 | null {
@@ -1093,6 +1219,83 @@ export class FoodTruckPlayableController extends Component {
         return tween(car).to(duration, props, { easing });
     }
 
+    private tweenCarAlongPoints (
+        car: Node,
+        points: Vec3[],
+        speed: number,
+        minSegmentDuration: number,
+    ): Tween<Node> {
+        let sequence = tween(car);
+        for (let i = 1; i < points.length; i++) {
+            const from = points[i - 1];
+            const to = points[i];
+            sequence = sequence.then(this.tweenCarTo(
+                car,
+                from,
+                to,
+                this.getTravelDuration(from, to, speed, minSegmentDuration),
+                'linear',
+            ));
+        }
+
+        return sequence;
+    }
+
+    private sampleCubicBezierPoints (
+        p0: Vec3,
+        p1: Vec3,
+        p2: Vec3,
+        p3: Vec3,
+        segments: number,
+    ): Vec3[] {
+        const points: Vec3[] = [p0.clone()];
+        for (let i = 1; i <= segments; i++) {
+            const t = i / segments;
+            const inv = 1 - t;
+            const inv2 = inv * inv;
+            const inv3 = inv2 * inv;
+            const t2 = t * t;
+            const t3 = t2 * t;
+            points.push(new Vec3(
+                inv3 * p0.x + 3 * inv2 * t * p1.x + 3 * inv * t2 * p2.x + t3 * p3.x,
+                inv3 * p0.y + 3 * inv2 * t * p1.y + 3 * inv * t2 * p2.y + t3 * p3.y,
+                inv3 * p0.z + 3 * inv2 * t * p1.z + 3 * inv * t2 * p2.z + t3 * p3.z,
+            ));
+        }
+
+        return points;
+    }
+
+    private normalizeVec3 (value: Vec3, fallback: Vec3): Vec3 {
+        const length = Math.sqrt(value.x * value.x + value.y * value.y + value.z * value.z);
+        if (length <= 0.0001) {
+            return fallback.clone();
+        }
+
+        return new Vec3(value.x / length, value.y / length, value.z / length);
+    }
+
+    private addScaled (origin: Vec3, direction: Vec3, distance: number): Vec3 {
+        return new Vec3(
+            origin.x + direction.x * distance,
+            origin.y + direction.y * distance,
+            origin.z + direction.z * distance,
+        );
+    }
+
+    private tweenQueueCarTo (car: Node, target: Vec3, minDuration = 0.24): Tween<Node> {
+        const current = car.position.clone();
+        const yaw = this.getTweenYaw(car, current, target);
+        const props: { position: Vec3; eulerAngles?: Vec3 } = {
+            position: target.clone(),
+        };
+        if (yaw !== null) {
+            props.eulerAngles = new Vec3(0, yaw, 0);
+        }
+
+        return tween(car).to(this.getTravelDuration(current, target, 11.5, minDuration), props, { easing: 'quadOut' });
+    }
+
     private getYawDegrees (from: Vec3, to: Vec3): number | null {
         const dx = to.x - from.x;
         const dz = to.z - from.z;
@@ -1121,6 +1324,14 @@ export class FoodTruckPlayableController extends Component {
         }
 
         return currentYaw + delta;
+    }
+
+    private getTravelDuration (from: Vec3, to: Vec3, speed: number, minDuration: number): number {
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const dz = to.z - from.z;
+        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        return Math.max(minDuration, distance / Math.max(0.01, speed));
     }
 
     private createButton (
