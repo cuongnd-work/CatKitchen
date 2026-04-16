@@ -14,6 +14,7 @@ import {
     UITransform,
     Vec3,
     Widget,
+    view,
     tween,
 } from 'cc';
 import super_html_script from 'db://assets/plugins/playable-foundation/super-html/super_html_script';
@@ -86,7 +87,7 @@ export class FoodTruckPlayableController extends Component {
     private _storeTitleLabel: Label | null = null;
     private _serviceProgressNode: Node | null = null;
     private _serviceProgressGraphics: Graphics | null = null;
-
+    private _serviceProgressTarget: Node | null = null;
     private _removeBarrierPulse: Tween<Node> | null = null;
     private _lanes: LaneData[] = [];
 
@@ -129,14 +130,12 @@ export class FoodTruckPlayableController extends Component {
         if (this._catNode) {
             Tween.stopAllByTarget(this._catNode);
         }
-        if (this._serviceProgressNode) {
-            Tween.stopAllByTarget(this._serviceProgressNode);
-        }
     }
 
     update (deltaTime: number): void {
         this._elapsed += Math.max(0, deltaTime);
         this.refreshDispatchButtonLabel();
+        this.updateServiceProgressPosition();
         if (this._phase === 'scene2' && !this._dispatchInProgress && this._elapsed >= this._nextDispatchTime) {
             this.tryDispatchCar();
         }
@@ -545,6 +544,13 @@ export class FoodTruckPlayableController extends Component {
             () => this.onOpenLaneClicked(),
         );
         this._openLaneLabel = this._openLaneButton.getComponentInChildren(Label);
+
+        this._serviceProgressNode = new Node('ServiceProgressOverlay');
+        this._overlayRoot.addChild(this._serviceProgressNode);
+        this.setUiLayerRecursive(this._serviceProgressNode);
+        this._serviceProgressNode.addComponent(UITransform).setContentSize(140, 140);
+        this._serviceProgressGraphics = this._serviceProgressNode.addComponent(Graphics);
+        this._serviceProgressNode.active = false;
     }
 
     private createEndingUi (): void {
@@ -996,61 +1002,81 @@ export class FoodTruckPlayableController extends Component {
             .start();
     }
 
-    private playServiceProgress (car: Node, duration: number): void {
-        const progressNode = this.ensureServiceProgressNode(car);
-        if (!progressNode || !this._serviceProgressGraphics) {
+    private beginServiceProgress (car: Node, progress: number): void {
+        if (!this._serviceProgressNode || !this._serviceProgressGraphics) {
             return;
         }
 
-        Tween.stopAllByTarget(progressNode);
-        progressNode.active = true;
-        this.drawServiceProgress(0);
+        this._serviceProgressTarget = this.ensureServiceProgressAnchor(car);
+        this.updateServiceProgressPosition();
+        Tween.stopAllByTarget(this._serviceProgressNode);
+        this._serviceProgressNode.active = true;
+        this.drawServiceProgress(this._serviceProgressGraphics, progress);
+    }
+
+    private playServiceProgress (car: Node, duration: number): void {
+        this.beginServiceProgress(car, 0);
+        if (!this._serviceProgressNode || !this._serviceProgressGraphics) {
+            return;
+        }
 
         const state = { value: 0 };
         tween(state)
             .to(duration, { value: 1 }, {
                 easing: 'linear',
                 onUpdate: () => {
-                    this.drawServiceProgress(state.value);
+                    if (this._serviceProgressGraphics) {
+                        this.drawServiceProgress(this._serviceProgressGraphics, state.value);
+                    }
                 },
             })
             .call(() => {
-                this.drawServiceProgress(1);
-                if (progressNode.isValid) {
-                    progressNode.active = false;
+                if (this._serviceProgressGraphics) {
+                    this.drawServiceProgress(this._serviceProgressGraphics, 1);
                 }
+                if (this._serviceProgressNode?.isValid) {
+                    this._serviceProgressNode.active = false;
+                }
+                this._serviceProgressTarget = null;
             })
             .start();
     }
 
-    private ensureServiceProgressNode (car: Node): Node | null {
-        if (!car || !car.isValid) {
-            return null;
-        }
-
-        let progressNode = car.getChildByName('ServiceProgress');
-        if (!progressNode) {
-            progressNode = new Node('ServiceProgress');
-            car.addChild(progressNode);
-            progressNode.layer = Layers.Enum.UI_2D;
-            progressNode.setPosition(0, 1.9, 0);
-            progressNode.setScale(0.018, 0.018, 0.018);
-            progressNode.addComponent(UITransform).setContentSize(120, 120);
-            this._serviceProgressGraphics = progressNode.addComponent(Graphics);
-        } else if (!this._serviceProgressGraphics || this._serviceProgressNode !== progressNode) {
-            this._serviceProgressGraphics = progressNode.getComponent(Graphics) ?? progressNode.addComponent(Graphics);
-        }
-
-        this._serviceProgressNode = progressNode;
-        return progressNode;
-    }
-
-    private drawServiceProgress (progress: number): void {
-        if (!this._serviceProgressGraphics) {
+    private updateServiceProgressPosition (): void {
+        if (!this._serviceProgressNode || !this._serviceProgressTarget || !this._serviceProgressTarget.isValid) {
             return;
         }
 
-        const graphics = this._serviceProgressGraphics;
+        const camera = this._mainCameraNode?.getComponent(Camera);
+        const overlayTransform = this._overlayRoot?.getComponent(UITransform);
+        if (!camera || !overlayTransform) {
+            return;
+        }
+
+        const worldPos = this._serviceProgressTarget.getWorldPosition(new Vec3());
+        const screenPos = camera.worldToScreen(worldPos);
+        const visibleSize = view.getVisibleSize();
+        const scaleX = overlayTransform.contentSize.width / Math.max(1, visibleSize.width);
+        const scaleY = overlayTransform.contentSize.height / Math.max(1, visibleSize.height);
+        const localX = (screenPos.x - visibleSize.width * 0.5) * scaleX;
+        const localY = (screenPos.y - visibleSize.height * 0.5) * scaleY;
+        this._serviceProgressNode.setPosition(localX, localY, 0);
+    }
+
+    private ensureServiceProgressAnchor (car: Node): Node {
+        const anchorParent = car.getChildByName('car_stationwagon') ?? car;
+        let anchor = anchorParent.getChildByName('ServiceProgressAnchor');
+        if (!anchor) {
+            anchor = new Node('ServiceProgressAnchor');
+            anchorParent.addChild(anchor);
+        }
+
+        anchor.layer = anchorParent.layer;
+        anchor.setPosition(0, 1.05, 0);
+        return anchor;
+    }
+
+    private drawServiceProgress (graphics: Graphics, progress: number): void {
         const clamped = Math.max(0, Math.min(1, progress));
         const radius = 34;
         const startAngle = Math.PI * 0.5;
