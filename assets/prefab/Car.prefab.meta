@@ -2,12 +2,12 @@
   "ver": "1.1.50",
   "importer": "prefab",
   "imported": true,
-  "uuid": "141f7f85-30ac-48d0-a28c-af2180dbf72d",
+  "uuid": "355d0539-760a-4d84-9c13-e7e1fbd9c6ea",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "cola"
+    "syncNodeName": "Car"
   }
 }

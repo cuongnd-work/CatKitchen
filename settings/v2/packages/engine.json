@@ -358,7 +358,7 @@
           },
           "spine": {
             "_value": true,
-            "_option": "spine-3.8"
+            "_option": "spine-4.2"
           },
           "spine-3.8": {
             "_value": true,
@@ -429,7 +429,7 @@
           "profiler",
           "rich-text",
           "skeletal-animation",
-          "spine-3.8",
+          "spine-4.2",
           "terrain",
           "tiled-map",
           "tween",

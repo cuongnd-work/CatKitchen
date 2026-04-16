@@ -1,16 +1,23 @@
 import {
     _decorator,
+    Camera,
     Color,
     Component,
     Graphics,
+    instantiate,
     Label,
+    Layers,
     Node,
+    SkeletalAnimation,
     Tween,
     UITransform,
     Vec3,
+    Widget,
     tween,
 } from 'cc';
 import super_html_script from 'db://assets/plugins/playable-foundation/super-html/super_html_script';
+import { CameraFollow } from './CameraFollow';
+import { OrientationCameraOrthoAdjuster } from './OrientationCameraOrthoAdjuster';
 import { UIScreenResolution } from './UIScreenResolution';
 
 const { ccclass } = _decorator;
@@ -19,11 +26,12 @@ type ScenePhase = 'scene1' | 'scene2' | 'ending';
 
 type LaneData = {
     index: number;
-    root: Node;
-    barrier: Node;
-    titleLabel: Label;
+    x: number;
+    barrier: Node | null;
     queueSlots: Vec3[];
     queueCars: Node[];
+    templateCar: Node | null;
+    targetQueueSize: number;
     open: boolean;
 };
 
@@ -31,8 +39,6 @@ type LaneData = {
 export class FoodTruckPlayableController extends Component {
     private static _activeInstance: FoodTruckPlayableController | null = null;
     private readonly laneCount = 4;
-    private readonly initialCarsPerLane = 8;
-    private readonly queueSpacing = 78;
     private readonly baseDispatchCooldown = 2;
     private readonly cooldownReductionPerOpenedLane = 0.5;
     private readonly minimumDispatchCooldown = 0.5;
@@ -51,17 +57,20 @@ export class FoodTruckPlayableController extends Component {
     private _lastLaneIndex = -1;
     private _playClicked = false;
 
-    private _root: Node | null = null;
+    private _laneTemplateSpacing = 120;
+    private _spawnSerial = 0;
+
     private _worldRoot: Node | null = null;
     private _overlayRoot: Node | null = null;
+    private _foodTruckNode: Node | null = null;
+    private _catNode: Node | null = null;
+    private _catScale = new Vec3(1, 1, 1);
+    private _mainCameraNode: Node | null = null;
 
     private _phaseLabel: Label | null = null;
     private _moneyLabel: Label | null = null;
     private _dispatchLabel: Label | null = null;
     private _openLaneLabel: Label | null = null;
-
-    private _catNode: Node | null = null;
-    private _catScale = new Vec3(1, 1, 1);
 
     private _playButton: Node | null = null;
     private _removeBarrierButton: Node | null = null;
@@ -81,10 +90,10 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
         FoodTruckPlayableController._activeInstance = this;
-        this.prepareLegacySceneNodes();
-        this.createLayout();
-        this.createFoodTruck();
-        this.createLanes();
+        this.prepareLegacyUiNodes();
+        this.bindWorldNodes();
+        this.configureMainCamera();
+        this.prepareLanesFromWorld();
         this.createHud();
         this.createEndingUi();
         this.refreshUiState();
@@ -111,9 +120,9 @@ export class FoodTruckPlayableController extends Component {
         }
     }
 
-    private prepareLegacySceneNodes (): void {
+    private prepareLegacyUiNodes (): void {
         const canvasNode = this.resolveCanvasNode();
-        const screenResolution = this.node.getComponent(UIScreenResolution);
+        const screenResolution = this.node.getComponentInChildren(UIScreenResolution);
         if (screenResolution) {
             screenResolution.enabled = false;
             if (screenResolution.Doc) {
@@ -132,112 +141,207 @@ export class FoodTruckPlayableController extends Component {
         if (level) {
             level.active = false;
         }
+
+        const legacyPortraitWidget = canvasNode.getChildByName('Wiget-portait');
+        if (legacyPortraitWidget) {
+            legacyPortraitWidget.active = false;
+        }
+
+        const legacyLandscapeWidget = canvasNode.getChildByName('Wiget-portait-001');
+        if (legacyLandscapeWidget) {
+            legacyLandscapeWidget.active = false;
+        }
     }
 
-    private createLayout (): void {
-        this._root = new Node('FoodTruckPlayableRoot');
-        this.node.addChild(this._root);
-        const rootTransform = this._root.addComponent(UITransform);
-        rootTransform.setContentSize(720, 1280);
-        this._root.setPosition(0, 0, 0);
+    private bindWorldNodes (): void {
+        const scene = this.node.scene;
+        if (!scene) {
+            return;
+        }
 
-        const bgBack = this.createRectNode(this._root, 'BackgroundBack', new Color(245, 199, 116, 255), 720, 1280);
-        bgBack.setPosition(0, 0, 0);
-        const bgTop = this.createRectNode(this._root, 'BackgroundTop', new Color(250, 225, 164, 255), 720, 550);
-        bgTop.setPosition(0, 365, 0);
+        const worldContainer = scene.getChildByName('Eviroments');
+        const worldRoot = worldContainer?.getChildByName('FoodWorld') ?? this.findNodeByName(scene, 'FoodWorld');
+        if (worldRoot) {
+            this._worldRoot = worldRoot;
+        }
 
-        this._worldRoot = new Node('WorldRoot');
-        this._root.addChild(this._worldRoot);
-        const worldTransform = this._worldRoot.addComponent(UITransform);
-        worldTransform.setContentSize(720, 1280);
-        this._worldRoot.setPosition(0, 0, 0);
+        this._foodTruckNode = this._worldRoot?.getChildByName('F11') ?? this.findNodeByName(scene, 'F11');
+        this._catNode = this._worldRoot?.getChildByName('Rig_Cat_02') ?? this.findNodeByName(scene, 'Rig_Cat_02');
 
-        const roadArea = this.createRectNode(this._worldRoot, 'RoadArea', new Color(62, 62, 62, 255), 620, 940);
-        roadArea.setPosition(0, -65, 0);
-
-        this._overlayRoot = new Node('OverlayRoot');
-        this._root.addChild(this._overlayRoot);
-        const overlayTransform = this._overlayRoot.addComponent(UITransform);
-        overlayTransform.setContentSize(720, 1280);
-        this._overlayRoot.setPosition(0, 0, 0);
+        if (this._catNode) {
+            this._catScale.set(this._catNode.scale.x, this._catNode.scale.y, this._catNode.scale.z);
+        }
     }
 
-    private createFoodTruck (): void {
+    private configureMainCamera (): void {
+        const scene = this.node.scene;
+        if (!scene) {
+            return;
+        }
+
+        const mainCameraNode = scene.getChildByName('Main Camera');
+        if (!mainCameraNode) {
+            return;
+        }
+
+        this._mainCameraNode = mainCameraNode;
+
+        const follow = mainCameraNode.getComponent(CameraFollow);
+        if (follow) {
+            follow.enabled = false;
+        }
+
+        const orthoAdjuster = mainCameraNode.getComponent(OrientationCameraOrthoAdjuster);
+        if (orthoAdjuster) {
+            orthoAdjuster.enabled = false;
+        }
+
+        const camera = mainCameraNode.getComponent(Camera);
+        if (camera) {
+            camera.projection = Camera.ProjectionType.PERSPECTIVE;
+            camera.fov = 45;
+            camera.near = 1;
+            camera.far = 1000;
+            camera.visibility = Layers.Enum.DEFAULT | Layers.Enum.UI_2D | Layers.Enum.UI_3D;
+            camera.clearFlags = Camera.ClearFlag.SOLID_COLOR;
+        }
+
+        // Match camera framing from original reference playable.
+        mainCameraNode.setPosition(-10.3644, 18.9254, -14.4767);
+        mainCameraNode.setRotationFromEuler(-43.4321, -148.3135, 0);
+    }
+
+    private prepareLanesFromWorld (): void {
         if (!this._worldRoot) {
             return;
         }
 
-        const truckBody = this.createRectNode(this._worldRoot, 'FoodTruckBody', new Color(255, 145, 74, 255), 400, 180, 18);
-        truckBody.setPosition(0, 445, 0);
+        this._lanes.length = 0;
 
-        const truckBanner = this.createRectNode(this._worldRoot, 'FoodTruckBanner', new Color(255, 241, 180, 255), 340, 52, 12);
-        truckBanner.setPosition(0, 500, 0);
-        this.createLabel(truckBanner, 'Street Food Cat', 34, new Color(75, 47, 28, 255), new Vec3(0, 0, 0));
+        const carNodes = this._worldRoot.children.filter((child) => child.active && child.name.startsWith('car_'));
+        const laneBuckets = new Map<number, Node[]>();
 
-        const truckText = this.createLabel(truckBody, 'Quay do an / Xe do an', 30, new Color(90, 36, 22, 255), new Vec3(0, 10, 0));
-        truckText.overflow = Label.Overflow.CLAMP;
-
-        this._catNode = this.createRectNode(truckBody, 'ChefCat', new Color(255, 236, 205, 255), 130, 92, 20);
-        this._catNode.setPosition(0, -42, 0);
-        this._catScale.set(1, 1, 1);
-        this._catNode.setScale(this._catScale);
-        this.createLabel(this._catNode, 'Meo Chef dang nau an', 21, new Color(96, 40, 28, 255), new Vec3(0, 0, 0));
-    }
-
-    private createLanes (): void {
-        if (!this._worldRoot) {
-            return;
+        for (const carNode of carNodes) {
+            const laneKey = Math.round(carNode.position.x);
+            const bucket = laneBuckets.get(laneKey);
+            if (bucket) {
+                bucket.push(carNode);
+            } else {
+                laneBuckets.set(laneKey, [carNode]);
+            }
         }
 
-        const laneX = [-240, -80, 80, 240];
-        const queueTopY = 185;
-        const laneBottom = -450;
+        const laneKeys = Array.from(laneBuckets.keys()).sort((a, b) => a - b).slice(0, this.laneCount);
+        for (let i = 0; i < laneKeys.length; i++) {
+            const laneX = laneKeys[i];
+            const laneCars = (laneBuckets.get(laneX) ?? []).sort((a, b) => a.position.y - b.position.y);
+            if (laneCars.length === 0) {
+                continue;
+            }
 
-        for (let i = 0; i < this.laneCount; i++) {
-            const laneRoot = new Node(`Lane_${i + 1}`);
-            this._worldRoot.addChild(laneRoot);
-            laneRoot.addComponent(UITransform).setContentSize(130, 980);
-            laneRoot.setPosition(laneX[i], -50, 0);
-
-            const lanePaint = this.createRectNode(laneRoot, `LanePaint_${i + 1}`, new Color(78, 78, 78, 255), 112, 900, 10);
-            lanePaint.setPosition(0, 0, 0);
-
-            const laneTitle = this.createLabel(laneRoot, `Lan ${i + 1} - Dang chan`, 20, new Color(250, 235, 206, 255), new Vec3(0, 350, 0));
-
-            const barrier = this.createRectNode(laneRoot, `Barrier_${i + 1}`, new Color(204, 64, 64, 255), 120, 22, 8);
-            barrier.setPosition(0, 250, 0);
-            this.createLabel(barrier, 'Chan', 18, new Color(255, 240, 236, 255), new Vec3(0, 0, 0));
+            const spacing = this.estimateLaneSpacing(laneCars);
+            this._laneTemplateSpacing = spacing;
 
             const queueSlots: Vec3[] = [];
-            for (let slot = 0; slot < this.initialCarsPerLane; slot++) {
-                queueSlots.push(new Vec3(0, queueTopY - slot * this.queueSpacing, 0));
+            for (const laneCar of laneCars) {
+                queueSlots.push(new Vec3(laneCar.position.x, laneCar.position.y, laneCar.position.z));
             }
+
+            const targetQueueSize = Math.max(8, queueSlots.length);
+            while (queueSlots.length < targetQueueSize) {
+                const slotIndex = queueSlots.length;
+                const y = queueSlots[0].y + slotIndex * spacing;
+                queueSlots.push(new Vec3(laneX, y, queueSlots[0].z));
+            }
+
+            const templateSource = laneCars[laneCars.length - 1];
+            const templateCar = instantiate(templateSource);
+            templateCar.active = false;
+            templateCar.name = `LaneTemplate_${i + 1}`;
+            this._worldRoot.addChild(templateCar);
+            templateCar.setPosition(templateSource.position);
 
             const lane: LaneData = {
                 index: i,
-                root: laneRoot,
-                barrier,
-                titleLabel: laneTitle,
+                x: laneX,
+                barrier: null,
                 queueSlots,
-                queueCars: [],
+                queueCars: laneCars,
+                templateCar,
+                targetQueueSize,
                 open: false,
             };
             this._lanes.push(lane);
-            this.fillLaneQueue(lane, true);
-
-            const laneCap = this.createRectNode(laneRoot, `LaneCap_${i + 1}`, new Color(94, 94, 94, 255), 130, 45, 8);
-            laneCap.setPosition(0, laneBottom, 0);
         }
+
+        this._lanes.sort((a, b) => a.x - b.x);
+        this._lanes.forEach((lane, index) => {
+            lane.index = index;
+            this.buildLaneBarrier(lane);
+            this.ensureLaneQueueLength(lane, lane.targetQueueSize, true);
+        });
     }
 
-    private createHud (): void {
-        if (!this._overlayRoot) {
+    private estimateLaneSpacing (laneCars: Node[]): number {
+        if (laneCars.length < 2) {
+            return this._laneTemplateSpacing;
+        }
+
+        let sum = 0;
+        let count = 0;
+        for (let i = 1; i < laneCars.length; i++) {
+            sum += Math.abs(laneCars[i].position.y - laneCars[i - 1].position.y);
+            count++;
+        }
+
+        const avg = count > 0 ? sum / count : this._laneTemplateSpacing;
+        return Math.max(30, avg);
+    }
+
+    private buildLaneBarrier (lane: LaneData): void {
+        if (!this._worldRoot) {
             return;
         }
 
+        const templateBarrier = this._worldRoot.getChildByName('Wood_Road_Block_XSmall');
+        if (!templateBarrier) {
+            return;
+        }
+
+        let barrier: Node;
+        if (lane.index === 0) {
+            barrier = templateBarrier;
+        } else {
+            barrier = instantiate(templateBarrier);
+            barrier.name = `Wood_Road_Block_XSmall_${lane.index + 1}`;
+            this._worldRoot.addChild(barrier);
+        }
+
+        barrier.setPosition(lane.x, templateBarrier.position.y, templateBarrier.position.z);
+        barrier.setScale(templateBarrier.scale);
+        barrier.setRotation(templateBarrier.rotation);
+        barrier.active = true;
+        lane.barrier = barrier;
+    }
+
+    private createHud (): void {
+        this._overlayRoot = new Node('PlayableHudRoot');
+        this.node.addChild(this._overlayRoot);
+        this._overlayRoot.addComponent(UITransform).setContentSize(720, 1280);
+        const widget = this._overlayRoot.addComponent(Widget);
+        widget.isAlignTop = true;
+        widget.isAlignBottom = true;
+        widget.isAlignLeft = true;
+        widget.isAlignRight = true;
+        widget.top = 0;
+        widget.bottom = 0;
+        widget.left = 0;
+        widget.right = 0;
+        widget.alignMode = Widget.AlignMode.ALWAYS;
+
         this._phaseLabel = this.createLabel(
             this._overlayRoot,
-            'Scene 1 - Xe xep hang mua do an',
+            'Scene 1 - 4 lan xe cho mua do an',
             28,
             new Color(82, 44, 18, 255),
             new Vec3(0, 588, 0),
@@ -359,13 +463,11 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private onPlayGameClicked (): void {
-        if (!this._playClicked) {
-            this._playClicked = true;
-            super_html_script.on_first_click();
-        }
+        this.trackFirstClick();
     }
 
     private onRemoveBarrierClicked (): void {
+        this.trackFirstClick();
         if (this._phase !== 'scene1' || this._openedLanes > 0) {
             return;
         }
@@ -376,10 +478,12 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private onDispatchClicked (): void {
+        this.trackFirstClick();
         this.tryDispatchCar();
     }
 
     private onOpenLaneClicked (): void {
+        this.trackFirstClick();
         if (this._phase !== 'scene1') {
             return;
         }
@@ -402,6 +506,14 @@ export class FoodTruckPlayableController extends Component {
         super_html_script.on_click_download();
     }
 
+    private trackFirstClick (): void {
+        if (this._playClicked) {
+            return;
+        }
+        this._playClicked = true;
+        super_html_script.on_first_click();
+    }
+
     private tryDispatchCar (): boolean {
         if (this._phase === 'ending') {
             return false;
@@ -411,7 +523,7 @@ export class FoodTruckPlayableController extends Component {
         }
 
         const lane = this.pickLaneForDispatch();
-        if (!lane || lane.queueCars.length === 0) {
+        if (!lane || lane.queueCars.length === 0 || !this._worldRoot) {
             return false;
         }
 
@@ -419,7 +531,6 @@ export class FoodTruckPlayableController extends Component {
         if (!car) {
             return false;
         }
-        this.moveCarToWorldRoot(car);
 
         this._dispatchInProgress = true;
         this._nextDispatchTime = this._elapsed + this.getDispatchCooldown();
@@ -430,13 +541,14 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private pickLaneForDispatch (): LaneData | null {
+        const laneTotal = this.getLaneTotal();
         const openLanes = this._lanes.filter((lane) => lane.open && lane.queueCars.length > 0);
         if (openLanes.length === 0) {
             return null;
         }
 
-        for (let step = 1; step <= this.laneCount; step++) {
-            const candidateIndex = (this._lastLaneIndex + step + this.laneCount) % this.laneCount;
+        for (let step = 1; step <= laneTotal; step++) {
+            const candidateIndex = (this._lastLaneIndex + step + laneTotal) % laneTotal;
             const lane = this._lanes[candidateIndex];
             if (lane && lane.open && lane.queueCars.length > 0) {
                 this._lastLaneIndex = candidateIndex;
@@ -448,19 +560,23 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private animateCarFlow (lane: LaneData, car: Node): void {
-        const laneX = lane.root.position.x;
-        const entry = new Vec3(laneX, 230, 0);
-        const shopPoint = new Vec3(0, 350, 0);
-        const exitPoint = new Vec3(358, 430, 0);
+        const laneUnit = Math.max(0.1, this._laneTemplateSpacing);
+        const barrierY = lane.barrier ? lane.barrier.position.y : lane.queueSlots[0].y - laneUnit * 3.5;
+        const carZ = car.position.z;
+        const truckPos = this._foodTruckNode ? this._foodTruckNode.position : new Vec3(2.25, 1.65, 0);
+        const entryPoint = new Vec3(lane.x, barrierY - laneUnit * 0.15, carZ);
+        const servicePoint = new Vec3(truckPos.x - laneUnit * 0.4, truckPos.y + laneUnit * 0.1, truckPos.z);
+        const exitPoint = new Vec3(truckPos.x + laneUnit * 1.55, truckPos.y + laneUnit * 0.35, truckPos.z);
 
+        Tween.stopAllByTarget(car);
         tween(car)
-            .to(0.35, { position: entry }, { easing: 'sineOut' })
-            .to(0.4, { position: shopPoint }, { easing: 'sineInOut' })
+            .to(0.5, { position: entryPoint }, { easing: 'sineOut' })
+            .to(0.38, { position: servicePoint }, { easing: 'sineInOut' })
             .call(() => {
                 this.playCatCookingAnim();
             })
             .delay(0.55)
-            .to(0.5, { position: exitPoint }, { easing: 'sineIn' })
+            .to(0.52, { position: exitPoint }, { easing: 'sineIn' })
             .call(() => {
                 if (car.isValid) {
                     car.destroy();
@@ -495,15 +611,16 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        while (this._openedLanes < this.laneCount) {
+        while (this._openedLanes < this.getLaneTotal()) {
             this.openNextLane();
         }
 
         this._phase = 'scene2';
         if (this._phaseLabel) {
-            this._phaseLabel.string = 'Scene 2 - Follow playable goc, toc do cao hon';
+            this._phaseLabel.string = 'Scene 2 - Follow playable goc';
         }
         this.fillOpenLaneQueues();
+        this._nextDispatchTime = this._elapsed + 0.8;
         this.refreshUiState();
     }
 
@@ -531,14 +648,14 @@ export class FoodTruckPlayableController extends Component {
         }
 
         nextLane.open = true;
-        nextLane.barrier.active = false;
-        nextLane.titleLabel.string = `Lan ${nextLane.index + 1} - Da mo`;
+        if (nextLane.barrier) {
+            nextLane.barrier.active = false;
+        }
         this._openedLanes++;
-        this.shiftLaneQueue(nextLane);
     }
 
     private getDispatchCooldown (): number {
-        const reduction = Math.max(0, this._openedLanes - 1) * this.cooldownReductionPerOpenedLane;
+        const reduction = this._openedLanes * this.cooldownReductionPerOpenedLane;
         return Math.max(this.minimumDispatchCooldown, this.baseDispatchCooldown - reduction);
     }
 
@@ -558,14 +675,14 @@ export class FoodTruckPlayableController extends Component {
         }
 
         if (this._openLaneButton) {
-            this._openLaneButton.active = this._phase === 'scene1' && this._openedLanes > 0 && this._openedLanes < this.laneCount;
+            this._openLaneButton.active = this._phase === 'scene1' && this._openedLanes > 0 && this._openedLanes < this.getLaneTotal();
         }
 
         if (this._openLaneLabel) {
             if (this._phase === 'scene2') {
-                this._openLaneLabel.string = 'Da mo du 4 lan';
+                this._openLaneLabel.string = `Da mo du ${this.getLaneTotal()} lan`;
             } else {
-                this._openLaneLabel.string = `Tao duong cho xe di vao (${this._openedLanes}/${this.laneCount})`;
+                this._openLaneLabel.string = `Tao duong cho xe di vao (${this._openedLanes}/${this.getLaneTotal()})`;
             }
         }
 
@@ -589,7 +706,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        this._dispatchLabel.string = `Cho xe vao (${this.getDispatchCooldown().toFixed(1)}s)`;
+        this._dispatchLabel.string = `Cho xe vao (CD ${this.getDispatchCooldown().toFixed(1)}s)`;
     }
 
     private refreshMoneyLabel (): void {
@@ -603,27 +720,47 @@ export class FoodTruckPlayableController extends Component {
         this.refreshMoneyLabel();
     }
 
-    private fillLaneQueue (lane: LaneData, instant = false): void {
-        while (lane.queueCars.length < this.initialCarsPerLane) {
-            const car = this.createCarNode(lane.index, lane.queueCars.length);
-            lane.root.addChild(car);
-            const slot = lane.queueSlots[lane.queueCars.length];
-            car.setPosition(slot.x, slot.y, 0);
-            if (!instant) {
-                car.setScale(0.8, 0.8, 1);
-                tween(car).to(0.2, { scale: new Vec3(1, 1, 1) }).start();
+    private fillOpenLaneQueues (): void {
+        this._lanes.forEach((lane) => {
+            if (!lane.open) {
+                return;
+            }
+            this.ensureLaneQueueLength(lane, lane.targetQueueSize);
+        });
+    }
+
+    private ensureLaneQueueLength (lane: LaneData, targetSize: number, instant = false): void {
+        while (lane.queueSlots.length < targetSize) {
+            const slotIndex = lane.queueSlots.length;
+            const y = lane.queueSlots[0].y + slotIndex * this._laneTemplateSpacing;
+            lane.queueSlots.push(new Vec3(lane.x, y, lane.queueSlots[0].z));
+        }
+
+        while (lane.queueCars.length < targetSize) {
+            const car = this.spawnCarForLane(lane);
+            if (!car) {
+                break;
             }
             lane.queueCars.push(car);
         }
+
         this.shiftLaneQueue(lane, instant);
     }
 
-    private fillOpenLaneQueues (): void {
-        this._lanes.forEach((lane) => {
-            if (lane.open) {
-                this.fillLaneQueue(lane);
-            }
-        });
+    private spawnCarForLane (lane: LaneData): Node | null {
+        if (!this._worldRoot || !lane.templateCar || !lane.templateCar.isValid) {
+            return null;
+        }
+
+        const car = instantiate(lane.templateCar);
+        car.active = true;
+        this._worldRoot.addChild(car);
+
+        const slotIndex = lane.queueCars.length;
+        const slot = lane.queueSlots[slotIndex];
+        car.setPosition(slot ? slot : new Vec3(lane.x, lane.queueSlots[0].y + slotIndex * this._laneTemplateSpacing, 0));
+        car.name = `car_lane${lane.index + 1}_${this._spawnSerial++}`;
+        return car;
     }
 
     private shiftLaneQueue (lane: LaneData, instant = false): void {
@@ -635,7 +772,7 @@ export class FoodTruckPlayableController extends Component {
             }
 
             if (instant) {
-                car.setPosition(target.x, target.y, 0);
+                car.setPosition(target);
             } else {
                 tween(car)
                     .to(0.22, { position: target }, { easing: 'sineOut' })
@@ -650,26 +787,18 @@ export class FoodTruckPlayableController extends Component {
         }
 
         Tween.stopAllByTarget(this._catNode);
-        this._catNode.setScale(this._catScale);
+        this._catNode.setScale(this._catScale.x, this._catScale.y, this._catScale.z);
 
         const bigger = new Vec3(this._catScale.x * 1.15, this._catScale.y * 1.15, this._catScale.z);
+        const skeletalAnimation = this._catNode.getComponent(SkeletalAnimation);
+        if (skeletalAnimation && skeletalAnimation.defaultClip) {
+            skeletalAnimation.crossFade(skeletalAnimation.defaultClip.name, 0.1);
+        }
+
         tween(this._catNode)
             .to(0.12, { scale: bigger }, { easing: 'sineOut' })
             .to(0.12, { scale: this._catScale }, { easing: 'sineIn' })
             .start();
-    }
-
-    private createCarNode (laneIndex: number, queueIndex: number): Node {
-        const palette = [
-            new Color(99, 165, 255, 255),
-            new Color(116, 199, 129, 255),
-            new Color(243, 172, 79, 255),
-            new Color(224, 120, 120, 255),
-        ];
-
-        const car = this.createRectNode(null, `Car_${laneIndex}_${queueIndex}`, palette[laneIndex % palette.length], 95, 46, 10);
-        this.createLabel(car, 'Xe', 18, new Color(255, 255, 255, 255), new Vec3(0, 0, 0));
-        return car;
     }
 
     private createButton (
@@ -760,14 +889,19 @@ export class FoodTruckPlayableController extends Component {
         this._removeBarrierButton.setScale(1, 1, 1);
     }
 
-    private moveCarToWorldRoot (car: Node): void {
-        if (!this._worldRoot || !car || !car.isValid) {
-            return;
+    private findNodeByName (root: Node, name: string): Node | null {
+        if (root.name === name) {
+            return root;
         }
 
-        const worldPos = car.getWorldPosition(new Vec3());
-        this._worldRoot.addChild(car);
-        car.setWorldPosition(worldPos);
+        for (const child of root.children) {
+            const found = this.findNodeByName(child, name);
+            if (found) {
+                return found;
+            }
+        }
+
+        return null;
     }
 
     private resolveCanvasNode (): Node | null {
@@ -781,5 +915,9 @@ export class FoodTruckPlayableController extends Component {
         }
 
         return null;
+    }
+
+    private getLaneTotal (): number {
+        return this._lanes.length > 0 ? this._lanes.length : this.laneCount;
     }
 }
