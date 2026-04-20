@@ -2,6 +2,8 @@ import {
     _decorator,
     Animation,
     AnimationClip,
+    AudioClip,
+    AudioSource,
     assetManager,
     Camera,
     Canvas,
@@ -56,6 +58,8 @@ type LaneData = {
 export class FoodTruckPlayableController extends Component {
     private static _activeInstance: FoodTruckPlayableController | null = null;
     private static readonly UI_FONT_UUID = '4b362bb5-2b14-46a5-8c9e-a6688bb70e61';
+    private static readonly ENGINE_START_AUDIO_UUID = '58263f6c-43e3-4c65-bf76-36fb080c0f8f';
+    private static readonly CAR_HORN_AUDIO_UUID = 'e61f7d9c-d841-44ee-8d0c-68b1f6dbd74c';
     private static readonly HAND_CLIP_UUID = 'e26e9387-4e91-437d-83e6-c772efc4e980';
     private static readonly HAND_FRAME_A_UUID = 'bde249fd-fb02-4191-820c-f22fda1fe1a6@f9941';
     private static readonly HAND_FRAME_B_UUID = 'a68ec147-ff49-457b-b230-122b84c2e70c@f9941';
@@ -72,12 +76,12 @@ export class FoodTruckPlayableController extends Component {
     private readonly removeBarrierCost = 25;
     private readonly dispatchCarCost = 5;
     private readonly openLaneCost = 120;
-    private readonly idleShakeZAngle = 1.0;
-    private readonly idleShakeDuration = 0.12;
     private readonly manualDispatchesToAuto = 20;
     private readonly autoCarsToEnding = 6;
     private readonly handHintIdleDelay = 4;
     private readonly handHintOffset = new Vec3(0, -86, 0);
+    private readonly hornPromptDelayMin = 6;
+    private readonly hornPromptDelayMax = 10;
 
     private _phase: ScenePhase = 'scene1';
     private _money = this.startingCash;
@@ -120,7 +124,6 @@ export class FoodTruckPlayableController extends Component {
     private _serviceProgressWorldPosition: Vec3 | null = null;
     private _removeBarrierPulse: Tween<Node> | null = null;
     private _lanes: LaneData[] = [];
-    private _idleShakeBaseByCar: Map<Node, { target: Node; eulerAngles: Vec3 }> = new Map();
     private _uiFont: Font | null = null;
     private _handHintRoot: Node | null = null;
     private _handHintAnimation: Animation | null = null;
@@ -129,6 +132,9 @@ export class FoodTruckPlayableController extends Component {
     private _handFrameB: SpriteFrame | null = null;
     private _handHintReady = false;
     private _handHintTarget: Node | null = null;
+    private _engineStartAudio: AudioClip | null = null;
+    private _carHornAudio: AudioClip | null = null;
+    private _engineAudioSource: AudioSource | null = null;
 
     @property(Node)
     public endingSelectionNode: Node | null = null;
@@ -154,6 +160,8 @@ export class FoodTruckPlayableController extends Component {
         this.destroyStaleHudRoots();
         this.prepareLegacyUiNodes();
         this.loadUiFont();
+        this.loadEngineStartAudio();
+        this.loadCarHornAudio();
         this.bindWorldNodes();
         this.configureMainCamera();
         this.prepareLanesFromWorld();
@@ -178,8 +186,8 @@ export class FoodTruckPlayableController extends Component {
         if (this._catNode) {
             Tween.stopAllByTarget(this._catNode);
         }
-        this.stopAllIdleCarShakes();
         this.unschedule(this.showHandHintForCurrentTarget);
+        this.unschedule(this.playHornPromptIfNeeded);
         input.off(Input.EventType.TOUCH_START, this.onGlobalTouchStart, this);
     }
 
@@ -802,6 +810,7 @@ export class FoodTruckPlayableController extends Component {
         const drivePath = this.buildDrivePath(lane, car.position.clone(), route.sPoint, route.rPoint);
 
         Tween.stopAllByTarget(car);
+        this.playEngineStartAudio();
         let sequence = tween(car);
         for (let i = 0; i < drivePath.length; i++) {
             const section = drivePath[i];
@@ -937,6 +946,68 @@ export class FoodTruckPlayableController extends Component {
         });
     }
 
+    private loadEngineStartAudio (): void {
+        assetManager.loadAny(FoodTruckPlayableController.ENGINE_START_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
+            if (error || !clip || !this.node?.isValid) {
+                return;
+            }
+
+            this._engineStartAudio = clip;
+        });
+    }
+
+    private loadCarHornAudio (): void {
+        assetManager.loadAny(FoodTruckPlayableController.CAR_HORN_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
+            if (error || !clip || !this.node?.isValid) {
+                return;
+            }
+
+            this._carHornAudio = clip;
+            this.refreshHornPrompt();
+        });
+    }
+
+    private playEngineStartAudio (): void {
+        if (!this._engineStartAudio || !this.node?.isValid) {
+            return;
+        }
+
+        const source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
+        this._engineAudioSource = source;
+        source.playOneShot(this._engineStartAudio, 1);
+    }
+
+    private playHornPromptIfNeeded = (): void => {
+        if (!this.shouldPromptDispatchHorn() || !this._carHornAudio || !this.node?.isValid) {
+            this.refreshHornPrompt();
+            return;
+        }
+
+        const source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
+        this._engineAudioSource = source;
+        source.playOneShot(this._carHornAudio, 0.6);
+        this.refreshHornPrompt();
+    };
+
+    private refreshHornPrompt (): void {
+        this.unschedule(this.playHornPromptIfNeeded);
+        if (!this.shouldPromptDispatchHorn() || !this._carHornAudio) {
+            return;
+        }
+
+        const delayRange = Math.max(0, this.hornPromptDelayMax - this.hornPromptDelayMin);
+        const nextDelay = this.hornPromptDelayMin + Math.random() * delayRange;
+        this.scheduleOnce(this.playHornPromptIfNeeded, nextDelay);
+    }
+
+    private shouldPromptDispatchHorn (): boolean {
+        return !!this._dispatchButton
+            && this._dispatchButton.activeInHierarchy
+            && this.canAfford(this.dispatchCarCost)
+            && this._activeDispatchCount === 0
+            && this._phase !== 'ending';
+    }
+
     private tryCreateHandHint (): void {
         if (this._handHintReady || !this._overlayRoot?.isValid || !this._handHintClip || !this._handFrameA || !this._handFrameB) {
             return;
@@ -997,7 +1068,12 @@ export class FoodTruckPlayableController extends Component {
         }
 
         this._handHintTarget = target;
-        const targetPosition = target.position.clone().add(this.handHintOffset);
+        const handScale = this._handHintRoot.getScale();
+        const targetPosition = target.position.clone().add(new Vec3(
+            this.handHintOffset.x * handScale.x,
+            this.handHintOffset.y * handScale.y,
+            this.handHintOffset.z,
+        ));
         this._handHintRoot.setPosition(targetPosition.x, targetPosition.y, targetPosition.z);
         this._handHintRoot.active = true;
         if (this._handHintAnimation && this._handHintClip) {
@@ -1124,6 +1200,7 @@ export class FoodTruckPlayableController extends Component {
 
         this.refreshMoneyLabel();
         this.refreshDispatchButtonLabel();
+        this.refreshHornPrompt();
         if (this._handHintRoot?.activeInHierarchy) {
             this.showHandHintForCurrentTarget();
         }
@@ -1200,7 +1277,6 @@ export class FoodTruckPlayableController extends Component {
             ));
         }
         car.name = `car_lane${lane.index + 1}_${this._spawnSerial++}`;
-        this.startIdleCarShake(car);
         return car;
     }
 
@@ -1214,9 +1290,8 @@ export class FoodTruckPlayableController extends Component {
 
             if (instant) {
                 car.setPosition(target);
-                this.startIdleCarShake(car);
             } else {
-                this.tweenQueueCarTo(car, target).call(() => this.startIdleCarShake(car)).start();
+                this.tweenQueueCarTo(car, target).start();
             }
         }
     }
@@ -1240,11 +1315,10 @@ export class FoodTruckPlayableController extends Component {
             targetSlot.z + laneStep.z,
         );
 
-        this.stopIdleCarShake(car);
         car.setPosition(recycleFrom);
         lane.queueCars.push(car);
 
-        this.tweenQueueCarTo(car, targetSlot, 0.32).call(() => this.startIdleCarShake(car)).start();
+        this.tweenQueueCarTo(car, targetSlot, 0.32).start();
     }
 
     private playCatCookingAnim (): void {
@@ -1571,65 +1645,6 @@ export class FoodTruckPlayableController extends Component {
         }
 
         return tween(car).to(this.getTravelDuration(current, target, 11.5, minDuration), props, { easing: 'quadOut' });
-    }
-
-    private startIdleCarShake (car: Node): void {
-        if (!car || !car.isValid) {
-            return;
-        }
-
-        this.stopIdleCarShake(car);
-        const shakeTarget = this.getCarShakeTarget(car);
-        const baseEuler = shakeTarget.eulerAngles.clone();
-        this._idleShakeBaseByCar.set(car, { target: shakeTarget, eulerAngles: baseEuler });
-
-        const rotateA = new Vec3(baseEuler.x, baseEuler.y, baseEuler.z - this.idleShakeZAngle);
-        const rotateB = new Vec3(baseEuler.x, baseEuler.y, baseEuler.z + this.idleShakeZAngle * 0.8);
-        const rotateC = new Vec3(baseEuler.x, baseEuler.y, baseEuler.z - this.idleShakeZAngle * 0.45);
-
-        tween(shakeTarget)
-            .to(this.idleShakeDuration, { eulerAngles: rotateA }, { easing: 'sineInOut' })
-            .to(this.idleShakeDuration, { eulerAngles: rotateB }, { easing: 'sineInOut' })
-            .to(this.idleShakeDuration, { eulerAngles: rotateC }, { easing: 'sineInOut' })
-            .to(this.idleShakeDuration, { eulerAngles: baseEuler.clone() }, { easing: 'sineInOut' })
-            .union()
-            .repeatForever()
-            .start();
-    }
-
-    private stopIdleCarShake (car: Node): void {
-        if (!car || !car.isValid) {
-            return;
-        }
-
-        const baseState = this._idleShakeBaseByCar.get(car);
-        if (!baseState) {
-            return;
-        }
-
-        Tween.stopAllByTarget(baseState.target);
-        baseState.target.setRotationFromEuler(baseState.eulerAngles.x, baseState.eulerAngles.y, baseState.eulerAngles.z);
-        this._idleShakeBaseByCar.delete(car);
-    }
-
-    private stopAllIdleCarShakes (): void {
-        this._idleShakeBaseByCar.forEach((baseState, car) => {
-            if (!car || !car.isValid) {
-                return;
-            }
-
-            if (!baseState.target || !baseState.target.isValid) {
-                return;
-            }
-
-            Tween.stopAllByTarget(baseState.target);
-            baseState.target.setRotationFromEuler(baseState.eulerAngles.x, baseState.eulerAngles.y, baseState.eulerAngles.z);
-        });
-        this._idleShakeBaseByCar.clear();
-    }
-
-    private getCarShakeTarget (car: Node): Node {
-        return car.getChildByName('car_stationwagon') ?? car;
     }
 
     private getYawDegrees (from: Vec3, to: Vec3): number | null {
