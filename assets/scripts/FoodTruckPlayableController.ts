@@ -61,6 +61,7 @@ export class FoodTruckPlayableController extends Component {
     private static readonly MONEY_ICON_UUID = '241afd78-7db8-4f2a-8ca9-926f46cdeaad@f9941';
     private static readonly BURGER_ICON_UUID = 'aa0974cb-529b-4d1d-9b3d-e9410d5176c2@f9941';
     private static readonly ENGINE_START_AUDIO_UUID = '58263f6c-43e3-4c65-bf76-36fb080c0f8f';
+    private static readonly RANKUP_AUDIO_UUID = 'b0e8e49d-a030-4b35-bc18-e02f19d9330d';
     private static readonly CAR_HORN_AUDIO_UUID = 'e61f7d9c-d841-44ee-8d0c-68b1f6dbd74c';
     private static readonly HAND_CLIP_UUID = 'e26e9387-4e91-437d-83e6-c772efc4e980';
     private static readonly HAND_FRAME_A_UUID = 'bde249fd-fb02-4191-820c-f22fda1fe1a6@f9941';
@@ -141,6 +142,7 @@ export class FoodTruckPlayableController extends Component {
     private _handHintReady = false;
     private _handHintTarget: Node | null = null;
     private _engineStartAudio: AudioClip | null = null;
+    private _rankupAudio: AudioClip | null = null;
     private _carHornAudio: AudioClip | null = null;
     private _engineAudioSource: AudioSource | null = null;
 
@@ -171,6 +173,7 @@ export class FoodTruckPlayableController extends Component {
         this.loadMoneyIcon();
         this.loadBurgerIcon();
         this.loadEngineStartAudio();
+        this.loadRankupAudio();
         this.loadCarHornAudio();
         this.bindWorldNodes();
         this.configureMainCamera();
@@ -717,6 +720,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
+        this.playRankupAudio();
         this.openNextLane();
         this.stopRemoveBarrierPulse();
         this.refreshUiState();
@@ -743,6 +747,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
+        this.playRankupAudio();
         this.tryEnterScene2();
     }
 
@@ -1001,6 +1006,16 @@ export class FoodTruckPlayableController extends Component {
         });
     }
 
+    private loadRankupAudio (): void {
+        assetManager.loadAny(FoodTruckPlayableController.RANKUP_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
+            if (error || !clip || !this.node?.isValid) {
+                return;
+            }
+
+            this._rankupAudio = clip;
+        });
+    }
+
     private loadCarHornAudio (): void {
         assetManager.loadAny(FoodTruckPlayableController.CAR_HORN_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
             if (error || !clip || !this.node?.isValid) {
@@ -1020,6 +1035,16 @@ export class FoodTruckPlayableController extends Component {
         const source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
         this._engineAudioSource = source;
         source.playOneShot(this._engineStartAudio, 1);
+    }
+
+    private playRankupAudio (): void {
+        if (!this._rankupAudio || !this.node?.isValid) {
+            return;
+        }
+
+        const source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
+        this._engineAudioSource = source;
+        source.playOneShot(this._rankupAudio, 0.9);
     }
 
     private playHornPromptIfNeeded = (): void => {
