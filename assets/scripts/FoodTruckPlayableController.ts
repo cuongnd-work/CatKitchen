@@ -59,6 +59,7 @@ export class FoodTruckPlayableController extends Component {
     private static _activeInstance: FoodTruckPlayableController | null = null;
     private static readonly UI_FONT_UUID = '4b362bb5-2b14-46a5-8c9e-a6688bb70e61';
     private static readonly MONEY_ICON_UUID = '241afd78-7db8-4f2a-8ca9-926f46cdeaad@f9941';
+    private static readonly BURGER_ICON_UUID = 'aa0974cb-529b-4d1d-9b3d-e9410d5176c2@f9941';
     private static readonly ENGINE_START_AUDIO_UUID = '58263f6c-43e3-4c65-bf76-36fb080c0f8f';
     private static readonly CAR_HORN_AUDIO_UUID = 'e61f7d9c-d841-44ee-8d0c-68b1f6dbd74c';
     private static readonly HAND_CLIP_UUID = 'e26e9387-4e91-437d-83e6-c772efc4e980';
@@ -131,6 +132,7 @@ export class FoodTruckPlayableController extends Component {
     private _removeBarrierPulse: Tween<Node> | null = null;
     private _lanes: LaneData[] = [];
     private _uiFont: Font | null = null;
+    private _burgerIconFrame: SpriteFrame | null = null;
     private _handHintRoot: Node | null = null;
     private _handHintAnimation: Animation | null = null;
     private _handHintClip: AnimationClip | null = null;
@@ -167,6 +169,7 @@ export class FoodTruckPlayableController extends Component {
         this.prepareLegacyUiNodes();
         this.loadUiFont();
         this.loadMoneyIcon();
+        this.loadBurgerIcon();
         this.loadEngineStartAudio();
         this.loadCarHornAudio();
         this.bindWorldNodes();
@@ -988,6 +991,16 @@ export class FoodTruckPlayableController extends Component {
         });
     }
 
+    private loadBurgerIcon (): void {
+        assetManager.loadAny(FoodTruckPlayableController.BURGER_ICON_UUID, (error: Error | null, spriteFrame: SpriteFrame) => {
+            if (error || !spriteFrame || !this.node?.isValid) {
+                return;
+            }
+
+            this._burgerIconFrame = spriteFrame;
+        });
+    }
+
     private loadCarHornAudio (): void {
         assetManager.loadAny(FoodTruckPlayableController.CAR_HORN_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
             if (error || !clip || !this.node?.isValid) {
@@ -1462,12 +1475,57 @@ export class FoodTruckPlayableController extends Component {
                 if (this._serviceProgressGraphics) {
                     this.drawServiceProgress(this._serviceProgressGraphics, 1);
                 }
+                this.playBurgerBurstAtProgress();
                 if (this._serviceProgressNode?.isValid) {
                     this._serviceProgressNode.active = false;
                 }
                 this._serviceProgressWorldPosition = null;
             })
             .start();
+    }
+
+    private playBurgerBurstAtProgress (): void {
+        if (!this._overlayRoot?.isValid || !this._serviceProgressNode?.isValid || !this._burgerIconFrame) {
+            return;
+        }
+
+        const origin = this._serviceProgressNode.position.clone();
+        const bursts = [
+            { offset: new Vec3(-40, 76, 0), scale: 0.16, delay: 0 },
+            { offset: new Vec3(0, 108, 0), scale: 0.2, delay: 0.04 },
+            { offset: new Vec3(42, 78, 0), scale: 0.16, delay: 0.08 },
+            { offset: new Vec3(-14, 128, 0), scale: 0.13, delay: 0.12 },
+        ];
+
+        for (let i = 0; i < bursts.length; i++) {
+            const burst = bursts[i];
+            const burgerNode = new Node(`BurgerBurst_${i}`);
+            this._overlayRoot.addChild(burgerNode);
+            burgerNode.layer = Layers.Enum.UI_2D;
+            burgerNode.addComponent(UITransform).setContentSize(100, 104);
+            const opacity = burgerNode.addComponent(UIOpacity);
+            opacity.opacity = 0;
+            burgerNode.setPosition(origin.x, origin.y + 12, 0);
+            burgerNode.setScale(burst.scale, burst.scale, 1);
+
+            const sprite = burgerNode.addComponent(Sprite);
+            sprite.spriteFrame = this._burgerIconFrame;
+
+            tween(opacity)
+                .delay(burst.delay)
+                .to(0.08, { opacity: 255 })
+                .to(0.2, { opacity: 0 })
+                .start();
+
+            tween(burgerNode)
+                .delay(burst.delay)
+                .to(0.42, {
+                    position: new Vec3(origin.x + burst.offset.x, origin.y + burst.offset.y, 0),
+                    scale: new Vec3(burst.scale * 1.2, burst.scale * 1.2, 1),
+                }, { easing: 'sineOut' })
+                .call(() => burgerNode.destroy())
+                .start();
+        }
     }
 
     private updateServiceProgressPosition (): void {
