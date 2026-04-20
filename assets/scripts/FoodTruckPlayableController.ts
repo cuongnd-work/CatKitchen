@@ -25,8 +25,6 @@ import {
     UIOpacity,
     UITransform,
     Vec3,
-    Widget,
-    view,
     tween,
 } from 'cc';
 import super_html_script from 'db://assets/plugins/playable-foundation/super-html/super_html_script';
@@ -34,7 +32,7 @@ import { CameraFollow } from './CameraFollow';
 import { OrientationCameraOrthoAdjuster } from './OrientationCameraOrthoAdjuster';
 import { UIScreenResolution } from './UIScreenResolution';
 
-const { ccclass, property } = _decorator;
+let { ccclass, property } = _decorator;
 
 type ScenePhase = 'scene1' | 'scene2' | 'ending';
 
@@ -57,15 +55,10 @@ type LaneData = {
 @ccclass('FoodTruckPlayableController')
 export class FoodTruckPlayableController extends Component {
     private static _activeInstance: FoodTruckPlayableController | null = null;
-    private static readonly UI_FONT_UUID = '4b362bb5-2b14-46a5-8c9e-a6688bb70e61';
-    private static readonly MONEY_ICON_UUID = '241afd78-7db8-4f2a-8ca9-926f46cdeaad@f9941';
-    private static readonly BURGER_ICON_UUID = 'aa0974cb-529b-4d1d-9b3d-e9410d5176c2@f9941';
     private static readonly ENGINE_START_AUDIO_UUID = '58263f6c-43e3-4c65-bf76-36fb080c0f8f';
     private static readonly RANKUP_AUDIO_UUID = 'b0e8e49d-a030-4b35-bc18-e02f19d9330d';
     private static readonly CAR_HORN_AUDIO_UUID = 'e61f7d9c-d841-44ee-8d0c-68b1f6dbd74c';
     private static readonly HAND_CLIP_UUID = 'e26e9387-4e91-437d-83e6-c772efc4e980';
-    private static readonly HAND_FRAME_A_UUID = 'bde249fd-fb02-4191-820c-f22fda1fe1a6@f9941';
-    private static readonly HAND_FRAME_B_UUID = 'a68ec147-ff49-457b-b230-122b84c2e70c@f9941';
     private readonly laneCount = 4;
     private readonly baseDispatchCooldown = 2;
     private readonly cooldownReductionPerOpenedLane = 0.5;
@@ -149,16 +142,31 @@ export class FoodTruckPlayableController extends Component {
     @property(Node)
     public endingSelectionNode: Node | null = null;
 
+    @property(Font)
+    public uiFontAsset: Font | null = null;
+
+    @property(SpriteFrame)
+    public moneyIconSpriteFrame: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    public burgerIconSpriteFrame: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    public handFrameASpriteFrame: SpriteFrame | null = null;
+
+    @property(SpriteFrame)
+    public handFrameBSpriteFrame: SpriteFrame | null = null;
+
     protected onLoad (): void {
-        const scene = this.node.scene;
-        const canvasController = scene ? this.findCanvasController(scene) : null;
+        let scene = this.node.scene;
+        let canvasController = scene ? this.findCanvasController(scene) : null;
         if (canvasController && canvasController !== this && !this.getComponent(Canvas)) {
             this.enabled = false;
             return;
         }
 
         if (FoodTruckPlayableController._activeInstance && FoodTruckPlayableController._activeInstance !== this) {
-            const preferCurrent = !!this.getComponent(Canvas) && !FoodTruckPlayableController._activeInstance.getComponent(Canvas);
+            let preferCurrent = !!this.getComponent(Canvas) && !FoodTruckPlayableController._activeInstance.getComponent(Canvas);
             if (!preferCurrent) {
                 this.enabled = false;
                 return;
@@ -167,20 +175,16 @@ export class FoodTruckPlayableController extends Component {
             FoodTruckPlayableController._activeInstance.enabled = false;
         }
         FoodTruckPlayableController._activeInstance = this;
-        this.destroyStaleHudRoots();
         this.prepareLegacyUiNodes();
-        this.loadUiFont();
-        this.loadMoneyIcon();
-        this.loadBurgerIcon();
         this.loadEngineStartAudio();
         this.loadRankupAudio();
         this.loadCarHornAudio();
         this.bindWorldNodes();
         this.configureMainCamera();
         this.prepareLanesFromWorld();
-        this.createHud();
+        this.bindSceneUi();
+        this.initializeSceneAssetReferences();
         this.loadHandHint();
-        this.createEndingUi();
         this.refreshUiState();
         if (this.endingSelectionNode) {
             this.endingSelectionNode.active = false;
@@ -214,8 +218,8 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private prepareLegacyUiNodes (): void {
-        const canvasNode = this.resolveCanvasNode();
-        const screenResolution = this.node.getComponentInChildren(UIScreenResolution);
+        let canvasNode = this.resolveCanvasNode();
+        let screenResolution = this.node.getComponentInChildren(UIScreenResolution);
         if (screenResolution) {
             screenResolution.enabled = false;
             if (screenResolution.Doc) {
@@ -230,30 +234,117 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const level = canvasNode.getChildByName('Level');
+        let level = canvasNode.getChildByName('Level');
         if (level) {
             level.active = false;
         }
 
-        const legacyPortraitWidget = canvasNode.getChildByName('Wiget-portait');
+        let legacyPortraitWidget = canvasNode.getChildByName('Wiget-portait');
         if (legacyPortraitWidget) {
             legacyPortraitWidget.active = false;
         }
 
-        const legacyLandscapeWidget = canvasNode.getChildByName('Wiget-portait-001');
+        let legacyLandscapeWidget = canvasNode.getChildByName('Wiget-portait-001');
         if (legacyLandscapeWidget) {
             legacyLandscapeWidget.active = false;
         }
     }
 
-    private bindWorldNodes (): void {
-        const scene = this.node.scene;
+    private bindSceneUi (): void {
+        let scene = this.node.scene;
         if (!scene) {
             return;
         }
 
-        const worldContainer = scene.getChildByName('Eviroments') ?? scene.getChildByName('Eviroment');
-        const worldRoot = worldContainer?.getChildByName('FoodWorld')
+        let canvasNode = this.resolveCanvasNode() ?? this.findNodeByName(scene, 'Canvas-001');
+        if (!canvasNode) {
+            return;
+        }
+
+        this._overlayRoot = this.findNodeByName(canvasNode, 'PlayableHudRoot');
+        this._playButton = this.findNodeByName(canvasNode, 'PlayGameButton');
+        this._removeBarrierButton = this.findNodeByName(canvasNode, 'RemoveBarrierButton');
+        this._dispatchButton = this.findNodeByName(canvasNode, 'DispatchButton');
+        this._openLaneButton = this.findNodeByName(canvasNode, 'OpenLaneButton');
+        this._serviceProgressNode = this.findNodeByName(canvasNode, 'ServiceProgressOverlay');
+        this._upgradePanel = this.findNodeByName(canvasNode, 'UpgradePanel');
+        this._storePopup = this.findNodeByName(canvasNode, 'StorePopup');
+        this._moneyLabel = this.findNodeByName(canvasNode, 'MoneyLabel')?.getComponent(Label) ?? null;
+        this._moneyHolderIcon = this.findNodeByName(canvasNode, 'MoneyHolderIcon')?.getComponent(Sprite) ?? null;
+        this._removeBarrierLabel = this.findNodeByName(canvasNode, 'RemoveBarrierButton_Label')?.getComponent(Label) ?? null;
+        this._dispatchLabel = this.findNodeByName(canvasNode, 'DispatchButton_Label')?.getComponent(Label) ?? null;
+        this._openLaneLabel = this.findNodeByName(canvasNode, 'OpenLaneButton_Label')?.getComponent(Label) ?? null;
+        this._removeBarrierCostIcon = this.findNodeByName(canvasNode, 'RemoveBarrierCostIcon')?.getComponent(Sprite) ?? null;
+        this._dispatchCostIcon = this.findNodeByName(canvasNode, 'DispatchCostIcon')?.getComponent(Sprite) ?? null;
+        this._openLaneCostIcon = this.findNodeByName(canvasNode, 'OpenLaneCostIcon')?.getComponent(Sprite) ?? null;
+        this._storeTitleLabel = this.findNodeByName(canvasNode, 'StoreTitleLabel')?.getComponent(Label) ?? null;
+        this._serviceProgressGraphics = this._serviceProgressNode?.getComponent(Graphics) ?? null;
+
+        if (this._serviceProgressNode) {
+            this._serviceProgressNode.active = false;
+        }
+        if (this._upgradePanel) {
+            this._upgradePanel.active = false;
+        }
+        if (this._storePopup) {
+            this._storePopup.active = false;
+        }
+
+        this.bindSceneButton(this._playButton, () => this.onPlayGameClicked());
+        this.bindSceneButton(this._removeBarrierButton, () => this.onRemoveBarrierClicked());
+        this.bindSceneButton(this._dispatchButton, () => this.onDispatchClicked());
+        this.bindSceneButton(this._openLaneButton, () => this.onOpenLaneClicked());
+        this.bindSceneButton(this.findNodeByName(canvasNode, 'RamenOption'), () => this.onEndingOptionClicked('Ramen'));
+        this.bindSceneButton(this.findNodeByName(canvasNode, 'HotDogOption'), () => this.onEndingOptionClicked('Hot Dog'));
+        this.bindSceneButton(this.findNodeByName(canvasNode, 'HamburgerOption'), () => this.onEndingOptionClicked('Hamburger'));
+        this.bindSceneButton(this.findNodeByName(canvasNode, 'StoreGoButton'), () => this.onStoreConfirmClicked());
+        this.bindSceneButton(this.findNodeByName(canvasNode, 'StoreCloseButton'), () => {
+            if (this._storePopup) {
+                this._storePopup.active = false;
+            }
+        });
+    }
+
+    private initializeSceneAssetReferences (): void {
+        this._uiFont = this.uiFontAsset;
+        this._moneyIconFrame = this.moneyIconSpriteFrame;
+        this._burgerIconFrame = this.burgerIconSpriteFrame;
+        this._handFrameA = this.handFrameASpriteFrame;
+        this._handFrameB = this.handFrameBSpriteFrame;
+        this.applyMoneyIconFrame(this._moneyHolderIcon);
+        this.applyMoneyIconFrame(this._removeBarrierCostIcon);
+        this.applyMoneyIconFrame(this._dispatchCostIcon);
+        this.applyMoneyIconFrame(this._openLaneCostIcon);
+        this.applyUiFont();
+    }
+
+    private bindSceneButton (buttonNode: Node | null, onClick: () => void): void {
+        if (!buttonNode || !buttonNode.isValid) {
+            return;
+        }
+
+        let boundKey = '__foodTruckBound';
+        let feedbackKey = '__foodTruckPressFeedbackBound';
+        if (!(buttonNode as Node & Record<string, unknown>)[feedbackKey]) {
+            this.attachButtonPressFeedback(buttonNode);
+            (buttonNode as Node & Record<string, unknown>)[feedbackKey] = true;
+        }
+        if ((buttonNode as Node & Record<string, unknown>)[boundKey]) {
+            return;
+        }
+
+        buttonNode.on(Node.EventType.TOUCH_END, onClick, this);
+        (buttonNode as Node & Record<string, unknown>)[boundKey] = true;
+    }
+
+    private bindWorldNodes (): void {
+        let scene = this.node.scene;
+        if (!scene) {
+            return;
+        }
+
+        let worldContainer = scene.getChildByName('Eviroments') ?? scene.getChildByName('Eviroment');
+        let worldRoot = worldContainer?.getChildByName('FoodWorld')
             ?? scene.getChildByName('Car')
             ?? this.findNodeByName(scene, 'FoodWorld')
             ?? this.findNodeByName(scene, 'Car');
@@ -272,29 +363,29 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private configureMainCamera (): void {
-        const scene = this.node.scene;
+        let scene = this.node.scene;
         if (!scene) {
             return;
         }
 
-        const mainCameraNode = scene.getChildByName('Main Camera');
+        let mainCameraNode = scene.getChildByName('Main Camera');
         if (!mainCameraNode) {
             return;
         }
 
         this._mainCameraNode = mainCameraNode;
 
-        const follow = mainCameraNode.getComponent(CameraFollow);
+        let follow = mainCameraNode.getComponent(CameraFollow);
         if (follow) {
             follow.enabled = false;
         }
 
-        const orthoAdjuster = mainCameraNode.getComponent(OrientationCameraOrthoAdjuster);
+        let orthoAdjuster = mainCameraNode.getComponent(OrientationCameraOrthoAdjuster);
         if (orthoAdjuster) {
             orthoAdjuster.enabled = false;
         }
 
-        const camera = mainCameraNode.getComponent(Camera);
+        let camera = mainCameraNode.getComponent(Camera);
         if (camera) {
             camera.projection = Camera.ProjectionType.PERSPECTIVE;
             camera.fov = 45;
@@ -318,14 +409,14 @@ export class FoodTruckPlayableController extends Component {
 
         this._lanes.length = 0;
 
-        const laneRoots = this._worldRoot.children
+        let laneRoots = this._worldRoot.children
             .filter((child) => child.active && /^Land\d+$/i.test(child.name))
             .sort((a, b) => b.position.x - a.position.x);
 
         if (laneRoots.length > 0) {
             laneRoots.slice(0, this.laneCount).forEach((laneRoot, index) => {
-                const landId = this.parseLandId(laneRoot.name, index + 1);
-                const laneCars = laneRoot.children
+                let landId = this.parseLandId(laneRoot.name, index + 1);
+                let laneCars = laneRoot.children
                     .filter((child) => child.active && child.name.startsWith('Car'))
                     .sort((a, b) => a.position.z - b.position.z);
 
@@ -333,13 +424,13 @@ export class FoodTruckPlayableController extends Component {
                     return;
                 }
 
-                const firstWorld = laneCars[0].getWorldPosition(new Vec3());
-                const firstLocal = this._worldRoot!.inverseTransformPoint(new Vec3(), firstWorld);
-                const spacing = this.estimateLaneDepthSpacing(laneCars);
+                let firstWorld = laneCars[0].getWorldPosition(new Vec3());
+                let firstLocal = this._worldRoot!.inverseTransformPoint(new Vec3(), firstWorld);
+                let spacing = this.estimateLaneDepthSpacing(laneCars);
                 this._laneTemplateSpacing = spacing;
 
-                const queueSlots = laneCars.map((laneCar) => {
-                    const worldPos = laneCar.getWorldPosition(new Vec3());
+                let queueSlots = laneCars.map((laneCar) => {
+                    let worldPos = laneCar.getWorldPosition(new Vec3());
                     return this._worldRoot!.inverseTransformPoint(new Vec3(), worldPos);
                 });
 
@@ -347,19 +438,19 @@ export class FoodTruckPlayableController extends Component {
                     laneCar.setParent(this._worldRoot!, true);
                 });
 
-                const targetQueueSize = Math.max(8, queueSlots.length);
+                let targetQueueSize = Math.max(8, queueSlots.length);
                 while (queueSlots.length < targetQueueSize) {
-                    const slotIndex = queueSlots.length;
-                    const z = queueSlots[0].z + slotIndex * spacing;
+                    let slotIndex = queueSlots.length;
+                    let z = queueSlots[0].z + slotIndex * spacing;
                     queueSlots.push(new Vec3(firstLocal.x, firstLocal.y, z));
                 }
 
-                const templateSource = laneCars[laneCars.length - 1];
-                const templateCar = instantiate(templateSource);
+                let templateSource = laneCars[laneCars.length - 1];
+                let templateCar = instantiate(templateSource);
                 templateCar.active = false;
                 templateCar.name = `LaneTemplate_${index + 1}`;
                 this._worldRoot!.addChild(templateCar);
-                const templateWorld = templateSource.getWorldPosition(new Vec3());
+                let templateWorld = templateSource.getWorldPosition(new Vec3());
                 templateCar.setPosition(this._worldRoot!.inverseTransformPoint(new Vec3(), templateWorld));
                 templateCar.setRotation(templateSource.rotation);
                 templateCar.setScale(templateSource.scale);
@@ -401,12 +492,12 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const carNodes = this._worldRoot.children.filter((child) => child.active && child.name.startsWith('car_'));
-        const laneBuckets = new Map<number, Node[]>();
+        let carNodes = this._worldRoot.children.filter((child) => child.active && child.name.startsWith('car_'));
+        let laneBuckets = new Map<number, Node[]>();
 
-        for (const carNode of carNodes) {
-            const laneKey = Math.round(carNode.position.x);
-            const bucket = laneBuckets.get(laneKey);
+        for (let carNode of carNodes) {
+            let laneKey = Math.round(carNode.position.x);
+            let bucket = laneBuckets.get(laneKey);
             if (bucket) {
                 bucket.push(carNode);
             } else {
@@ -414,31 +505,31 @@ export class FoodTruckPlayableController extends Component {
             }
         }
 
-        const laneKeys = Array.from(laneBuckets.keys()).sort((a, b) => a - b).slice(0, this.laneCount);
+        let laneKeys = Array.from(laneBuckets.keys()).sort((a, b) => a - b).slice(0, this.laneCount);
         for (let i = 0; i < laneKeys.length; i++) {
-            const laneX = laneKeys[i];
-            const laneCars = (laneBuckets.get(laneX) ?? []).sort((a, b) => a.position.y - b.position.y);
+            let laneX = laneKeys[i];
+            let laneCars = (laneBuckets.get(laneX) ?? []).sort((a, b) => a.position.y - b.position.y);
             if (laneCars.length === 0) {
                 continue;
             }
 
-            const spacing = this.estimateLaneSpacing(laneCars);
+            let spacing = this.estimateLaneSpacing(laneCars);
             this._laneTemplateSpacing = spacing;
 
-            const queueSlots: Vec3[] = [];
-            for (const laneCar of laneCars) {
+            let queueSlots: Vec3[] = [];
+            for (let laneCar of laneCars) {
                 queueSlots.push(new Vec3(laneCar.position.x, laneCar.position.y, laneCar.position.z));
             }
 
-            const targetQueueSize = Math.max(8, queueSlots.length);
+            let targetQueueSize = Math.max(8, queueSlots.length);
             while (queueSlots.length < targetQueueSize) {
-                const slotIndex = queueSlots.length;
-                const y = queueSlots[0].y + slotIndex * spacing;
+                let slotIndex = queueSlots.length;
+                let y = queueSlots[0].y + slotIndex * spacing;
                 queueSlots.push(new Vec3(laneX, y, queueSlots[0].z));
             }
 
-            const templateSource = laneCars[laneCars.length - 1];
-            const templateCar = instantiate(templateSource);
+            let templateSource = laneCars[laneCars.length - 1];
+            let templateCar = instantiate(templateSource);
             templateCar.active = false;
             templateCar.name = `LaneTemplate_${i + 1}`;
             this._worldRoot.addChild(templateCar);
@@ -474,7 +565,7 @@ export class FoodTruckPlayableController extends Component {
             count++;
         }
 
-        const avg = count > 0 ? sum / count : this._laneTemplateSpacing;
+        let avg = count > 0 ? sum / count : this._laneTemplateSpacing;
         return Math.max(0.5, avg);
     }
 
@@ -490,7 +581,7 @@ export class FoodTruckPlayableController extends Component {
             count++;
         }
 
-        const avg = count > 0 ? sum / count : this._laneTemplateSpacing;
+        let avg = count > 0 ? sum / count : this._laneTemplateSpacing;
         return Math.max(30, avg);
     }
 
@@ -499,29 +590,29 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const scene = this.node.scene;
-        const existingBarriers = scene
+        let scene = this.node.scene;
+        let existingBarriers = scene
             ? scene.children
                 .flatMap((child) => child.name === 'Eviroment' || child.name === 'Eviroments' ? child.children : [])
                 .filter((child) => child.name.startsWith('Wood_Road_Block_XSmall'))
                 .sort((a, b) => b.position.x - a.position.x)
             : [];
 
-        const existingBarrier = existingBarriers[lane.index] ?? null;
+        let existingBarrier = existingBarriers[lane.index] ?? null;
         if (existingBarrier) {
             existingBarrier.active = true;
             lane.barrier = existingBarrier;
             return;
         }
 
-        const templateBarrier = existingBarriers[0]
+        let templateBarrier = existingBarriers[0]
             ?? this._worldRoot.getChildByName('Wood_Road_Block_XSmall')
             ?? (scene ? this.findNodeByName(scene, 'Wood_Road_Block_XSmall') : null);
         if (!templateBarrier) {
             return;
         }
 
-        const barrier = instantiate(templateBarrier);
+        let barrier = instantiate(templateBarrier);
         barrier.name = `Wood_Road_Block_XSmall_${lane.index + 1}`;
         (templateBarrier.parent ?? this._worldRoot).addChild(barrier);
         barrier.setPosition(lane.x, templateBarrier.position.y, templateBarrier.position.z);
@@ -529,183 +620,6 @@ export class FoodTruckPlayableController extends Component {
         barrier.setRotation(templateBarrier.rotation);
         barrier.active = true;
         lane.barrier = barrier;
-    }
-
-    private createHud (): void {
-        const canvasNode = this.resolveCanvasNode() ?? this.node;
-        const canvasTransform = canvasNode.getComponent(UITransform);
-        const canvasWidth = canvasTransform?.contentSize.width ?? 720;
-        const canvasHeight = canvasTransform?.contentSize.height ?? 1280;
-        const halfWidth = canvasWidth * 0.5;
-        const halfHeight = canvasHeight * 0.5;
-
-        this._overlayRoot = new Node('PlayableHudRoot');
-        canvasNode.addChild(this._overlayRoot);
-        this.setUiLayerRecursive(this._overlayRoot);
-        this._overlayRoot.addComponent(UITransform).setContentSize(canvasWidth, canvasHeight);
-        const widget = this._overlayRoot.addComponent(Widget);
-        widget.isAlignTop = true;
-        widget.isAlignBottom = true;
-        widget.isAlignLeft = true;
-        widget.isAlignRight = true;
-        widget.top = 0;
-        widget.bottom = 0;
-        widget.left = 0;
-        widget.right = 0;
-        widget.alignMode = Widget.AlignMode.ALWAYS;
-
-        const topCardWidth = Math.min(220, canvasWidth * 0.36);
-        const topCardHeight = canvasWidth < 500 ? 52 : 64;
-
-        const moneyHolder = this.createRectNode(this._overlayRoot, 'MoneyHolder', new Color(255, 255, 255, 230), topCardWidth, topCardHeight, 12);
-        moneyHolder.setPosition(halfWidth - topCardWidth * 0.5 - 16, halfHeight - topCardHeight * 0.5 - 18, 0);
-        this._moneyHolderIcon = this.createMoneyIconSprite(
-            moneyHolder,
-            'MoneyHolderIcon',
-            new Vec3(-topCardWidth * 0.3, 0, 0),
-            canvasWidth < 500 ? 34 : 42,
-        );
-        this._moneyLabel = this.createLabel(
-            moneyHolder,
-            `${this._money}`,
-            canvasWidth < 500 ? 22 : 28,
-            new Color(41, 134, 54, 255),
-            new Vec3(18, 0, 0),
-        );
-
-        this._playButton = this.createButton(
-            this._overlayRoot,
-            'PlayGameButton',
-            'Play Game',
-            new Vec3(-halfWidth + topCardWidth * 0.5 + 16, halfHeight - topCardHeight * 0.5 - 18, 0),
-            new Vec3(topCardWidth, topCardHeight, 0),
-            new Color(53, 159, 226, 255),
-            () => this.onPlayGameClicked(),
-        );
-
-        const primaryButtonWidth = Math.min(300, canvasWidth - 40);
-        const secondaryButtonWidth = Math.min(370, canvasWidth - 24);
-        const primaryButtonHeight = canvasWidth < 500 ? 64 : 72;
-        const secondaryButtonHeight = canvasWidth < 500 ? 58 : 66;
-        const bottomPrimaryY = -halfHeight + 160;
-        const bottomSecondaryY = -halfHeight + 88;
-
-        this._removeBarrierButton = this.createButton(
-            this._overlayRoot,
-            'RemoveBarrierButton',
-            `Remove Barrier ${this.removeBarrierCost}`,
-            new Vec3(0, bottomPrimaryY, 0),
-            new Vec3(primaryButtonWidth, primaryButtonHeight, 0),
-            new Color(52, 173, 96, 255),
-            () => this.onRemoveBarrierClicked(),
-        );
-        this._removeBarrierLabel = this._removeBarrierButton.getComponentInChildren(Label);
-        this._removeBarrierCostIcon = this.attachMoneyIconToButton(this._removeBarrierButton, 118);
-
-        this._dispatchButton = this.createButton(
-            this._overlayRoot,
-            'DispatchButton',
-            `Send Cars ${this.dispatchCarCost}`,
-            new Vec3(0, bottomPrimaryY, 0),
-            new Vec3(primaryButtonWidth, primaryButtonHeight, 0),
-            new Color(61, 123, 236, 255),
-            () => this.onDispatchClicked(),
-        );
-        this._dispatchLabel = this._dispatchButton.getComponentInChildren(Label);
-        this._dispatchCostIcon = this.attachMoneyIconToButton(this._dispatchButton, 86);
-
-        this._openLaneButton = this.createButton(
-            this._overlayRoot,
-            'OpenLaneButton',
-            `Open Car Route ${this.openLaneCost}`,
-            new Vec3(0, bottomSecondaryY, 0),
-            new Vec3(secondaryButtonWidth, secondaryButtonHeight, 0),
-            new Color(241, 144, 57, 255),
-            () => this.onOpenLaneClicked(),
-        );
-        this._openLaneLabel = this._openLaneButton.getComponentInChildren(Label);
-        this._openLaneCostIcon = this.attachMoneyIconToButton(this._openLaneButton, 138);
-
-        this._serviceProgressNode = new Node('ServiceProgressOverlay');
-        this._overlayRoot.addChild(this._serviceProgressNode);
-        this.setUiLayerRecursive(this._serviceProgressNode);
-        this._serviceProgressNode.addComponent(UITransform).setContentSize(56, 56);
-        this._serviceProgressGraphics = this._serviceProgressNode.addComponent(Graphics);
-        this._serviceProgressNode.active = false;
-    }
-
-    private createEndingUi (): void {
-        if (!this._overlayRoot) {
-            return;
-        }
-
-        const overlayTransform = this._overlayRoot.getComponent(UITransform);
-        const overlayWidth = overlayTransform?.contentSize.width ?? 720;
-        const overlayHeight = overlayTransform?.contentSize.height ?? 1280;
-        const cardWidth = Math.min(560, overlayWidth - 40);
-        const cardHeight = Math.min(520, overlayHeight - 120);
-
-        this._upgradePanel = this.createRectNode(this._overlayRoot, 'UpgradePanel', new Color(24, 24, 24, 198), overlayWidth, overlayHeight);
-        this._upgradePanel.setPosition(0, 0, 0);
-        this._upgradePanel.active = false;
-
-        const card = this.createRectNode(this._upgradePanel, 'UpgradeCard', new Color(252, 236, 209, 255), cardWidth, cardHeight, 16);
-        card.setPosition(0, Math.min(40, overlayHeight * 0.08), 0);
-
-        this.createLabel(card, 'Upgrade Unlocked!', overlayWidth < 500 ? 28 : 42, new Color(79, 48, 28, 255), new Vec3(0, cardHeight * 0.36, 0));
-        this.createLabel(card, 'Choose your next restaurant:', overlayWidth < 500 ? 20 : 28, new Color(106, 64, 36, 255), new Vec3(0, cardHeight * 0.24, 0));
-
-        this.createEndingOption(card, 'Ramen', new Vec3(0, cardHeight * 0.04, 0));
-        this.createEndingOption(card, 'Hot Dog', new Vec3(0, -cardHeight * 0.14, 0));
-        this.createEndingOption(card, 'Hamburger', new Vec3(0, -cardHeight * 0.32, 0));
-
-        this._storePopup = this.createRectNode(this._upgradePanel, 'StorePopup', new Color(255, 255, 255, 255), Math.min(490, overlayWidth - 36), overlayWidth < 500 ? 210 : 240, 14);
-        this._storePopup.setPosition(0, -Math.min(overlayHeight * 0.3, 220), 0);
-        this._storePopup.active = false;
-
-        this._storeTitleLabel = this.createLabel(
-            this._storePopup,
-            'Store Open',
-            30,
-            new Color(73, 41, 20, 255),
-            new Vec3(0, 65, 0),
-        );
-
-        this.createButton(
-            this._storePopup,
-            'StoreGoButton',
-            'Enter Store',
-            new Vec3(0, -10, 0),
-            new Vec3(220, 62, 0),
-            new Color(52, 173, 96, 255),
-            () => this.onStoreConfirmClicked(),
-        );
-
-        this.createButton(
-            this._storePopup,
-            'StoreCloseButton',
-            'Close',
-            new Vec3(0, -84, 0),
-            new Vec3(140, 48, 0),
-            new Color(144, 144, 144, 255),
-            () => {
-                if (this._storePopup) {
-                    this._storePopup.active = false;
-                }
-            },
-        );
-    }
-
-    private createEndingOption (parent: Node, title: string, position: Vec3): void {
-        this.createButton(
-            parent,
-            `${title}Option`,
-            title,
-            position,
-            new Vec3(300, 68, 0),
-            new Color(245, 160, 73, 255),
-            () => this.onEndingOptionClicked(title),
-        );
     }
 
     private onPlayGameClicked (): void {
@@ -738,7 +652,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const dispatched = this.tryDispatchCar(true);
+        let dispatched = this.tryDispatchCar(true);
         if (!dispatched) {
             this.addMoney(this.dispatchCarCost);
             if (this._phase === 'scene1') {
@@ -792,12 +706,12 @@ export class FoodTruckPlayableController extends Component {
             return false;
         }
 
-        const lane = this.pickLaneForDispatch();
+        let lane = this.pickLaneForDispatch();
         if (!lane || lane.queueCars.length === 0 || !this._worldRoot) {
             return false;
         }
 
-        const car = lane.queueCars.shift();
+        let car = lane.queueCars.shift();
         if (!car) {
             return false;
         }
@@ -812,15 +726,15 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private pickLaneForDispatch (): LaneData | null {
-        const laneTotal = this.getLaneTotal();
-        const openLanes = this._lanes.filter((lane) => lane.open && lane.queueCars.length > 0 && lane.activeDispatches === 0);
+        let laneTotal = this.getLaneTotal();
+        let openLanes = this._lanes.filter((lane) => lane.open && lane.queueCars.length > 0 && lane.activeDispatches === 0);
         if (openLanes.length === 0) {
             return null;
         }
 
         for (let step = 1; step <= laneTotal; step++) {
-            const candidateIndex = (this._lastLaneIndex + step + laneTotal) % laneTotal;
-            const lane = this._lanes[candidateIndex];
+            let candidateIndex = (this._lastLaneIndex + step + laneTotal) % laneTotal;
+            let lane = this._lanes[candidateIndex];
             if (lane && lane.open && lane.queueCars.length > 0 && lane.activeDispatches === 0) {
                 this._lastLaneIndex = candidateIndex;
                 return lane;
@@ -831,15 +745,15 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private animateCarFlow (lane: LaneData, car: Node): void {
-        const frontSlot = lane.queueSlots[0] ?? car.position.clone();
-        const route = this.getLaneRouteTargets(lane, frontSlot);
-        const drivePath = this.buildDrivePath(lane, car.position.clone(), route.sPoint, route.rPoint);
+        let frontSlot = lane.queueSlots[0] ?? car.position.clone();
+        let route = this.getLaneRouteTargets(lane, frontSlot);
+        let drivePath = this.buildDrivePath(lane, car.position.clone(), route.sPoint, route.rPoint);
 
         Tween.stopAllByTarget(car);
         this.playEngineStartAudio();
         let sequence = tween(car);
         for (let i = 0; i < drivePath.length; i++) {
-            const section = drivePath[i];
+            let section = drivePath[i];
             sequence = sequence.then(this.tweenCarAlongPoints(car, section.points, section.speed, section.minSegmentDuration));
             if (section.pauseAfter > 0) {
                 sequence = sequence.call(() => {
@@ -916,7 +830,7 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private openNextLane (): void {
-        const nextLane = this._lanes.find((lane) => !lane.open);
+        let nextLane = this._lanes.find((lane) => !lane.open);
         if (!nextLane) {
             return;
         }
@@ -934,8 +848,8 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const openedAllLanes = this._openedLanes >= this.getLaneTotal();
-        const reachedManualDispatchTarget = this._manualDispatchCount >= this.manualDispatchesToAuto;
+        let openedAllLanes = this._openedLanes >= this.getLaneTotal();
+        let reachedManualDispatchTarget = this._manualDispatchCount >= this.manualDispatchesToAuto;
         if (!openedAllLanes && !reachedManualDispatchTarget) {
             return;
         }
@@ -952,24 +866,6 @@ export class FoodTruckPlayableController extends Component {
             this._handHintClip = clipAsset;
             this.tryCreateHandHint();
         });
-
-        assetManager.loadAny(FoodTruckPlayableController.HAND_FRAME_A_UUID, (frameError: Error | null, frameAsset: SpriteFrame) => {
-            if (frameError || !frameAsset || !this.node?.isValid) {
-                return;
-            }
-
-            this._handFrameA = frameAsset;
-            this.tryCreateHandHint();
-        });
-
-        assetManager.loadAny(FoodTruckPlayableController.HAND_FRAME_B_UUID, (frameError: Error | null, frameAsset: SpriteFrame) => {
-            if (frameError || !frameAsset || !this.node?.isValid) {
-                return;
-            }
-
-            this._handFrameB = frameAsset;
-            this.tryCreateHandHint();
-        });
     }
 
     private loadEngineStartAudio (): void {
@@ -979,30 +875,6 @@ export class FoodTruckPlayableController extends Component {
             }
 
             this._engineStartAudio = clip;
-        });
-    }
-
-    private loadMoneyIcon (): void {
-        assetManager.loadAny(FoodTruckPlayableController.MONEY_ICON_UUID, (error: Error | null, spriteFrame: SpriteFrame) => {
-            if (error || !spriteFrame || !this.node?.isValid) {
-                return;
-            }
-
-            this._moneyIconFrame = spriteFrame;
-            this.applyMoneyIconFrame(this._moneyHolderIcon);
-            this.applyMoneyIconFrame(this._removeBarrierCostIcon);
-            this.applyMoneyIconFrame(this._dispatchCostIcon);
-            this.applyMoneyIconFrame(this._openLaneCostIcon);
-        });
-    }
-
-    private loadBurgerIcon (): void {
-        assetManager.loadAny(FoodTruckPlayableController.BURGER_ICON_UUID, (error: Error | null, spriteFrame: SpriteFrame) => {
-            if (error || !spriteFrame || !this.node?.isValid) {
-                return;
-            }
-
-            this._burgerIconFrame = spriteFrame;
         });
     }
 
@@ -1032,7 +904,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
+        let source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
         this._engineAudioSource = source;
         source.playOneShot(this._engineStartAudio, 1);
     }
@@ -1042,7 +914,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
+        let source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
         this._engineAudioSource = source;
         source.playOneShot(this._rankupAudio, 0.9);
     }
@@ -1053,7 +925,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
+        let source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
         this._engineAudioSource = source;
         source.playOneShot(this._carHornAudio, 0.9);
         this.unschedule(this.playHornPromptIfNeeded);
@@ -1079,28 +951,6 @@ export class FoodTruckPlayableController extends Component {
             && this._phase !== 'ending';
     }
 
-    private createMoneyIconSprite (parent: Node, name: string, position: Vec3, size: number): Sprite {
-        const node = new Node(name);
-        parent.addChild(node);
-        node.layer = Layers.Enum.UI_2D;
-        node.addComponent(UITransform).setContentSize(size, size);
-        node.setPosition(position.x, position.y, position.z);
-        node.setScale(0.12, 0.12, 1);
-        const sprite = node.addComponent(Sprite);
-        this.applyMoneyIconFrame(sprite);
-        return sprite;
-    }
-
-    private attachMoneyIconToButton (buttonNode: Node, x: number): Sprite {
-        const label = buttonNode.getComponentInChildren(Label);
-        if (label?.node?.isValid) {
-            const current = label.node.position.clone();
-            label.node.setPosition(current.x - 14, current.y, current.z);
-        }
-
-        return this.createMoneyIconSprite(buttonNode, `${buttonNode.name}_MoneyIcon`, new Vec3(x, 0, 0), 26);
-    }
-
     private applyMoneyIconFrame (sprite: Sprite | null): void {
         if (!sprite || !sprite.isValid || !this._moneyIconFrame) {
             return;
@@ -1114,19 +964,19 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const root = new Node('HandHint');
+        let root = new Node('HandHint');
         this._overlayRoot.addChild(root);
         root.layer = Layers.Enum.UI_2D;
         root.addComponent(UITransform).setContentSize(180, 190);
         root.setScale(0.6, 0.6, 1);
         root.active = false;
 
-        const frameA = this.createHandFrameNode(root, 'tile000', this._handFrameA);
+        let frameA = this.createHandFrameNode(root, 'tile000', this._handFrameA);
         frameA.active = true;
-        const frameB = this.createHandFrameNode(root, 'tile001', this._handFrameB);
+        let frameB = this.createHandFrameNode(root, 'tile001', this._handFrameB);
         frameB.active = false;
 
-        const animation = root.addComponent(Animation);
+        let animation = root.addComponent(Animation);
         animation.defaultClip = this._handHintClip;
         animation.playOnLoad = false;
         animation.addClip(this._handHintClip, this._handHintClip.name);
@@ -1138,11 +988,11 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private createHandFrameNode (parent: Node, name: string, frame: SpriteFrame): Node {
-        const node = new Node(name);
+        let node = new Node(name);
         parent.addChild(node);
         node.layer = Layers.Enum.UI_2D;
         node.addComponent(UITransform).setContentSize(180, 190);
-        const sprite = node.addComponent(Sprite);
+        let sprite = node.addComponent(Sprite);
         sprite.spriteFrame = frame;
         return node;
     }
@@ -1163,15 +1013,15 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const target = this.getPreferredHandHintTarget();
+        let target = this.getPreferredHandHintTarget();
         if (!target) {
             this.hideHandHint();
             return;
         }
 
         this._handHintTarget = target;
-        const handScale = this._handHintRoot.getScale();
-        const targetPosition = target.position.clone().add(new Vec3(
+        let handScale = this._handHintRoot.getScale();
+        let targetPosition = target.position.clone().add(new Vec3(
             this.handHintOffset.x * handScale.x,
             this.handHintOffset.y * handScale.y,
             this.handHintOffset.z,
@@ -1196,13 +1046,13 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private getPreferredHandHintTarget (): Node | null {
-        const candidates = [
+        let candidates = [
             this._removeBarrierButton,
             this._openLaneButton,
             this._dispatchButton,
         ];
 
-        for (const button of candidates) {
+        for (let button of candidates) {
             if (!button || !button.isValid || !button.activeInHierarchy) {
                 continue;
             }
@@ -1226,7 +1076,7 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private getDispatchCooldown (): number {
-        const reduction = this._openedLanes * this.cooldownReductionPerOpenedLane;
+        let reduction = this._openedLanes * this.cooldownReductionPerOpenedLane;
         return Math.max(this.minimumDispatchCooldown, this.baseDispatchCooldown - reduction);
     }
 
@@ -1266,14 +1116,14 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private refreshUiState (): void {
-        const waitingForBarrier = this._phase === 'scene1' && this._openedLanes === 0;
+        let waitingForBarrier = this._phase === 'scene1' && this._openedLanes === 0;
         if (this._removeBarrierButton) {
             this._removeBarrierButton.active = waitingForBarrier;
         }
         if (this._removeBarrierLabel) {
             this._removeBarrierLabel.string = `Remove Barrier ${this.removeBarrierCost}`;
         }
-        const canBuyBarrier = waitingForBarrier && this.canAfford(this.removeBarrierCost);
+        let canBuyBarrier = waitingForBarrier && this.canAfford(this.removeBarrierCost);
         this.setButtonLockedVisual(this._removeBarrierButton, canBuyBarrier);
         if (canBuyBarrier) {
             this.startRemoveBarrierPulse();
@@ -1281,13 +1131,13 @@ export class FoodTruckPlayableController extends Component {
             this.stopRemoveBarrierPulse();
         }
 
-        const dispatchVisible = this._phase !== 'ending' && this._openedLanes > 0;
+        let dispatchVisible = this._phase !== 'ending' && this._openedLanes > 0;
         if (this._dispatchButton) {
             this._dispatchButton.active = dispatchVisible;
         }
         this.setButtonLockedVisual(this._dispatchButton, dispatchVisible && this.canAfford(this.dispatchCarCost));
 
-        const openLaneVisible = this._phase === 'scene1' && this._openedLanes > 0 && this._openedLanes < this.getLaneTotal();
+        let openLaneVisible = this._phase === 'scene1' && this._openedLanes > 0 && this._openedLanes < this.getLaneTotal();
         if (this._openLaneButton) {
             this._openLaneButton.active = openLaneVisible;
         }
@@ -1327,10 +1177,10 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const labelNode = this._moneyLabel.node;
-        const baseScale = new Vec3(1, 1, 1);
-        const baseColor = new Color(41, 134, 54, 255);
-        const flashColor = isSpend ? new Color(220, 76, 76, 255) : new Color(74, 185, 92, 255);
+        let labelNode = this._moneyLabel.node;
+        let baseScale = new Vec3(1, 1, 1);
+        let baseColor = new Color(41, 134, 54, 255);
+        let flashColor = isSpend ? new Color(220, 76, 76, 255) : new Color(74, 185, 92, 255);
 
         Tween.stopAllByTarget(labelNode);
         this._moneyLabel.color = flashColor;
@@ -1361,9 +1211,9 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private ensureLaneQueueLength (lane: LaneData, targetSize: number, instant = false): void {
-        const laneStep = this.getLaneSlotStep(lane);
+        let laneStep = this.getLaneSlotStep(lane);
         while (lane.queueSlots.length < targetSize) {
-            const slotIndex = lane.queueSlots.length;
+            let slotIndex = lane.queueSlots.length;
             lane.queueSlots.push(new Vec3(
                 lane.queueSlots[0].x + laneStep.x * slotIndex,
                 lane.queueSlots[0].y + laneStep.y * slotIndex,
@@ -1372,7 +1222,7 @@ export class FoodTruckPlayableController extends Component {
         }
 
         while (lane.queueCars.length < targetSize) {
-            const car = this.spawnCarForLane(lane);
+            let car = this.spawnCarForLane(lane);
             if (!car) {
                 break;
             }
@@ -1387,16 +1237,16 @@ export class FoodTruckPlayableController extends Component {
             return null;
         }
 
-        const car = instantiate(lane.templateCar);
+        let car = instantiate(lane.templateCar);
         car.active = true;
         this._worldRoot.addChild(car);
 
-        const slotIndex = lane.queueCars.length;
-        const slot = lane.queueSlots[slotIndex];
+        let slotIndex = lane.queueCars.length;
+        let slot = lane.queueSlots[slotIndex];
         if (slot) {
             car.setPosition(slot);
         } else {
-            const laneStep = this.getLaneSlotStep(lane);
+            let laneStep = this.getLaneSlotStep(lane);
             car.setPosition(new Vec3(
                 lane.queueSlots[0].x + laneStep.x * slotIndex,
                 lane.queueSlots[0].y + laneStep.y * slotIndex,
@@ -1409,8 +1259,8 @@ export class FoodTruckPlayableController extends Component {
 
     private shiftLaneQueue (lane: LaneData, instant = false): void {
         for (let i = 0; i < lane.queueCars.length; i++) {
-            const car = lane.queueCars[i];
-            const target = lane.queueSlots[i];
+            let car = lane.queueCars[i];
+            let target = lane.queueSlots[i];
             if (!target || !car || !car.isValid) {
                 continue;
             }
@@ -1428,15 +1278,15 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const targetIndex = lane.queueCars.length;
-        const targetSlot = lane.queueSlots[targetIndex];
+        let targetIndex = lane.queueCars.length;
+        let targetSlot = lane.queueSlots[targetIndex];
         if (!targetSlot) {
             car.destroy();
             return;
         }
 
-        const laneStep = this.getLaneSlotStep(lane);
-        const recycleFrom = new Vec3(
+        let laneStep = this.getLaneSlotStep(lane);
+        let recycleFrom = new Vec3(
             targetSlot.x + laneStep.x,
             targetSlot.y + laneStep.y,
             targetSlot.z + laneStep.z,
@@ -1456,8 +1306,8 @@ export class FoodTruckPlayableController extends Component {
         Tween.stopAllByTarget(this._catNode);
         this._catNode.setScale(this._catScale.x, this._catScale.y, this._catScale.z);
 
-        const bigger = new Vec3(this._catScale.x * 1.15, this._catScale.y * 1.15, this._catScale.z);
-        const skeletalAnimation = this._catNode.getComponent(SkeletalAnimation);
+        let bigger = new Vec3(this._catScale.x * 1.15, this._catScale.y * 1.15, this._catScale.z);
+        let skeletalAnimation = this._catNode.getComponent(SkeletalAnimation);
         if (skeletalAnimation && skeletalAnimation.defaultClip) {
             skeletalAnimation.crossFade(skeletalAnimation.defaultClip.name, 0.1);
         }
@@ -1473,7 +1323,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const worldPosition = car.getWorldPosition(new Vec3());
+        let worldPosition = car.getWorldPosition(new Vec3());
         worldPosition.y += 1.8;
         this._serviceProgressWorldPosition = worldPosition;
         this.updateServiceProgressPosition();
@@ -1488,7 +1338,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const state = { value: 0 };
+        let state = { value: 0 };
         tween(state)
             .to(duration, { value: 1 }, {
                 easing: 'linear',
@@ -1516,8 +1366,8 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const origin = this._serviceProgressNode.position.clone();
-        const bursts = [
+        let origin = this._serviceProgressNode.position.clone();
+        let bursts = [
             { offset: new Vec3(-40, 76, 0), scale: 0.16, delay: 0 },
             { offset: new Vec3(0, 108, 0), scale: 0.2, delay: 0.04 },
             { offset: new Vec3(42, 78, 0), scale: 0.16, delay: 0.08 },
@@ -1525,17 +1375,17 @@ export class FoodTruckPlayableController extends Component {
         ];
 
         for (let i = 0; i < bursts.length; i++) {
-            const burst = bursts[i];
-            const burgerNode = new Node(`BurgerBurst_${i}`);
+            let burst = bursts[i];
+            let burgerNode = new Node(`BurgerBurst_${i}`);
             this._overlayRoot.addChild(burgerNode);
             burgerNode.layer = Layers.Enum.UI_2D;
             burgerNode.addComponent(UITransform).setContentSize(100, 104);
-            const opacity = burgerNode.addComponent(UIOpacity);
+            let opacity = burgerNode.addComponent(UIOpacity);
             opacity.opacity = 0;
             burgerNode.setPosition(origin.x, origin.y + 12, 0);
             burgerNode.setScale(burst.scale, burst.scale, 1);
 
-            const sprite = burgerNode.addComponent(Sprite);
+            let sprite = burgerNode.addComponent(Sprite);
             sprite.spriteFrame = this._burgerIconFrame;
 
             tween(opacity)
@@ -1560,21 +1410,21 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const camera = this._mainCameraNode?.getComponent(Camera);
+        let camera = this._mainCameraNode?.getComponent(Camera);
         if (!camera || !this._overlayRoot?.isValid) {
             return;
         }
 
-        const uiPosition = new Vec3();
+        let uiPosition = new Vec3();
         camera.convertToUINode(this._serviceProgressWorldPosition, this._overlayRoot, uiPosition);
-        this._serviceProgressNode.setPosition(uiPosition.x - 20, uiPosition.y - 50, 0);
+        this._serviceProgressNode.setPosition(uiPosition.x - 20, uiPosition.y - 140, 0);
     }
 
     private drawServiceProgress (graphics: Graphics, progress: number): void {
-        const clamped = Math.max(0, Math.min(1, progress));
-        const radius = 14;
-        const startAngle = Math.PI * 0.5;
-        const endAngle = startAngle - Math.PI * 2 * clamped;
+        let clamped = Math.max(0, Math.min(1, progress));
+        let radius = 14;
+        let startAngle = Math.PI * 0.5;
+        let endAngle = startAngle - Math.PI * 2 * clamped;
 
         graphics.clear();
 
@@ -1598,8 +1448,8 @@ export class FoodTruckPlayableController extends Component {
             return false;
         }
 
-        const first = lane.queueSlots[0];
-        const second = lane.queueSlots[1];
+        let first = lane.queueSlots[0];
+        let second = lane.queueSlots[1];
         return Math.abs(second.z - first.z) > Math.abs(second.y - first.y);
     }
 
@@ -1610,14 +1460,14 @@ export class FoodTruckPlayableController extends Component {
                 : new Vec3(0, this._laneTemplateSpacing, 0);
         }
 
-        const first = lane.queueSlots[0];
-        const second = lane.queueSlots[1];
+        let first = lane.queueSlots[0];
+        let second = lane.queueSlots[1];
         return new Vec3(second.x - first.x, second.y - first.y, second.z - first.z);
     }
 
     private getLaneForwardStep (lane: LaneData): Vec3 {
-        const backStep = this.getLaneSlotStep(lane);
-        const length = Math.sqrt(backStep.x * backStep.x + backStep.y * backStep.y + backStep.z * backStep.z);
+        let backStep = this.getLaneSlotStep(lane);
+        let length = Math.sqrt(backStep.x * backStep.x + backStep.y * backStep.y + backStep.z * backStep.z);
         if (length <= 0.0001) {
             return this.isDepthLane(lane) ? new Vec3(0, 0, -1) : new Vec3(0, -1, 0);
         }
@@ -1626,10 +1476,10 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private getLaneRouteTargets (lane: LaneData, frontSlot: Vec3): { sPoint: Vec3; rPoint: Vec3 } {
-        const sPoint = lane.sPoint
+        let sPoint = lane.sPoint
             ? lane.sPoint.clone()
             : new Vec3(frontSlot.x + 2, frontSlot.y, frontSlot.z);
-        const rPoint = lane.rPoint
+        let rPoint = lane.rPoint
             ? lane.rPoint.clone()
             : new Vec3(sPoint.x + 6, sPoint.y, sPoint.z);
 
@@ -1642,33 +1492,33 @@ export class FoodTruckPlayableController extends Component {
         sPoint: Vec3,
         rPoint: Vec3,
     ): Array<{ points: Vec3[]; speed: number; minSegmentDuration: number; pauseAfter: number }> {
-        const queueForward = this.normalizeVec3(this.getLaneForwardStep(lane), new Vec3(1, 0, 0));
-        const roadForward = this.normalizeVec3(
+        let queueForward = this.normalizeVec3(this.getLaneForwardStep(lane), new Vec3(1, 0, 0));
+        let roadForward = this.normalizeVec3(
             new Vec3(rPoint.x - sPoint.x, rPoint.y - sPoint.y, rPoint.z - sPoint.z),
             new Vec3(1, 0, 0),
         );
-        const radius = Math.max(0.9, Math.min(2.1, Vec3.distance(start, sPoint) * 0.28));
-        const exitPoint = new Vec3(
+        let radius = Math.max(0.9, Math.min(2.1, Vec3.distance(start, sPoint) * 0.28));
+        let exitPoint = new Vec3(
             rPoint.x + roadForward.x * 1.6,
             rPoint.y + roadForward.y * 1.6,
             rPoint.z + roadForward.z * 1.6,
         );
 
-        const approachPoints = this.sampleCubicBezierPoints(
+        let approachPoints = this.sampleCubicBezierPoints(
             start,
             this.addScaled(start, queueForward, radius),
             this.addScaled(sPoint, roadForward, -radius * 0.65),
             sPoint,
             10,
         );
-        const departurePoints = this.sampleCubicBezierPoints(
+        let departurePoints = this.sampleCubicBezierPoints(
             sPoint,
             this.addScaled(sPoint, roadForward, radius * 0.45),
             this.addScaled(rPoint, roadForward, -radius * 0.5),
             rPoint,
             12,
         );
-        const exitPoints = this.sampleCubicBezierPoints(
+        let exitPoints = this.sampleCubicBezierPoints(
             rPoint,
             this.addScaled(rPoint, roadForward, radius * 0.35),
             this.addScaled(exitPoint, roadForward, -radius * 0.15),
@@ -1684,22 +1534,22 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private findLaneRouteMarker (name: string): Vec3 | null {
-        const scene = this.node.scene;
+        let scene = this.node.scene;
         if (!scene || !this._worldRoot) {
             return null;
         }
 
-        const marker = this.findNodeByName(scene, name);
+        let marker = this.findNodeByName(scene, name);
         if (!marker) {
             return null;
         }
 
-        const worldPos = marker.getWorldPosition(new Vec3());
+        let worldPos = marker.getWorldPosition(new Vec3());
         return this._worldRoot.inverseTransformPoint(new Vec3(), worldPos);
     }
 
     private parseLandId (name: string, fallback: number): number {
-        const match = name.match(/^Land(\d+)$/i);
+        let match = name.match(/^Land(\d+)$/i);
         if (!match) {
             return fallback;
         }
@@ -1712,7 +1562,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const yaw = this.getTweenYaw(car, from, to);
+        let yaw = this.getTweenYaw(car, from, to);
         if (yaw === null) {
             return;
         }
@@ -1727,8 +1577,8 @@ export class FoodTruckPlayableController extends Component {
         duration: number,
         easing: TweenEasing,
     ): Tween<Node> {
-        const yaw = this.getTweenYaw(car, from, to);
-        const props: { position: Vec3; eulerAngles?: Vec3 } = {
+        let yaw = this.getTweenYaw(car, from, to);
+        let props: { position: Vec3; eulerAngles?: Vec3 } = {
             position: to.clone(),
         };
 
@@ -1747,8 +1597,8 @@ export class FoodTruckPlayableController extends Component {
     ): Tween<Node> {
         let sequence = tween(car);
         for (let i = 1; i < points.length; i++) {
-            const from = points[i - 1];
-            const to = points[i];
+            let from = points[i - 1];
+            let to = points[i];
             sequence = sequence.then(this.tweenCarTo(
                 car,
                 from,
@@ -1768,14 +1618,14 @@ export class FoodTruckPlayableController extends Component {
         p3: Vec3,
         segments: number,
     ): Vec3[] {
-        const points: Vec3[] = [p0.clone()];
+        let points: Vec3[] = [p0.clone()];
         for (let i = 1; i <= segments; i++) {
-            const t = i / segments;
-            const inv = 1 - t;
-            const inv2 = inv * inv;
-            const inv3 = inv2 * inv;
-            const t2 = t * t;
-            const t3 = t2 * t;
+            let t = i / segments;
+            let inv = 1 - t;
+            let inv2 = inv * inv;
+            let inv3 = inv2 * inv;
+            let t2 = t * t;
+            let t3 = t2 * t;
             points.push(new Vec3(
                 inv3 * p0.x + 3 * inv2 * t * p1.x + 3 * inv * t2 * p2.x + t3 * p3.x,
                 inv3 * p0.y + 3 * inv2 * t * p1.y + 3 * inv * t2 * p2.y + t3 * p3.y,
@@ -1787,7 +1637,7 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private normalizeVec3 (value: Vec3, fallback: Vec3): Vec3 {
-        const length = Math.sqrt(value.x * value.x + value.y * value.y + value.z * value.z);
+        let length = Math.sqrt(value.x * value.x + value.y * value.y + value.z * value.z);
         if (length <= 0.0001) {
             return fallback.clone();
         }
@@ -1804,9 +1654,9 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private tweenQueueCarTo (car: Node, target: Vec3, minDuration = 0.24): Tween<Node> {
-        const current = car.position.clone();
-        const yaw = this.getTweenYaw(car, current, target);
-        const props: { position: Vec3; eulerAngles?: Vec3 } = {
+        let current = car.position.clone();
+        let yaw = this.getTweenYaw(car, current, target);
+        let props: { position: Vec3; eulerAngles?: Vec3 } = {
             position: target.clone(),
         };
         if (yaw !== null) {
@@ -1817,8 +1667,8 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private getYawDegrees (from: Vec3, to: Vec3): number | null {
-        const dx = to.x - from.x;
-        const dz = to.z - from.z;
+        let dx = to.x - from.x;
+        let dz = to.z - from.z;
         if (Math.abs(dx) < 0.0001 && Math.abs(dz) < 0.0001) {
             return null;
         }
@@ -1827,7 +1677,7 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private getTweenYaw (car: Node, from: Vec3, to: Vec3): number | null {
-        const targetYaw = this.getYawDegrees(from, to);
+        let targetYaw = this.getYawDegrees(from, to);
         if (targetYaw === null) {
             return null;
         }
@@ -1847,42 +1697,22 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private getTravelDuration (from: Vec3, to: Vec3, speed: number, minDuration: number): number {
-        const dx = to.x - from.x;
-        const dy = to.y - from.y;
-        const dz = to.z - from.z;
-        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        let dx = to.x - from.x;
+        let dy = to.y - from.y;
+        let dz = to.z - from.z;
+        let distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
         return Math.max(minDuration, distance / Math.max(0.01, speed));
     }
 
-    private createButton (
-        parent: Node,
-        name: string,
-        text: string,
-        position: Vec3,
-        size: Vec3,
-        color: Color,
-        onClick: () => void,
-    ): Node {
-        const buttonNode = this.createRectNode(parent, name, color, size.x, size.y, 14);
-        if (!buttonNode.getComponent(UIOpacity)) {
-            buttonNode.addComponent(UIOpacity);
-        }
-        buttonNode.setPosition(position.x, position.y, position.z);
-        this.createLabel(buttonNode, text, 24, new Color(255, 255, 255, 255), new Vec3(0, 0, 0));
-        this.attachButtonPressFeedback(buttonNode);
-        buttonNode.on(Node.EventType.TOUCH_END, onClick, this);
-        return buttonNode;
-    }
-
     private attachButtonPressFeedback (buttonNode: Node): void {
-        const opacity = buttonNode.getComponent(UIOpacity) ?? buttonNode.addComponent(UIOpacity);
-        const pressedOffset = 4;
-        const pressedOpacityDelta = 35;
+        let opacity = buttonNode.getComponent(UIOpacity) ?? buttonNode.addComponent(UIOpacity);
+        let pressedOffset = 4;
+        let pressedOpacityDelta = 35;
         let isPressed = false;
         let restPosition = buttonNode.position.clone();
         let restOpacity = opacity.opacity;
 
-        const restoreState = (): void => {
+        let restoreState = (): void => {
             if (!buttonNode.isValid || !isPressed) {
                 return;
             }
@@ -1913,71 +1743,8 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const opacity = button.getComponent(UIOpacity) ?? button.addComponent(UIOpacity);
+        let opacity = button.getComponent(UIOpacity) ?? button.addComponent(UIOpacity);
         opacity.opacity = enabled ? 255 : 120;
-    }
-
-    private createRectNode (
-        parent: Node | null,
-        name: string,
-        color: Color,
-        width: number,
-        height: number,
-        radius = 0,
-    ): Node {
-        const node = new Node(name);
-        if (parent) {
-            parent.addChild(node);
-        }
-
-        node.layer = Layers.Enum.UI_2D;
-        node.addComponent(UITransform).setContentSize(width, height);
-        const graphics = node.addComponent(Graphics);
-        graphics.clear();
-        graphics.fillColor = color;
-        if (radius > 0) {
-            graphics.roundRect(-width * 0.5, -height * 0.5, width, height, radius);
-        } else {
-            graphics.rect(-width * 0.5, -height * 0.5, width, height);
-        }
-        graphics.fill();
-        return node;
-    }
-
-    private createLabel (
-        parent: Node,
-        text: string,
-        fontSize: number,
-        color: Color,
-        position: Vec3,
-    ): Label {
-        const labelNode = new Node(`${parent.name}_Label`);
-        parent.addChild(labelNode);
-        labelNode.layer = Layers.Enum.UI_2D;
-        labelNode.addComponent(UITransform).setContentSize(600, 70);
-        labelNode.setPosition(position.x, position.y, position.z);
-        const label = labelNode.addComponent(Label);
-        label.string = text;
-        label.fontSize = fontSize;
-        label.lineHeight = Math.round(fontSize * 1.2);
-        label.color = color;
-        if (this._uiFont) {
-            label.font = this._uiFont;
-        }
-        label.horizontalAlign = Label.HorizontalAlign.CENTER;
-        label.verticalAlign = Label.VerticalAlign.CENTER;
-        return label;
-    }
-
-    private loadUiFont (): void {
-        assetManager.loadAny(FoodTruckPlayableController.UI_FONT_UUID, (error: Error | null, asset: Font) => {
-            if (error || !asset || !this.node?.isValid) {
-                return;
-            }
-
-            this._uiFont = asset;
-            this.applyUiFont();
-        });
     }
 
     private applyUiFont (): void {
@@ -1991,12 +1758,12 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private applyUiFontToNode (node: Node): void {
-        const label = node.getComponent(Label);
+        let label = node.getComponent(Label);
         if (label) {
             label.font = this._uiFont;
         }
 
-        for (const child of node.children) {
+        for (let child of node.children) {
             this.applyUiFontToNode(child);
         }
     }
@@ -2031,8 +1798,8 @@ export class FoodTruckPlayableController extends Component {
             return root;
         }
 
-        for (const child of root.children) {
-            const found = this.findNodeByName(child, name);
+        for (let child of root.children) {
+            let found = this.findNodeByName(child, name);
             if (found) {
                 return found;
             }
@@ -2042,14 +1809,14 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private findCanvasController (root: Node): FoodTruckPlayableController | null {
-        const canvas = root.getComponent(Canvas);
-        const controller = root.getComponent(FoodTruckPlayableController);
+        let canvas = root.getComponent(Canvas);
+        let controller = root.getComponent(FoodTruckPlayableController);
         if (canvas && controller) {
             return controller;
         }
 
-        for (const child of root.children) {
-            const found = this.findCanvasController(child);
+        for (let child of root.children) {
+            let found = this.findCanvasController(child);
             if (found) {
                 return found;
             }
@@ -2058,38 +1825,8 @@ export class FoodTruckPlayableController extends Component {
         return null;
     }
 
-    private destroyStaleHudRoots (): void {
-        const scene = this.node.scene;
-        if (!scene) {
-            return;
-        }
-
-        const hudRoots = this.collectNodesByName(scene, 'PlayableHudRoot');
-        for (const hudRoot of hudRoots) {
-            if (!hudRoot.isValid) {
-                continue;
-            }
-
-            if (hudRoot.parent !== this.node) {
-                hudRoot.destroy();
-            }
-        }
-    }
-
-    private collectNodesByName (root: Node, name: string, result: Node[] = []): Node[] {
-        if (root.name === name) {
-            result.push(root);
-        }
-
-        for (const child of root.children) {
-            this.collectNodesByName(child, name, result);
-        }
-
-        return result;
-    }
-
     private resolveCanvasNode (): Node | null {
-        const selfCanvas = this.node.getComponent(Canvas);
+        let selfCanvas = this.node.getComponent(Canvas);
         if (selfCanvas) {
             return this.node;
         }
@@ -2098,7 +1835,7 @@ export class FoodTruckPlayableController extends Component {
             return this.node;
         }
 
-        const parent = this.node.parent;
+        let parent = this.node.parent;
         if (parent?.getComponent(Canvas)) {
             return parent;
         }
@@ -2108,14 +1845,6 @@ export class FoodTruckPlayableController extends Component {
 
         return null;
     }
-
-    private setUiLayerRecursive (node: Node): void {
-        node.layer = Layers.Enum.UI_2D;
-        for (const child of node.children) {
-            this.setUiLayerRecursive(child);
-        }
-    }
-
     private getLaneTotal (): number {
         return this._lanes.length > 0 ? this._lanes.length : this.laneCount;
     }

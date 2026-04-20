@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "mcp__serena__list_dir",
-      "Bash(dir /b \"E:\\\\Cocos\\\\Projects\\\\CatKitchen\\\\assets\\\\plugins\\\\game-foundation\")"
+      "Bash(dir /b \"E:\\\\Cocos\\\\Projects\\\\CatKitchen\\\\assets\\\\plugins\\\\game-foundation\")",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__find_symbol"
     ]
   }
 }
