@@ -4,33 +4,32 @@ import {
     AnimationClip,
     AudioClip,
     AudioSource,
-    assetManager,
     Camera,
     Canvas,
     Color,
     Component,
     Font,
     Graphics,
+    input,
+    Input,
     instantiate,
     Label,
     Layers,
     Node,
-    input,
-    Input,
     SkeletalAnimation,
     Sprite,
     SpriteFrame,
     Tween,
+    tween,
     TweenEasing,
     UIOpacity,
     UITransform,
     Vec3,
-    tween,
 } from 'cc';
 import super_html_script from 'db://assets/plugins/playable-foundation/super-html/super_html_script';
-import { CameraFollow } from './CameraFollow';
-import { OrientationCameraOrthoAdjuster } from './OrientationCameraOrthoAdjuster';
-import { UIScreenResolution } from './UIScreenResolution';
+import {CameraFollow} from './CameraFollow';
+import {OrientationCameraOrthoAdjuster} from './OrientationCameraOrthoAdjuster';
+import {UIScreenResolution} from './UIScreenResolution';
 
 let { ccclass, property } = _decorator;
 
@@ -55,10 +54,6 @@ type LaneData = {
 @ccclass('FoodTruckPlayableController')
 export class FoodTruckPlayableController extends Component {
     private static _activeInstance: FoodTruckPlayableController | null = null;
-    private static readonly ENGINE_START_AUDIO_UUID = '58263f6c-43e3-4c65-bf76-36fb080c0f8f';
-    private static readonly RANKUP_AUDIO_UUID = 'b0e8e49d-a030-4b35-bc18-e02f19d9330d';
-    private static readonly CAR_HORN_AUDIO_UUID = 'e61f7d9c-d841-44ee-8d0c-68b1f6dbd74c';
-    private static readonly HAND_CLIP_UUID = 'e26e9387-4e91-437d-83e6-c772efc4e980';
     private readonly laneCount = 4;
     private readonly baseDispatchCooldown = 2;
     private readonly cooldownReductionPerOpenedLane = 0.5;
@@ -857,46 +852,68 @@ export class FoodTruckPlayableController extends Component {
         this.enterScene2();
     }
 
-    private loadHandHint (): void {
-        assetManager.loadAny(FoodTruckPlayableController.HAND_CLIP_UUID, (clipError: Error | null, clipAsset: AnimationClip) => {
-            if (clipError || !clipAsset || !this.node?.isValid) {
-                return;
-            }
+    @property(AnimationClip)
+    public clipAsset:AnimationClip  = null;
 
-            this._handHintClip = clipAsset;
+    private loadHandHint (): void {
+        // assetManager.loadAny(FoodTruckPlayableController.HAND_CLIP_UUID, (clipError: Error | null, clipAsset: AnimationClip) => {
+        //     if (clipError || !clipAsset || !this.node?.isValid) {
+        //         return;
+        //     }
+        //
+        //     this._handHintClip = clipAsset;
+        //     this.tryCreateHandHint();
+        // });
+
+            this._handHintClip = this.clipAsset;
             this.tryCreateHandHint();
-        });
     }
+
+    @property(AudioClip)
+    public clip:AudioClip  = null;
 
     private loadEngineStartAudio (): void {
-        assetManager.loadAny(FoodTruckPlayableController.ENGINE_START_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
-            if (error || !clip || !this.node?.isValid) {
-                return;
-            }
+        // assetManager.loadAny(FoodTruckPlayableController.ENGINE_START_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
+        //     if (error || !clip || !this.node?.isValid) {
+        //         return;
+        //     }
+        //
+        //     this._engineStartAudio = clip;
+        // });
 
-            this._engineStartAudio = clip;
-        });
+        this._engineStartAudio = this.clip;
     }
+
+    @property(AudioClip)
+    public rankUpclip:AudioClip  = null;
 
     private loadRankupAudio (): void {
-        assetManager.loadAny(FoodTruckPlayableController.RANKUP_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
-            if (error || !clip || !this.node?.isValid) {
-                return;
-            }
+        // assetManager.loadAny(FoodTruckPlayableController.RANKUP_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
+        //     if (error || !clip || !this.node?.isValid) {
+        //         return;
+        //     }
+        //
+        //     this._rankupAudio = clip;
+        // });
 
-            this._rankupAudio = clip;
-        });
+            this._rankupAudio = this.rankUpclip;
     }
 
-    private loadCarHornAudio (): void {
-        assetManager.loadAny(FoodTruckPlayableController.CAR_HORN_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
-            if (error || !clip || !this.node?.isValid) {
-                return;
-            }
+    @property(AudioClip)
+    public r1ankUpclip:AudioClip  = null;
 
-            this._carHornAudio = clip;
+    private loadCarHornAudio (): void {
+        // assetManager.loadAny(FoodTruckPlayableController.CAR_HORN_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
+        //     if (error || !clip || !this.node?.isValid) {
+        //         return;
+        //     }
+        //
+        //     this._carHornAudio = clip;
+        //     this.refreshHornPrompt();
+        // });
+
+            this._carHornAudio = this.r1ankUpclip;
             this.refreshHornPrompt();
-        });
     }
 
     private playEngineStartAudio (): void {
