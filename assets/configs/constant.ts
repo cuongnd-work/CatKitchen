@@ -14,7 +14,7 @@
     }
 
     static TRACKING = {
-        PLAYABLE_ID: "PA0007",
+        PLAYABLE_ID: "PA0008",
         PACKAGE_NAME: "com.archer.cat.kitchen",
         MAX_TRACKING_DURATION_SEC: 60,
         ENV: "production"

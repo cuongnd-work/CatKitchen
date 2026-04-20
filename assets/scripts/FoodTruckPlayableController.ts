@@ -58,6 +58,7 @@ type LaneData = {
 export class FoodTruckPlayableController extends Component {
     private static _activeInstance: FoodTruckPlayableController | null = null;
     private static readonly UI_FONT_UUID = '4b362bb5-2b14-46a5-8c9e-a6688bb70e61';
+    private static readonly MONEY_ICON_UUID = '241afd78-7db8-4f2a-8ca9-926f46cdeaad@f9941';
     private static readonly ENGINE_START_AUDIO_UUID = '58263f6c-43e3-4c65-bf76-36fb080c0f8f';
     private static readonly CAR_HORN_AUDIO_UUID = 'e61f7d9c-d841-44ee-8d0c-68b1f6dbd74c';
     private static readonly HAND_CLIP_UUID = 'e26e9387-4e91-437d-83e6-c772efc4e980';
@@ -107,6 +108,11 @@ export class FoodTruckPlayableController extends Component {
 
     private _phaseLabel: Label | null = null;
     private _moneyLabel: Label | null = null;
+    private _moneyIconFrame: SpriteFrame | null = null;
+    private _moneyHolderIcon: Sprite | null = null;
+    private _removeBarrierCostIcon: Sprite | null = null;
+    private _dispatchCostIcon: Sprite | null = null;
+    private _openLaneCostIcon: Sprite | null = null;
     private _removeBarrierLabel: Label | null = null;
     private _dispatchLabel: Label | null = null;
     private _openLaneLabel: Label | null = null;
@@ -160,6 +166,7 @@ export class FoodTruckPlayableController extends Component {
         this.destroyStaleHudRoots();
         this.prepareLegacyUiNodes();
         this.loadUiFont();
+        this.loadMoneyIcon();
         this.loadEngineStartAudio();
         this.loadCarHornAudio();
         this.bindWorldNodes();
@@ -546,12 +553,18 @@ export class FoodTruckPlayableController extends Component {
 
         const moneyHolder = this.createRectNode(this._overlayRoot, 'MoneyHolder', new Color(255, 255, 255, 230), topCardWidth, topCardHeight, 12);
         moneyHolder.setPosition(halfWidth - topCardWidth * 0.5 - 16, halfHeight - topCardHeight * 0.5 - 18, 0);
+        this._moneyHolderIcon = this.createMoneyIconSprite(
+            moneyHolder,
+            'MoneyHolderIcon',
+            new Vec3(-topCardWidth * 0.3, 0, 0),
+            canvasWidth < 500 ? 34 : 42,
+        );
         this._moneyLabel = this.createLabel(
             moneyHolder,
-            `Cash: ${this._money}`,
+            `${this._money}`,
             canvasWidth < 500 ? 22 : 28,
             new Color(41, 134, 54, 255),
-            new Vec3(0, 0, 0),
+            new Vec3(18, 0, 0),
         );
 
         this._playButton = this.createButton(
@@ -574,35 +587,38 @@ export class FoodTruckPlayableController extends Component {
         this._removeBarrierButton = this.createButton(
             this._overlayRoot,
             'RemoveBarrierButton',
-            `Remove Barrier ($${this.removeBarrierCost})`,
+            `Remove Barrier ${this.removeBarrierCost}`,
             new Vec3(0, bottomPrimaryY, 0),
             new Vec3(primaryButtonWidth, primaryButtonHeight, 0),
             new Color(52, 173, 96, 255),
             () => this.onRemoveBarrierClicked(),
         );
         this._removeBarrierLabel = this._removeBarrierButton.getComponentInChildren(Label);
+        this._removeBarrierCostIcon = this.attachMoneyIconToButton(this._removeBarrierButton, 118);
 
         this._dispatchButton = this.createButton(
             this._overlayRoot,
             'DispatchButton',
-            `Send Cars ($${this.dispatchCarCost})`,
+            `Send Cars ${this.dispatchCarCost}`,
             new Vec3(0, bottomPrimaryY, 0),
             new Vec3(primaryButtonWidth, primaryButtonHeight, 0),
             new Color(61, 123, 236, 255),
             () => this.onDispatchClicked(),
         );
         this._dispatchLabel = this._dispatchButton.getComponentInChildren(Label);
+        this._dispatchCostIcon = this.attachMoneyIconToButton(this._dispatchButton, 86);
 
         this._openLaneButton = this.createButton(
             this._overlayRoot,
             'OpenLaneButton',
-            `Open Car Route ($${this.openLaneCost})`,
+            `Open Car Route ${this.openLaneCost}`,
             new Vec3(0, bottomSecondaryY, 0),
             new Vec3(secondaryButtonWidth, secondaryButtonHeight, 0),
             new Color(241, 144, 57, 255),
             () => this.onOpenLaneClicked(),
         );
         this._openLaneLabel = this._openLaneButton.getComponentInChildren(Label);
+        this._openLaneCostIcon = this.attachMoneyIconToButton(this._openLaneButton, 138);
 
         this._serviceProgressNode = new Node('ServiceProgressOverlay');
         this._overlayRoot.addChild(this._serviceProgressNode);
@@ -958,6 +974,20 @@ export class FoodTruckPlayableController extends Component {
         });
     }
 
+    private loadMoneyIcon (): void {
+        assetManager.loadAny(FoodTruckPlayableController.MONEY_ICON_UUID, (error: Error | null, spriteFrame: SpriteFrame) => {
+            if (error || !spriteFrame || !this.node?.isValid) {
+                return;
+            }
+
+            this._moneyIconFrame = spriteFrame;
+            this.applyMoneyIconFrame(this._moneyHolderIcon);
+            this.applyMoneyIconFrame(this._removeBarrierCostIcon);
+            this.applyMoneyIconFrame(this._dispatchCostIcon);
+            this.applyMoneyIconFrame(this._openLaneCostIcon);
+        });
+    }
+
     private loadCarHornAudio (): void {
         assetManager.loadAny(FoodTruckPlayableController.CAR_HORN_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
             if (error || !clip || !this.node?.isValid) {
@@ -1009,6 +1039,36 @@ export class FoodTruckPlayableController extends Component {
             && this.canAfford(this.dispatchCarCost)
             && this._activeDispatchCount === 0
             && this._phase !== 'ending';
+    }
+
+    private createMoneyIconSprite (parent: Node, name: string, position: Vec3, size: number): Sprite {
+        const node = new Node(name);
+        parent.addChild(node);
+        node.layer = Layers.Enum.UI_2D;
+        node.addComponent(UITransform).setContentSize(size, size);
+        node.setPosition(position.x, position.y, position.z);
+        node.setScale(0.12, 0.12, 1);
+        const sprite = node.addComponent(Sprite);
+        this.applyMoneyIconFrame(sprite);
+        return sprite;
+    }
+
+    private attachMoneyIconToButton (buttonNode: Node, x: number): Sprite {
+        const label = buttonNode.getComponentInChildren(Label);
+        if (label?.node?.isValid) {
+            const current = label.node.position.clone();
+            label.node.setPosition(current.x - 14, current.y, current.z);
+        }
+
+        return this.createMoneyIconSprite(buttonNode, `${buttonNode.name}_MoneyIcon`, new Vec3(x, 0, 0), 26);
+    }
+
+    private applyMoneyIconFrame (sprite: Sprite | null): void {
+        if (!sprite || !sprite.isValid || !this._moneyIconFrame) {
+            return;
+        }
+
+        sprite.spriteFrame = this._moneyIconFrame;
     }
 
     private tryCreateHandHint (): void {
@@ -1163,6 +1223,7 @@ export class FoodTruckPlayableController extends Component {
 
         this._money -= cost;
         this.refreshUiState();
+        this.animateMoneyLabel(true);
         return true;
     }
 
@@ -1172,7 +1233,7 @@ export class FoodTruckPlayableController extends Component {
             this._removeBarrierButton.active = waitingForBarrier;
         }
         if (this._removeBarrierLabel) {
-            this._removeBarrierLabel.string = `Remove Barrier ($${this.removeBarrierCost})`;
+            this._removeBarrierLabel.string = `Remove Barrier ${this.removeBarrierCost}`;
         }
         const canBuyBarrier = waitingForBarrier && this.canAfford(this.removeBarrierCost);
         this.setButtonLockedVisual(this._removeBarrierButton, canBuyBarrier);
@@ -1197,7 +1258,7 @@ export class FoodTruckPlayableController extends Component {
             if (this._phase === 'scene2') {
                 this._openLaneLabel.string = `All ${this.getLaneTotal()} Lanes Open`;
             } else {
-                this._openLaneLabel.string = `Open Car Route ($${this.openLaneCost})`;
+                this._openLaneLabel.string = `Open Car Route ${this.openLaneCost}`;
             }
         }
         this.setButtonLockedVisual(this._openLaneButton, openLaneVisible && this.canAfford(this.openLaneCost));
@@ -1214,13 +1275,37 @@ export class FoodTruckPlayableController extends Component {
         if (!this._dispatchLabel || !this._dispatchButton || !this._dispatchButton.active) {
             return;
         }
-        this._dispatchLabel.string = `Send Cars ($${this.dispatchCarCost})`;
+        this._dispatchLabel.string = `Send Cars ${this.dispatchCarCost}`;
     }
 
     private refreshMoneyLabel (): void {
         if (this._moneyLabel) {
-            this._moneyLabel.string = `Cash: ${this._money}`;
+            this._moneyLabel.string = `${this._money}`;
         }
+    }
+
+    private animateMoneyLabel (isSpend: boolean): void {
+        if (!this._moneyLabel?.node?.isValid) {
+            return;
+        }
+
+        const labelNode = this._moneyLabel.node;
+        const baseScale = new Vec3(1, 1, 1);
+        const baseColor = new Color(41, 134, 54, 255);
+        const flashColor = isSpend ? new Color(220, 76, 76, 255) : new Color(74, 185, 92, 255);
+
+        Tween.stopAllByTarget(labelNode);
+        this._moneyLabel.color = flashColor;
+        labelNode.setScale(baseScale);
+        tween(labelNode)
+            .to(0.12, { scale: new Vec3(1.18, 1.18, 1) }, { easing: 'sineOut' })
+            .to(0.16, { scale: baseScale }, { easing: 'sineIn' })
+            .call(() => {
+                if (this._moneyLabel) {
+                    this._moneyLabel.color = baseColor;
+                }
+            })
+            .start();
     }
 
     private addMoney (amount: number): void {
