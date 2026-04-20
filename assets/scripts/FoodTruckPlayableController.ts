@@ -1,5 +1,7 @@
 import {
     _decorator,
+    Animation,
+    AnimationClip,
     assetManager,
     Camera,
     Canvas,
@@ -11,8 +13,13 @@ import {
     Label,
     Layers,
     Node,
+    input,
+    Input,
     SkeletalAnimation,
+    Sprite,
+    SpriteFrame,
     Tween,
+    TweenEasing,
     UIOpacity,
     UITransform,
     Vec3,
@@ -49,6 +56,9 @@ type LaneData = {
 export class FoodTruckPlayableController extends Component {
     private static _activeInstance: FoodTruckPlayableController | null = null;
     private static readonly UI_FONT_UUID = '4b362bb5-2b14-46a5-8c9e-a6688bb70e61';
+    private static readonly HAND_CLIP_UUID = 'e26e9387-4e91-437d-83e6-c772efc4e980';
+    private static readonly HAND_FRAME_A_UUID = 'bde249fd-fb02-4191-820c-f22fda1fe1a6@f9941';
+    private static readonly HAND_FRAME_B_UUID = 'a68ec147-ff49-457b-b230-122b84c2e70c@f9941';
     private readonly laneCount = 4;
     private readonly baseDispatchCooldown = 2;
     private readonly cooldownReductionPerOpenedLane = 0.5;
@@ -66,6 +76,8 @@ export class FoodTruckPlayableController extends Component {
     private readonly idleShakeDuration = 0.12;
     private readonly manualDispatchesToAuto = 20;
     private readonly autoCarsToEnding = 6;
+    private readonly handHintIdleDelay = 4;
+    private readonly handHintOffset = new Vec3(0, -86, 0);
 
     private _phase: ScenePhase = 'scene1';
     private _money = this.startingCash;
@@ -110,6 +122,13 @@ export class FoodTruckPlayableController extends Component {
     private _lanes: LaneData[] = [];
     private _idleShakeBaseByCar: Map<Node, { target: Node; eulerAngles: Vec3 }> = new Map();
     private _uiFont: Font | null = null;
+    private _handHintRoot: Node | null = null;
+    private _handHintAnimation: Animation | null = null;
+    private _handHintClip: AnimationClip | null = null;
+    private _handFrameA: SpriteFrame | null = null;
+    private _handFrameB: SpriteFrame | null = null;
+    private _handHintReady = false;
+    private _handHintTarget: Node | null = null;
 
     @property(Node)
     public endingSelectionNode: Node | null = null;
@@ -139,11 +158,13 @@ export class FoodTruckPlayableController extends Component {
         this.configureMainCamera();
         this.prepareLanesFromWorld();
         this.createHud();
+        this.loadHandHint();
         this.createEndingUi();
         this.refreshUiState();
         if (this.endingSelectionNode) {
             this.endingSelectionNode.active = false;
         }
+        input.on(Input.EventType.TOUCH_START, this.onGlobalTouchStart, this);
     }
 
     protected onDestroy (): void {
@@ -158,6 +179,8 @@ export class FoodTruckPlayableController extends Component {
             Tween.stopAllByTarget(this._catNode);
         }
         this.stopAllIdleCarShakes();
+        this.unschedule(this.showHandHintForCurrentTarget);
+        input.off(Input.EventType.TOUCH_START, this.onGlobalTouchStart, this);
     }
 
     update (deltaTime: number): void {
@@ -655,6 +678,8 @@ export class FoodTruckPlayableController extends Component {
 
     private onPlayGameClicked (): void {
         this.trackFirstClick();
+        super_html_script.on_click_game_end();
+        super_html_script.on_click_download();
     }
 
     private onRemoveBarrierClicked (): void {
@@ -716,13 +741,13 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private trackFirstClick (): void {
+        this.hideHandHint();
+        this.scheduleHandHint();
         if (this._playClicked) {
             return;
         }
         this._playClicked = true;
         super_html_script.on_first_click();
-        super_html_script.on_click_game_end();
-        super_html_script.on_click_download();
     }
 
     private tryDispatchCar (ignoreCooldown = false): boolean {
@@ -883,6 +908,145 @@ export class FoodTruckPlayableController extends Component {
         this.enterScene2();
     }
 
+    private loadHandHint (): void {
+        assetManager.loadAny(FoodTruckPlayableController.HAND_CLIP_UUID, (clipError: Error | null, clipAsset: AnimationClip) => {
+            if (clipError || !clipAsset || !this.node?.isValid) {
+                return;
+            }
+
+            this._handHintClip = clipAsset;
+            this.tryCreateHandHint();
+        });
+
+        assetManager.loadAny(FoodTruckPlayableController.HAND_FRAME_A_UUID, (frameError: Error | null, frameAsset: SpriteFrame) => {
+            if (frameError || !frameAsset || !this.node?.isValid) {
+                return;
+            }
+
+            this._handFrameA = frameAsset;
+            this.tryCreateHandHint();
+        });
+
+        assetManager.loadAny(FoodTruckPlayableController.HAND_FRAME_B_UUID, (frameError: Error | null, frameAsset: SpriteFrame) => {
+            if (frameError || !frameAsset || !this.node?.isValid) {
+                return;
+            }
+
+            this._handFrameB = frameAsset;
+            this.tryCreateHandHint();
+        });
+    }
+
+    private tryCreateHandHint (): void {
+        if (this._handHintReady || !this._overlayRoot?.isValid || !this._handHintClip || !this._handFrameA || !this._handFrameB) {
+            return;
+        }
+
+        const root = new Node('HandHint');
+        this._overlayRoot.addChild(root);
+        root.layer = Layers.Enum.UI_2D;
+        root.addComponent(UITransform).setContentSize(180, 190);
+        root.setScale(0.6, 0.6, 1);
+        root.active = false;
+
+        const frameA = this.createHandFrameNode(root, 'tile000', this._handFrameA);
+        frameA.active = true;
+        const frameB = this.createHandFrameNode(root, 'tile001', this._handFrameB);
+        frameB.active = false;
+
+        const animation = root.addComponent(Animation);
+        animation.defaultClip = this._handHintClip;
+        animation.playOnLoad = false;
+        animation.addClip(this._handHintClip, this._handHintClip.name);
+
+        this._handHintRoot = root;
+        this._handHintAnimation = animation;
+        this._handHintReady = true;
+        this.showHandHintForCurrentTarget();
+    }
+
+    private createHandFrameNode (parent: Node, name: string, frame: SpriteFrame): Node {
+        const node = new Node(name);
+        parent.addChild(node);
+        node.layer = Layers.Enum.UI_2D;
+        node.addComponent(UITransform).setContentSize(180, 190);
+        const sprite = node.addComponent(Sprite);
+        sprite.spriteFrame = frame;
+        return node;
+    }
+
+    private onGlobalTouchStart (): void {
+        this.hideHandHint();
+        this.scheduleHandHint();
+    }
+
+    private scheduleHandHint (): void {
+        this.unschedule(this.showHandHintForCurrentTarget);
+        this.scheduleOnce(this.showHandHintForCurrentTarget, this.handHintIdleDelay);
+    }
+
+    private showHandHintForCurrentTarget = (): void => {
+        if (!this._handHintReady || !this._handHintRoot?.isValid) {
+            return;
+        }
+
+        const target = this.getPreferredHandHintTarget();
+        if (!target) {
+            this.hideHandHint();
+            return;
+        }
+
+        this._handHintTarget = target;
+        const targetPosition = target.position.clone().add(this.handHintOffset);
+        this._handHintRoot.setPosition(targetPosition.x, targetPosition.y, targetPosition.z);
+        this._handHintRoot.active = true;
+        if (this._handHintAnimation && this._handHintClip) {
+            this._handHintAnimation.play(this._handHintClip.name);
+        }
+    };
+
+    private hideHandHint (): void {
+        if (!this._handHintRoot?.isValid) {
+            return;
+        }
+
+        this._handHintRoot.active = false;
+        this._handHintTarget = null;
+        if (this._handHintAnimation) {
+            this._handHintAnimation.stop();
+        }
+    }
+
+    private getPreferredHandHintTarget (): Node | null {
+        const candidates = [
+            this._removeBarrierButton,
+            this._openLaneButton,
+            this._dispatchButton,
+        ];
+
+        for (const button of candidates) {
+            if (!button || !button.isValid || !button.activeInHierarchy) {
+                continue;
+            }
+
+            if (button === this._removeBarrierButton && !this.canAfford(this.removeBarrierCost)) {
+                continue;
+            }
+
+            if (button === this._openLaneButton && !this.canAfford(this.openLaneCost)) {
+                continue;
+            }
+
+            if (button === this._dispatchButton && !this.canAfford(this.dispatchCarCost)) {
+                continue;
+            }
+
+            return button;
+        }
+
+        return null;
+    }
+
     private getDispatchCooldown (): number {
         const reduction = this._openedLanes * this.cooldownReductionPerOpenedLane;
         return Math.max(this.minimumDispatchCooldown, this.baseDispatchCooldown - reduction);
@@ -960,32 +1124,15 @@ export class FoodTruckPlayableController extends Component {
 
         this.refreshMoneyLabel();
         this.refreshDispatchButtonLabel();
+        if (this._handHintRoot?.activeInHierarchy) {
+            this.showHandHintForCurrentTarget();
+        }
     }
 
     private refreshDispatchButtonLabel (): void {
         if (!this._dispatchLabel || !this._dispatchButton || !this._dispatchButton.active) {
             return;
         }
-
-        if (this._activeDispatchCount > 0) {
-            const maxConcurrent = this.getMaxConcurrentDispatches(true);
-            this._dispatchLabel.string = maxConcurrent > 1
-                ? `Cars Incoming... (${this._activeDispatchCount}/${maxConcurrent})`
-                : 'Car Incoming...';
-            return;
-        }
-
-        if (!this.canAfford(this.dispatchCarCost)) {
-            this._dispatchLabel.string = `Send Cars ($${this.dispatchCarCost})`;
-            return;
-        }
-
-        const remain = Math.max(0, this._nextDispatchTime - this._elapsed);
-        if (remain > 0.01) {
-            this._dispatchLabel.string = `Send Cars ($${this.dispatchCarCost} | ${remain.toFixed(1)}s)`;
-            return;
-        }
-
         this._dispatchLabel.string = `Send Cars ($${this.dispatchCarCost})`;
     }
 
@@ -1335,7 +1482,7 @@ export class FoodTruckPlayableController extends Component {
         from: Vec3,
         to: Vec3,
         duration: number,
-        easing: string,
+        easing: TweenEasing,
     ): Tween<Node> {
         const yaw = this.getTweenYaw(car, from, to);
         const props: { position: Vec3; eulerAngles?: Vec3 } = {
