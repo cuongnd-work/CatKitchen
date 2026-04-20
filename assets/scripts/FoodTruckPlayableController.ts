@@ -540,7 +540,7 @@ export class FoodTruckPlayableController extends Component {
         const halfHeight = canvasHeight * 0.5;
 
         this._overlayRoot = new Node('PlayableHudRoot');
-        this.node.addChild(this._overlayRoot);
+        canvasNode.addChild(this._overlayRoot);
         this.setUiLayerRecursive(this._overlayRoot);
         this._overlayRoot.addComponent(UITransform).setContentSize(canvasWidth, canvasHeight);
         const widget = this._overlayRoot.addComponent(Widget);
@@ -1473,7 +1473,9 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        this._serviceProgressWorldPosition = lane.progressPoint?.clone() ?? car.getWorldPosition(new Vec3());
+        const worldPosition = car.getWorldPosition(new Vec3());
+        worldPosition.y += 1.8;
+        this._serviceProgressWorldPosition = worldPosition;
         this.updateServiceProgressPosition();
         Tween.stopAllByTarget(this._serviceProgressNode);
         this._serviceProgressNode.active = true;
@@ -1559,18 +1561,13 @@ export class FoodTruckPlayableController extends Component {
         }
 
         const camera = this._mainCameraNode?.getComponent(Camera);
-        const overlayTransform = this._overlayRoot?.getComponent(UITransform);
-        if (!camera || !overlayTransform) {
+        if (!camera || !this._overlayRoot?.isValid) {
             return;
         }
 
-        const screenPos = camera.worldToScreen(this._serviceProgressWorldPosition);
-        const visibleSize = view.getVisibleSize();
-        const scaleX = overlayTransform.contentSize.width / Math.max(1, visibleSize.width);
-        const scaleY = overlayTransform.contentSize.height / Math.max(1, visibleSize.height);
-        const localX = (screenPos.x - visibleSize.width * 0.5) * scaleX;
-        const localY = (screenPos.y - visibleSize.height * 0.5) * scaleY;
-        this._serviceProgressNode.setPosition(localX, localY, 0);
+        const uiPosition = new Vec3();
+        camera.convertToUINode(this._serviceProgressWorldPosition, this._overlayRoot, uiPosition);
+        this._serviceProgressNode.setPosition(uiPosition.x - 20, uiPosition.y - 50, 0);
     }
 
     private drawServiceProgress (graphics: Graphics, progress: number): void {
