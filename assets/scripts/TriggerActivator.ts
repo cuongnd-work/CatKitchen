@@ -1,5 +1,4 @@
 import { _decorator, Component, Node, Collider, ITriggerEvent } from 'cc';
-import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 
 const { ccclass, property } = _decorator;
 
@@ -122,14 +121,12 @@ export class TriggerActivator extends Component {
 
     private beginJoystickInteraction (): void {
         if (!this._joystickInteractionActive) {
-            UI_Joystick.beginExternalInteraction();
             this._joystickInteractionActive = true;
         }
     }
 
     private endJoystickInteraction (): void {
         if (this._joystickInteractionActive) {
-            UI_Joystick.endExternalInteraction();
             this._joystickInteractionActive = false;
         }
     }

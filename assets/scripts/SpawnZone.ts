@@ -2,7 +2,6 @@ import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, Qua
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 import { CollectibleItem } from './CollectibleItem';
 import { getMoneyCarryShift } from './MoneyCarryRegistry';
-import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 const { ccclass, property } = _decorator;
 
 const EVENT_TRIGGER_ENTER = 'onTriggerEnter';
@@ -960,9 +959,6 @@ export class SpawnZone extends Component {
 
     private incrementJoystickInteraction (): void {
         this._joystickInteractionRefs++;
-        if (this._joystickInteractionRefs === 1) {
-            UI_Joystick.beginExternalInteraction();
-        }
     }
 
     private decrementJoystickInteraction (): void {
@@ -970,15 +966,11 @@ export class SpawnZone extends Component {
             return;
         }
         this._joystickInteractionRefs--;
-        if (this._joystickInteractionRefs === 0) {
-            UI_Joystick.endExternalInteraction();
-        }
     }
 
     private clearJoystickInteractions (): void {
         while (this._joystickInteractionRefs > 0) {
             this._joystickInteractionRefs--;
-            UI_Joystick.endExternalInteraction();
         }
     }
 }

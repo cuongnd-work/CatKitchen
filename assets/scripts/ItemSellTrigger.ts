@@ -1,5 +1,4 @@
 import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, tween, TweenEasing, Tween, Prefab, AudioSource } from 'cc';
-import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 import { CollectibleItem } from './CollectibleItem';
 import { SpawnZone } from './SpawnZone';
 import { clearMoneyCarryShift, setMoneyCarryShift } from './MoneyCarryRegistry';
@@ -1508,14 +1507,12 @@ export class ItemSellTrigger extends Component {
 
     private beginJoystickInteraction (): void {
         if (!this._joystickInteractionActive) {
-            UI_Joystick.beginExternalInteraction();
             this._joystickInteractionActive = true;
         }
     }
 
     private endJoystickInteraction (): void {
         if (this._joystickInteractionActive) {
-            UI_Joystick.endExternalInteraction();
             this._joystickInteractionActive = false;
         }
     }

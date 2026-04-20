@@ -1,0 +1,165 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "6e791c7d-9925-417c-a222-b22ac48eb40c",
+  "files": [],
+  "subMetas": {
+    "dfe3b": {
+      "importer": "gltf-mesh",
+      "uuid": "6e791c7d-9925-417c-a222-b22ac48eb40c@dfe3b",
+      "displayName": "",
+      "id": "dfe3b",
+      "name": "Cube.953.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 60
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "7d6ab": {
+      "importer": "texture",
+      "uuid": "6e791c7d-9925-417c-a222-b22ac48eb40c@7d6ab",
+      "displayName": "",
+      "id": "7d6ab",
+      "name": "base_color_texture.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/Newtheme/KayKit_City_Builder_Bits_1.0_FREE/Assets/fbx/citybits_texture.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "319cb": {
+      "importer": "gltf-material",
+      "uuid": "6e791c7d-9925-417c-a222-b22ac48eb40c@319cb",
+      "displayName": "",
+      "id": "319cb",
+      "name": "citybits_texture.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "c5edb": {
+      "importer": "gltf-scene",
+      "uuid": "6e791c7d-9925-417c-a222-b22ac48eb40c@c5edb",
+      "displayName": "",
+      "id": "c5edb",
+      "name": "base.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/Newtheme/KayKit_City_Builder_Bits_1.0_FREE/Assets/fbx/citybits_texture.png"
+      }
+    ],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "6e791c7d-9925-417c-a222-b22ac48eb40c@dfe3b"
+      ],
+      "skeletons": [],
+      "textures": [
+        "6e791c7d-9925-417c-a222-b22ac48eb40c@7d6ab"
+      ],
+      "materials": [
+        "6e791c7d-9925-417c-a222-b22ac48eb40c@319cb"
+      ],
+      "scenes": [
+        "6e791c7d-9925-417c-a222-b22ac48eb40c@c5edb"
+      ]
+    },
+    "materials": {
+      "6e791c7d-9925-417c-a222-b22ac48eb40c@319cb": {
+        "__type__": "cc.Material",
+        "_name": "",
+        "_objFlags": 0,
+        "__editorExtras__": {},
+        "_native": "",
+        "_effectAsset": {
+          "__uuid__": "d732ebd3-d64d-4582-bf49-b30c48e73637",
+          "__expectedType__": "cc.EffectAsset"
+        },
+        "_techIdx": 0,
+        "_defines": [
+          {}
+        ],
+        "_states": [
+          {
+            "rasterizerState": {},
+            "depthStencilState": {},
+            "blendState": {
+              "targets": [
+                {}
+              ]
+            }
+          }
+        ],
+        "_props": [
+          {
+            "mainColor": {
+              "__type__": "cc.Color",
+              "r": 207,
+              "g": 203,
+              "b": 108,
+              "a": 255
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,9 +1,11 @@
 import {
     _decorator,
+    assetManager,
     Camera,
     Canvas,
     Color,
     Component,
+    Font,
     Graphics,
     instantiate,
     Label,
@@ -11,6 +13,7 @@ import {
     Node,
     SkeletalAnimation,
     Tween,
+    UIOpacity,
     UITransform,
     Vec3,
     Widget,
@@ -22,7 +25,7 @@ import { CameraFollow } from './CameraFollow';
 import { OrientationCameraOrthoAdjuster } from './OrientationCameraOrthoAdjuster';
 import { UIScreenResolution } from './UIScreenResolution';
 
-const { ccclass } = _decorator;
+const { ccclass, property } = _decorator;
 
 type ScenePhase = 'scene1' | 'scene2' | 'ending';
 
@@ -36,31 +39,45 @@ type LaneData = {
     templateCar: Node | null;
     targetQueueSize: number;
     open: boolean;
+    activeDispatches: number;
     sPoint: Vec3 | null;
     rPoint: Vec3 | null;
+    progressPoint: Vec3 | null;
 };
 
 @ccclass('FoodTruckPlayableController')
 export class FoodTruckPlayableController extends Component {
     private static _activeInstance: FoodTruckPlayableController | null = null;
+    private static readonly UI_FONT_UUID = '4b362bb5-2b14-46a5-8c9e-a6688bb70e61';
     private readonly laneCount = 4;
     private readonly baseDispatchCooldown = 2;
     private readonly cooldownReductionPerOpenedLane = 0.5;
     private readonly minimumDispatchCooldown = 0.5;
-    private readonly scene1Reward = 28;
-    private readonly scene2Reward = 44;
+    private readonly startingCash = 30;
+    private readonly scene1Reward = 200;
+    private readonly scene2Reward = 200;
     private readonly scene2StartMoney = 220;
     private readonly endingMoneyTarget = 720;
+    private readonly scene2MaxConcurrentDispatches = 3;
+    private readonly removeBarrierCost = 25;
+    private readonly dispatchCarCost = 5;
+    private readonly openLaneCost = 120;
+    private readonly idleShakeZAngle = 1.0;
+    private readonly idleShakeDuration = 0.12;
+    private readonly manualDispatchesToAuto = 20;
+    private readonly autoCarsToEnding = 6;
 
     private _phase: ScenePhase = 'scene1';
-    private _money = 0;
+    private _money = this.startingCash;
     private _carsServed = 0;
     private _openedLanes = 0;
+    private _activeDispatchCount = 0;
     private _elapsed = 0;
     private _nextDispatchTime = 0;
-    private _dispatchInProgress = false;
     private _lastLaneIndex = -1;
     private _playClicked = false;
+    private _manualDispatchCount = 0;
+    private _autoCarsServed = 0;
 
     private _laneTemplateSpacing = 120;
     private _spawnSerial = 0;
@@ -74,6 +91,7 @@ export class FoodTruckPlayableController extends Component {
 
     private _phaseLabel: Label | null = null;
     private _moneyLabel: Label | null = null;
+    private _removeBarrierLabel: Label | null = null;
     private _dispatchLabel: Label | null = null;
     private _openLaneLabel: Label | null = null;
 
@@ -87,9 +105,14 @@ export class FoodTruckPlayableController extends Component {
     private _storeTitleLabel: Label | null = null;
     private _serviceProgressNode: Node | null = null;
     private _serviceProgressGraphics: Graphics | null = null;
-    private _serviceProgressTarget: Node | null = null;
+    private _serviceProgressWorldPosition: Vec3 | null = null;
     private _removeBarrierPulse: Tween<Node> | null = null;
     private _lanes: LaneData[] = [];
+    private _idleShakeBaseByCar: Map<Node, { target: Node; eulerAngles: Vec3 }> = new Map();
+    private _uiFont: Font | null = null;
+
+    @property(Node)
+    public endingSelectionNode: Node | null = null;
 
     protected onLoad (): void {
         const scene = this.node.scene;
@@ -111,12 +134,16 @@ export class FoodTruckPlayableController extends Component {
         FoodTruckPlayableController._activeInstance = this;
         this.destroyStaleHudRoots();
         this.prepareLegacyUiNodes();
+        this.loadUiFont();
         this.bindWorldNodes();
         this.configureMainCamera();
         this.prepareLanesFromWorld();
         this.createHud();
         this.createEndingUi();
         this.refreshUiState();
+        if (this.endingSelectionNode) {
+            this.endingSelectionNode.active = false;
+        }
     }
 
     protected onDestroy (): void {
@@ -130,13 +157,14 @@ export class FoodTruckPlayableController extends Component {
         if (this._catNode) {
             Tween.stopAllByTarget(this._catNode);
         }
+        this.stopAllIdleCarShakes();
     }
 
     update (deltaTime: number): void {
         this._elapsed += Math.max(0, deltaTime);
         this.refreshDispatchButtonLabel();
         this.updateServiceProgressPosition();
-        if (this._phase === 'scene2' && !this._dispatchInProgress && this._elapsed >= this._nextDispatchTime) {
+        if (this._phase === 'scene2' && this.canDispatchMoreCars() && this._elapsed >= this._nextDispatchTime) {
             this.tryDispatchCar();
         }
     }
@@ -302,8 +330,10 @@ export class FoodTruckPlayableController extends Component {
                     templateCar,
                     targetQueueSize,
                     open: false,
+                    activeDispatches: 0,
                     sPoint: null,
                     rPoint: null,
+                    progressPoint: null,
                 });
             });
         }
@@ -317,6 +347,7 @@ export class FoodTruckPlayableController extends Component {
             lane.index = index;
             lane.sPoint = this.findLaneRouteMarker(`S${lane.landId}`);
             lane.rPoint = this.findLaneRouteMarker(`R${lane.landId}`);
+            lane.progressPoint = this.findLaneRouteMarker(`P${lane.landId}`);
             this.buildLaneBarrier(lane);
         });
     }
@@ -379,8 +410,10 @@ export class FoodTruckPlayableController extends Component {
                 templateCar,
                 targetQueueSize,
                 open: false,
+                activeDispatches: 0,
                 sPoint: null,
                 rPoint: null,
+                progressPoint: null,
             });
         }
     }
@@ -477,14 +510,6 @@ export class FoodTruckPlayableController extends Component {
         widget.right = 0;
         widget.alignMode = Widget.AlignMode.ALWAYS;
 
-        this._phaseLabel = this.createLabel(
-            this._overlayRoot,
-            'Scene 1 - 4 lan xe cho mua do an',
-            canvasWidth < 500 ? 20 : 28,
-            new Color(82, 44, 18, 255),
-            new Vec3(0, halfHeight - 36, 0),
-        );
-
         const topCardWidth = Math.min(220, canvasWidth * 0.36);
         const topCardHeight = canvasWidth < 500 ? 52 : 64;
 
@@ -492,7 +517,7 @@ export class FoodTruckPlayableController extends Component {
         moneyHolder.setPosition(halfWidth - topCardWidth * 0.5 - 16, halfHeight - topCardHeight * 0.5 - 18, 0);
         this._moneyLabel = this.createLabel(
             moneyHolder,
-            'Tien: 0',
+            `Cash: ${this._money}`,
             canvasWidth < 500 ? 22 : 28,
             new Color(41, 134, 54, 255),
             new Vec3(0, 0, 0),
@@ -516,17 +541,18 @@ export class FoodTruckPlayableController extends Component {
         this._removeBarrierButton = this.createButton(
             this._overlayRoot,
             'RemoveBarrierButton',
-            'Bo thanh chan (0$)',
+            `Remove Barrier ($${this.removeBarrierCost})`,
             new Vec3(0, -halfHeight + 110, 0),
             new Vec3(primaryButtonWidth, primaryButtonHeight, 0),
             new Color(52, 173, 96, 255),
             () => this.onRemoveBarrierClicked(),
         );
+        this._removeBarrierLabel = this._removeBarrierButton.getComponentInChildren(Label);
 
         this._dispatchButton = this.createButton(
             this._overlayRoot,
             'DispatchButton',
-            'Cho xe vao',
+            `Send Cars ($${this.dispatchCarCost})`,
             new Vec3(0, -halfHeight + 110, 0),
             new Vec3(primaryButtonWidth, primaryButtonHeight, 0),
             new Color(61, 123, 236, 255),
@@ -537,7 +563,7 @@ export class FoodTruckPlayableController extends Component {
         this._openLaneButton = this.createButton(
             this._overlayRoot,
             'OpenLaneButton',
-            'Tao duong cho xe di vao',
+            `Open Car Route ($${this.openLaneCost})`,
             new Vec3(0, -halfHeight + 38, 0),
             new Vec3(secondaryButtonWidth, secondaryButtonHeight, 0),
             new Color(241, 144, 57, 255),
@@ -548,7 +574,7 @@ export class FoodTruckPlayableController extends Component {
         this._serviceProgressNode = new Node('ServiceProgressOverlay');
         this._overlayRoot.addChild(this._serviceProgressNode);
         this.setUiLayerRecursive(this._serviceProgressNode);
-        this._serviceProgressNode.addComponent(UITransform).setContentSize(140, 140);
+        this._serviceProgressNode.addComponent(UITransform).setContentSize(56, 56);
         this._serviceProgressGraphics = this._serviceProgressNode.addComponent(Graphics);
         this._serviceProgressNode.active = false;
     }
@@ -571,8 +597,8 @@ export class FoodTruckPlayableController extends Component {
         const card = this.createRectNode(this._upgradePanel, 'UpgradeCard', new Color(252, 236, 209, 255), cardWidth, cardHeight, 16);
         card.setPosition(0, Math.min(40, overlayHeight * 0.08), 0);
 
-        this.createLabel(card, 'Du tien upgrade nha moi!', overlayWidth < 500 ? 28 : 42, new Color(79, 48, 28, 255), new Vec3(0, cardHeight * 0.36, 0));
-        this.createLabel(card, 'Chon nha hang ban muon mo:', overlayWidth < 500 ? 20 : 28, new Color(106, 64, 36, 255), new Vec3(0, cardHeight * 0.24, 0));
+        this.createLabel(card, 'Upgrade Unlocked!', overlayWidth < 500 ? 28 : 42, new Color(79, 48, 28, 255), new Vec3(0, cardHeight * 0.36, 0));
+        this.createLabel(card, 'Choose your next restaurant:', overlayWidth < 500 ? 20 : 28, new Color(106, 64, 36, 255), new Vec3(0, cardHeight * 0.24, 0));
 
         this.createEndingOption(card, 'Ramen', new Vec3(0, cardHeight * 0.04, 0));
         this.createEndingOption(card, 'Hot Dog', new Vec3(0, -cardHeight * 0.14, 0));
@@ -584,7 +610,7 @@ export class FoodTruckPlayableController extends Component {
 
         this._storeTitleLabel = this.createLabel(
             this._storePopup,
-            'Mo Store',
+            'Store Open',
             30,
             new Color(73, 41, 20, 255),
             new Vec3(0, 65, 0),
@@ -593,7 +619,7 @@ export class FoodTruckPlayableController extends Component {
         this.createButton(
             this._storePopup,
             'StoreGoButton',
-            'Vao Store',
+            'Enter Store',
             new Vec3(0, -10, 0),
             new Vec3(220, 62, 0),
             new Color(52, 173, 96, 255),
@@ -603,7 +629,7 @@ export class FoodTruckPlayableController extends Component {
         this.createButton(
             this._storePopup,
             'StoreCloseButton',
-            'Dong',
+            'Close',
             new Vec3(0, -84, 0),
             new Vec3(140, 48, 0),
             new Color(144, 144, 144, 255),
@@ -633,7 +659,7 @@ export class FoodTruckPlayableController extends Component {
 
     private onRemoveBarrierClicked (): void {
         this.trackFirstClick();
-        if (this._phase !== 'scene1' || this._openedLanes > 0) {
+        if (this._phase !== 'scene1' || this._openedLanes > 0 || !this.trySpendMoney(this.removeBarrierCost)) {
             return;
         }
 
@@ -644,26 +670,44 @@ export class FoodTruckPlayableController extends Component {
 
     private onDispatchClicked (): void {
         this.trackFirstClick();
-        this.tryDispatchCar();
+        if (this._phase === 'scene1') {
+            this._manualDispatchCount++;
+        }
+        if (!this.trySpendMoney(this.dispatchCarCost)) {
+            if (this._phase === 'scene1') {
+                this._manualDispatchCount = Math.max(0, this._manualDispatchCount - 1);
+            }
+            return;
+        }
+
+        const dispatched = this.tryDispatchCar(true);
+        if (!dispatched) {
+            this.addMoney(this.dispatchCarCost);
+            if (this._phase === 'scene1') {
+                this._manualDispatchCount = Math.max(0, this._manualDispatchCount - 1);
+            }
+            return;
+        }
+
+        this.tryEnterScene2();
     }
 
     private onOpenLaneClicked (): void {
         this.trackFirstClick();
-        if (this._phase !== 'scene1') {
+        if (this._phase !== 'scene1' || !this.trySpendMoney(this.openLaneCost)) {
             return;
         }
         this.openNextLane();
         this.refreshUiState();
     }
 
-    private onEndingOptionClicked (selection: string): void {
-        if (!this._storePopup) {
-            return;
+    private onEndingOptionClicked (_selection: string): void {
+        if (this._storePopup) {
+            this._storePopup.active = false;
         }
-        this._storePopup.active = true;
-        if (this._storeTitleLabel) {
-            this._storeTitleLabel.string = `${selection} da san sang. Mo Store ngay!`;
-        }
+
+        super_html_script.on_click_game_end();
+        super_html_script.on_click_download();
     }
 
     private onStoreConfirmClicked (): void {
@@ -677,13 +721,15 @@ export class FoodTruckPlayableController extends Component {
         }
         this._playClicked = true;
         super_html_script.on_first_click();
+        super_html_script.on_click_game_end();
+        super_html_script.on_click_download();
     }
 
-    private tryDispatchCar (): boolean {
+    private tryDispatchCar (ignoreCooldown = false): boolean {
         if (this._phase === 'ending') {
             return false;
         }
-        if (this._dispatchInProgress || this._elapsed < this._nextDispatchTime) {
+        if (!this.canDispatchMoreCars(ignoreCooldown) || (!ignoreCooldown && this._elapsed < this._nextDispatchTime)) {
             return false;
         }
 
@@ -697,7 +743,8 @@ export class FoodTruckPlayableController extends Component {
             return false;
         }
 
-        this._dispatchInProgress = true;
+        lane.activeDispatches++;
+        this._activeDispatchCount++;
         this._nextDispatchTime = this._elapsed + this.getDispatchCooldown();
         this.shiftLaneQueue(lane);
         this.animateCarFlow(lane, car);
@@ -707,7 +754,7 @@ export class FoodTruckPlayableController extends Component {
 
     private pickLaneForDispatch (): LaneData | null {
         const laneTotal = this.getLaneTotal();
-        const openLanes = this._lanes.filter((lane) => lane.open && lane.queueCars.length > 0);
+        const openLanes = this._lanes.filter((lane) => lane.open && lane.queueCars.length > 0 && lane.activeDispatches === 0);
         if (openLanes.length === 0) {
             return null;
         }
@@ -715,7 +762,7 @@ export class FoodTruckPlayableController extends Component {
         for (let step = 1; step <= laneTotal; step++) {
             const candidateIndex = (this._lastLaneIndex + step + laneTotal) % laneTotal;
             const lane = this._lanes[candidateIndex];
-            if (lane && lane.open && lane.queueCars.length > 0) {
+            if (lane && lane.open && lane.queueCars.length > 0 && lane.activeDispatches === 0) {
                 this._lastLaneIndex = candidateIndex;
                 return lane;
             }
@@ -737,7 +784,7 @@ export class FoodTruckPlayableController extends Component {
             if (section.pauseAfter > 0) {
                 sequence = sequence.call(() => {
                     this.playCatCookingAnim();
-                    this.playServiceProgress(car, section.pauseAfter);
+                    this.playServiceProgress(lane, car, section.pauseAfter);
                 }).delay(section.pauseAfter);
             }
         }
@@ -745,26 +792,25 @@ export class FoodTruckPlayableController extends Component {
         sequence
             .call(() => {
                 this.recycleCarToLane(lane, car);
-                this.onCarServed();
+                this.onCarServed(lane);
             })
             .start();
     }
 
-    private onCarServed (): void {
-        this._dispatchInProgress = false;
+    private onCarServed (lane: LaneData): void {
+        lane.activeDispatches = Math.max(0, lane.activeDispatches - 1);
+        this._activeDispatchCount = Math.max(0, this._activeDispatchCount - 1);
         this._carsServed++;
         this.addMoney(this._phase === 'scene1' ? this.scene1Reward : this.scene2Reward);
 
         if (this._phase === 'scene1') {
-            if (this._money >= this.scene2StartMoney && this._openedLanes >= 2) {
-                this.enterScene2();
-            }
             return;
         }
 
         if (this._phase === 'scene2') {
+            this._autoCarsServed++;
             this.fillOpenLaneQueues();
-            if (this._money >= this.endingMoneyTarget) {
+            if (this._autoCarsServed >= this.autoCarsToEnding) {
                 this.enterEnding();
             }
         }
@@ -780,8 +826,9 @@ export class FoodTruckPlayableController extends Component {
         }
 
         this._phase = 'scene2';
+        this._autoCarsServed = 0;
         if (this._phaseLabel) {
-            this._phaseLabel.string = 'Scene 2 - Follow playable goc';
+            this._phaseLabel.string = 'Scene 2 - Full Auto Service';
         }
         this.fillOpenLaneQueues();
         this._nextDispatchTime = this._elapsed + 0.8;
@@ -794,10 +841,13 @@ export class FoodTruckPlayableController extends Component {
         }
         this._phase = 'ending';
         if (this._phaseLabel) {
-            this._phaseLabel.string = 'Ending - Chon nha hang moi';
+            this._phaseLabel.string = 'Ending - Choose a New Restaurant';
         }
         if (this._upgradePanel) {
             this._upgradePanel.active = true;
+        }
+        if (this.endingSelectionNode) {
+            this.endingSelectionNode.active = true;
         }
         if (this._storePopup) {
             this._storePopup.active = false;
@@ -816,6 +866,21 @@ export class FoodTruckPlayableController extends Component {
             nextLane.barrier.active = false;
         }
         this._openedLanes++;
+        this.tryEnterScene2();
+    }
+
+    private tryEnterScene2 (): void {
+        if (this._phase !== 'scene1') {
+            return;
+        }
+
+        const openedAllLanes = this._openedLanes >= this.getLaneTotal();
+        const reachedManualDispatchTarget = this._manualDispatchCount >= this.manualDispatchesToAuto;
+        if (!openedAllLanes && !reachedManualDispatchTarget) {
+            return;
+        }
+
+        this.enterScene2();
     }
 
     private getDispatchCooldown (): number {
@@ -823,32 +888,75 @@ export class FoodTruckPlayableController extends Component {
         return Math.max(this.minimumDispatchCooldown, this.baseDispatchCooldown - reduction);
     }
 
+    private getMaxConcurrentDispatches (ignoreCooldown = false): number {
+        if (ignoreCooldown && this._openedLanes > 0) {
+            return this.scene2MaxConcurrentDispatches;
+        }
+
+        if (this._phase === 'scene2') {
+            return this.scene2MaxConcurrentDispatches;
+        }
+
+        return 1;
+    }
+
+    private canDispatchMoreCars (ignoreCooldown = false): boolean {
+        return this._activeDispatchCount < this.getMaxConcurrentDispatches(ignoreCooldown);
+    }
+
+    private canAfford (cost: number): boolean {
+        return this._money >= cost;
+    }
+
+    private trySpendMoney (cost: number): boolean {
+        if (cost <= 0) {
+            return true;
+        }
+        if (!this.canAfford(cost)) {
+            this.refreshUiState();
+            return false;
+        }
+
+        this._money -= cost;
+        this.refreshUiState();
+        return true;
+    }
+
     private refreshUiState (): void {
         const waitingForBarrier = this._phase === 'scene1' && this._openedLanes === 0;
         if (this._removeBarrierButton) {
             this._removeBarrierButton.active = waitingForBarrier;
         }
-        if (waitingForBarrier) {
+        if (this._removeBarrierLabel) {
+            this._removeBarrierLabel.string = `Remove Barrier ($${this.removeBarrierCost})`;
+        }
+        const canBuyBarrier = waitingForBarrier && this.canAfford(this.removeBarrierCost);
+        this.setButtonLockedVisual(this._removeBarrierButton, canBuyBarrier);
+        if (canBuyBarrier) {
             this.startRemoveBarrierPulse();
         } else {
             this.stopRemoveBarrierPulse();
         }
 
+        const dispatchVisible = this._phase !== 'ending' && this._openedLanes > 0;
         if (this._dispatchButton) {
-            this._dispatchButton.active = this._phase !== 'ending' && this._openedLanes > 0;
+            this._dispatchButton.active = dispatchVisible;
         }
+        this.setButtonLockedVisual(this._dispatchButton, dispatchVisible && this.canAfford(this.dispatchCarCost));
 
+        const openLaneVisible = this._phase === 'scene1' && this._openedLanes > 0 && this._openedLanes < this.getLaneTotal();
         if (this._openLaneButton) {
-            this._openLaneButton.active = this._phase === 'scene1' && this._openedLanes > 0 && this._openedLanes < this.getLaneTotal();
+            this._openLaneButton.active = openLaneVisible;
         }
 
         if (this._openLaneLabel) {
             if (this._phase === 'scene2') {
-                this._openLaneLabel.string = `Da mo du ${this.getLaneTotal()} lan`;
+                this._openLaneLabel.string = `All ${this.getLaneTotal()} Lanes Open`;
             } else {
-                this._openLaneLabel.string = `Tao duong cho xe di vao (${this._openedLanes}/${this.getLaneTotal()})`;
+                this._openLaneLabel.string = `Open Car Route ($${this.openLaneCost})`;
             }
         }
+        this.setButtonLockedVisual(this._openLaneButton, openLaneVisible && this.canAfford(this.openLaneCost));
 
         this.refreshMoneyLabel();
         this.refreshDispatchButtonLabel();
@@ -859,29 +967,37 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        if (this._dispatchInProgress) {
-            this._dispatchLabel.string = 'Xe dang di vao...';
+        if (this._activeDispatchCount > 0) {
+            const maxConcurrent = this.getMaxConcurrentDispatches(true);
+            this._dispatchLabel.string = maxConcurrent > 1
+                ? `Cars Incoming... (${this._activeDispatchCount}/${maxConcurrent})`
+                : 'Car Incoming...';
+            return;
+        }
+
+        if (!this.canAfford(this.dispatchCarCost)) {
+            this._dispatchLabel.string = `Send Cars ($${this.dispatchCarCost})`;
             return;
         }
 
         const remain = Math.max(0, this._nextDispatchTime - this._elapsed);
         if (remain > 0.01) {
-            this._dispatchLabel.string = `Cho xe vao (${remain.toFixed(1)}s)`;
+            this._dispatchLabel.string = `Send Cars ($${this.dispatchCarCost} | ${remain.toFixed(1)}s)`;
             return;
         }
 
-        this._dispatchLabel.string = `Cho xe vao (CD ${this.getDispatchCooldown().toFixed(1)}s)`;
+        this._dispatchLabel.string = `Send Cars ($${this.dispatchCarCost})`;
     }
 
     private refreshMoneyLabel (): void {
         if (this._moneyLabel) {
-            this._moneyLabel.string = `Tien: ${this._money}`;
+            this._moneyLabel.string = `Cash: ${this._money}`;
         }
     }
 
     private addMoney (amount: number): void {
         this._money += Math.max(0, Math.floor(amount));
-        this.refreshMoneyLabel();
+        this.refreshUiState();
     }
 
     private fillOpenLaneQueues (): void {
@@ -937,6 +1053,7 @@ export class FoodTruckPlayableController extends Component {
             ));
         }
         car.name = `car_lane${lane.index + 1}_${this._spawnSerial++}`;
+        this.startIdleCarShake(car);
         return car;
     }
 
@@ -950,8 +1067,9 @@ export class FoodTruckPlayableController extends Component {
 
             if (instant) {
                 car.setPosition(target);
+                this.startIdleCarShake(car);
             } else {
-                this.tweenQueueCarTo(car, target).start();
+                this.tweenQueueCarTo(car, target).call(() => this.startIdleCarShake(car)).start();
             }
         }
     }
@@ -975,11 +1093,11 @@ export class FoodTruckPlayableController extends Component {
             targetSlot.z + laneStep.z,
         );
 
-        Tween.stopAllByTarget(car);
+        this.stopIdleCarShake(car);
         car.setPosition(recycleFrom);
         lane.queueCars.push(car);
 
-        this.tweenQueueCarTo(car, targetSlot, 0.32).start();
+        this.tweenQueueCarTo(car, targetSlot, 0.32).call(() => this.startIdleCarShake(car)).start();
     }
 
     private playCatCookingAnim (): void {
@@ -1002,20 +1120,20 @@ export class FoodTruckPlayableController extends Component {
             .start();
     }
 
-    private beginServiceProgress (car: Node, progress: number): void {
+    private beginServiceProgress (lane: LaneData, car: Node, progress: number): void {
         if (!this._serviceProgressNode || !this._serviceProgressGraphics) {
             return;
         }
 
-        this._serviceProgressTarget = this.ensureServiceProgressAnchor(car);
+        this._serviceProgressWorldPosition = lane.progressPoint?.clone() ?? car.getWorldPosition(new Vec3());
         this.updateServiceProgressPosition();
         Tween.stopAllByTarget(this._serviceProgressNode);
         this._serviceProgressNode.active = true;
         this.drawServiceProgress(this._serviceProgressGraphics, progress);
     }
 
-    private playServiceProgress (car: Node, duration: number): void {
-        this.beginServiceProgress(car, 0);
+    private playServiceProgress (lane: LaneData, car: Node, duration: number): void {
+        this.beginServiceProgress(lane, car, 0);
         if (!this._serviceProgressNode || !this._serviceProgressGraphics) {
             return;
         }
@@ -1037,13 +1155,13 @@ export class FoodTruckPlayableController extends Component {
                 if (this._serviceProgressNode?.isValid) {
                     this._serviceProgressNode.active = false;
                 }
-                this._serviceProgressTarget = null;
+                this._serviceProgressWorldPosition = null;
             })
             .start();
     }
 
     private updateServiceProgressPosition (): void {
-        if (!this._serviceProgressNode || !this._serviceProgressTarget || !this._serviceProgressTarget.isValid) {
+        if (!this._serviceProgressNode || !this._serviceProgressWorldPosition) {
             return;
         }
 
@@ -1053,8 +1171,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const worldPos = this._serviceProgressTarget.getWorldPosition(new Vec3());
-        const screenPos = camera.worldToScreen(worldPos);
+        const screenPos = camera.worldToScreen(this._serviceProgressWorldPosition);
         const visibleSize = view.getVisibleSize();
         const scaleX = overlayTransform.contentSize.width / Math.max(1, visibleSize.width);
         const scaleY = overlayTransform.contentSize.height / Math.max(1, visibleSize.height);
@@ -1063,39 +1180,26 @@ export class FoodTruckPlayableController extends Component {
         this._serviceProgressNode.setPosition(localX, localY, 0);
     }
 
-    private ensureServiceProgressAnchor (car: Node): Node {
-        const anchorParent = car.getChildByName('car_stationwagon') ?? car;
-        let anchor = anchorParent.getChildByName('ServiceProgressAnchor');
-        if (!anchor) {
-            anchor = new Node('ServiceProgressAnchor');
-            anchorParent.addChild(anchor);
-        }
-
-        anchor.layer = anchorParent.layer;
-        anchor.setPosition(0, 1.05, 0);
-        return anchor;
-    }
-
     private drawServiceProgress (graphics: Graphics, progress: number): void {
         const clamped = Math.max(0, Math.min(1, progress));
-        const radius = 34;
+        const radius = 14;
         const startAngle = Math.PI * 0.5;
         const endAngle = startAngle - Math.PI * 2 * clamped;
 
         graphics.clear();
 
-        graphics.lineWidth = 10;
+        graphics.lineWidth = 4;
         graphics.strokeColor = new Color(255, 255, 255, 150);
         graphics.circle(0, 0, radius);
         graphics.stroke();
 
-        graphics.lineWidth = 12;
+        graphics.lineWidth = 5;
         graphics.strokeColor = new Color(97, 227, 128, 255);
         graphics.arc(0, 0, radius, startAngle, endAngle, true);
         graphics.stroke();
 
         graphics.fillColor = new Color(30, 30, 30, 220);
-        graphics.circle(0, 0, radius - 12);
+        graphics.circle(0, 0, radius - 6);
         graphics.fill();
     }
 
@@ -1183,7 +1287,7 @@ export class FoodTruckPlayableController extends Component {
         );
 
         return [
-            { points: approachPoints, speed: 6.8, minSegmentDuration: 0.05, pauseAfter: 0.7 },
+            { points: approachPoints, speed: 6.8, minSegmentDuration: 0.05, pauseAfter: 0.45 },
             { points: departurePoints, speed: 8.6, minSegmentDuration: 0.045, pauseAfter: 0 },
             { points: exitPoints, speed: 10.5, minSegmentDuration: 0.04, pauseAfter: 0 },
         ];
@@ -1322,6 +1426,65 @@ export class FoodTruckPlayableController extends Component {
         return tween(car).to(this.getTravelDuration(current, target, 11.5, minDuration), props, { easing: 'quadOut' });
     }
 
+    private startIdleCarShake (car: Node): void {
+        if (!car || !car.isValid) {
+            return;
+        }
+
+        this.stopIdleCarShake(car);
+        const shakeTarget = this.getCarShakeTarget(car);
+        const baseEuler = shakeTarget.eulerAngles.clone();
+        this._idleShakeBaseByCar.set(car, { target: shakeTarget, eulerAngles: baseEuler });
+
+        const rotateA = new Vec3(baseEuler.x, baseEuler.y, baseEuler.z - this.idleShakeZAngle);
+        const rotateB = new Vec3(baseEuler.x, baseEuler.y, baseEuler.z + this.idleShakeZAngle * 0.8);
+        const rotateC = new Vec3(baseEuler.x, baseEuler.y, baseEuler.z - this.idleShakeZAngle * 0.45);
+
+        tween(shakeTarget)
+            .to(this.idleShakeDuration, { eulerAngles: rotateA }, { easing: 'sineInOut' })
+            .to(this.idleShakeDuration, { eulerAngles: rotateB }, { easing: 'sineInOut' })
+            .to(this.idleShakeDuration, { eulerAngles: rotateC }, { easing: 'sineInOut' })
+            .to(this.idleShakeDuration, { eulerAngles: baseEuler.clone() }, { easing: 'sineInOut' })
+            .union()
+            .repeatForever()
+            .start();
+    }
+
+    private stopIdleCarShake (car: Node): void {
+        if (!car || !car.isValid) {
+            return;
+        }
+
+        const baseState = this._idleShakeBaseByCar.get(car);
+        if (!baseState) {
+            return;
+        }
+
+        Tween.stopAllByTarget(baseState.target);
+        baseState.target.setRotationFromEuler(baseState.eulerAngles.x, baseState.eulerAngles.y, baseState.eulerAngles.z);
+        this._idleShakeBaseByCar.delete(car);
+    }
+
+    private stopAllIdleCarShakes (): void {
+        this._idleShakeBaseByCar.forEach((baseState, car) => {
+            if (!car || !car.isValid) {
+                return;
+            }
+
+            if (!baseState.target || !baseState.target.isValid) {
+                return;
+            }
+
+            Tween.stopAllByTarget(baseState.target);
+            baseState.target.setRotationFromEuler(baseState.eulerAngles.x, baseState.eulerAngles.y, baseState.eulerAngles.z);
+        });
+        this._idleShakeBaseByCar.clear();
+    }
+
+    private getCarShakeTarget (car: Node): Node {
+        return car.getChildByName('car_stationwagon') ?? car;
+    }
+
     private getYawDegrees (from: Vec3, to: Vec3): number | null {
         const dx = to.x - from.x;
         const dz = to.z - from.z;
@@ -1370,10 +1533,57 @@ export class FoodTruckPlayableController extends Component {
         onClick: () => void,
     ): Node {
         const buttonNode = this.createRectNode(parent, name, color, size.x, size.y, 14);
+        if (!buttonNode.getComponent(UIOpacity)) {
+            buttonNode.addComponent(UIOpacity);
+        }
         buttonNode.setPosition(position.x, position.y, position.z);
         this.createLabel(buttonNode, text, 24, new Color(255, 255, 255, 255), new Vec3(0, 0, 0));
+        this.attachButtonPressFeedback(buttonNode);
         buttonNode.on(Node.EventType.TOUCH_END, onClick, this);
         return buttonNode;
+    }
+
+    private attachButtonPressFeedback (buttonNode: Node): void {
+        const opacity = buttonNode.getComponent(UIOpacity) ?? buttonNode.addComponent(UIOpacity);
+        const pressedOffset = 4;
+        const pressedOpacityDelta = 35;
+        let isPressed = false;
+        let restPosition = buttonNode.position.clone();
+        let restOpacity = opacity.opacity;
+
+        const restoreState = (): void => {
+            if (!buttonNode.isValid || !isPressed) {
+                return;
+            }
+
+            isPressed = false;
+            buttonNode.setPosition(restPosition.x, restPosition.y, restPosition.z);
+            opacity.opacity = restOpacity;
+        };
+
+        buttonNode.on(Node.EventType.TOUCH_START, () => {
+            if (!buttonNode.activeInHierarchy || isPressed) {
+                return;
+            }
+
+            isPressed = true;
+            restPosition = buttonNode.position.clone();
+            restOpacity = opacity.opacity;
+            buttonNode.setPosition(restPosition.x, restPosition.y - pressedOffset, restPosition.z);
+            opacity.opacity = Math.max(80, restOpacity - pressedOpacityDelta);
+        }, this);
+
+        buttonNode.on(Node.EventType.TOUCH_END, restoreState, this);
+        buttonNode.on(Node.EventType.TOUCH_CANCEL, restoreState, this);
+    }
+
+    private setButtonLockedVisual (button: Node | null, enabled: boolean): void {
+        if (!button || !button.isValid) {
+            return;
+        }
+
+        const opacity = button.getComponent(UIOpacity) ?? button.addComponent(UIOpacity);
+        opacity.opacity = enabled ? 255 : 120;
     }
 
     private createRectNode (
@@ -1420,9 +1630,44 @@ export class FoodTruckPlayableController extends Component {
         label.fontSize = fontSize;
         label.lineHeight = Math.round(fontSize * 1.2);
         label.color = color;
+        if (this._uiFont) {
+            label.font = this._uiFont;
+        }
         label.horizontalAlign = Label.HorizontalAlign.CENTER;
         label.verticalAlign = Label.VerticalAlign.CENTER;
         return label;
+    }
+
+    private loadUiFont (): void {
+        assetManager.loadAny(FoodTruckPlayableController.UI_FONT_UUID, (error: Error | null, asset: Font) => {
+            if (error || !asset || !this.node?.isValid) {
+                return;
+            }
+
+            this._uiFont = asset;
+            this.applyUiFont();
+        });
+    }
+
+    private applyUiFont (): void {
+        if (!this._uiFont) {
+            return;
+        }
+
+        if (this._overlayRoot?.isValid) {
+            this.applyUiFontToNode(this._overlayRoot);
+        }
+    }
+
+    private applyUiFontToNode (node: Node): void {
+        const label = node.getComponent(Label);
+        if (label) {
+            label.font = this._uiFont;
+        }
+
+        for (const child of node.children) {
+            this.applyUiFontToNode(child);
+        }
     }
 
     private startRemoveBarrierPulse (): void {
