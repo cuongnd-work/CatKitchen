@@ -80,8 +80,8 @@ export class FoodTruckPlayableController extends Component {
     private readonly autoCarsToEnding = 6;
     private readonly handHintIdleDelay = 4;
     private readonly handHintOffset = new Vec3(0, -86, 0);
-    private readonly hornPromptDelayMin = 6;
-    private readonly hornPromptDelayMax = 10;
+    private readonly hornPromptIdleDelay = 4;
+    private readonly hornPromptRepeatDelay = 3.2;
 
     private _phase: ScenePhase = 'scene1';
     private _money = this.startingCash;
@@ -985,8 +985,11 @@ export class FoodTruckPlayableController extends Component {
 
         const source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
         this._engineAudioSource = source;
-        source.playOneShot(this._carHornAudio, 0.6);
-        this.refreshHornPrompt();
+        source.playOneShot(this._carHornAudio, 0.9);
+        this.unschedule(this.playHornPromptIfNeeded);
+        if (this.shouldPromptDispatchHorn()) {
+            this.scheduleOnce(this.playHornPromptIfNeeded, this.hornPromptRepeatDelay);
+        }
     };
 
     private refreshHornPrompt (): void {
@@ -995,9 +998,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const delayRange = Math.max(0, this.hornPromptDelayMax - this.hornPromptDelayMin);
-        const nextDelay = this.hornPromptDelayMin + Math.random() * delayRange;
-        this.scheduleOnce(this.playHornPromptIfNeeded, nextDelay);
+        this.scheduleOnce(this.playHornPromptIfNeeded, this.hornPromptIdleDelay);
     }
 
     private shouldPromptDispatchHorn (): boolean {
@@ -1049,6 +1050,7 @@ export class FoodTruckPlayableController extends Component {
     private onGlobalTouchStart (): void {
         this.hideHandHint();
         this.scheduleHandHint();
+        this.refreshHornPrompt();
     }
 
     private scheduleHandHint (): void {
