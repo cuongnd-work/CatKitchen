@@ -1043,7 +1043,7 @@ export class FoodTruckPlayableController extends Component {
             this.handHintOffset.y * handScale.y,
             this.handHintOffset.z,
         ));
-        this._handHintRoot.setPosition(targetPosition.x, targetPosition.y, targetPosition.z);
+        this._handHintRoot.setPosition(targetPosition.x + 145.9, targetPosition.y, targetPosition.z);
         this._handHintRoot.active = true;
         if (this._handHintAnimation && this._handHintClip) {
             this._handHintAnimation.play(this._handHintClip.name);
@@ -1138,7 +1138,7 @@ export class FoodTruckPlayableController extends Component {
             this._removeBarrierButton.active = waitingForBarrier;
         }
         if (this._removeBarrierLabel) {
-            this._removeBarrierLabel.string = `Remove Barrier ${this.removeBarrierCost}`;
+            this._removeBarrierLabel.string = `Remove Barrier\n${this.removeBarrierCost}`;
         }
         let canBuyBarrier = waitingForBarrier && this.canAfford(this.removeBarrierCost);
         this.setButtonLockedVisual(this._removeBarrierButton, canBuyBarrier);
@@ -1163,7 +1163,7 @@ export class FoodTruckPlayableController extends Component {
             if (this._phase === 'scene2') {
                 this._openLaneLabel.string = `All ${this.getLaneTotal()} Lanes Open`;
             } else {
-                this._openLaneLabel.string = `Open Car Route ${this.openLaneCost}`;
+                this._openLaneLabel.string = `Open Car Route\n${this.openLaneCost}`;
             }
         }
         this.setButtonLockedVisual(this._openLaneButton, openLaneVisible && this.canAfford(this.openLaneCost));
@@ -1180,7 +1180,7 @@ export class FoodTruckPlayableController extends Component {
         if (!this._dispatchLabel || !this._dispatchButton || !this._dispatchButton.active) {
             return;
         }
-        this._dispatchLabel.string = `Send Cars ${this.dispatchCarCost}`;
+        this._dispatchLabel.string = `Send Cars\n${this.dispatchCarCost}`;
     }
 
     private refreshMoneyLabel (): void {
@@ -1200,14 +1200,14 @@ export class FoodTruckPlayableController extends Component {
         let flashColor = isSpend ? new Color(220, 76, 76, 255) : new Color(74, 185, 92, 255);
 
         Tween.stopAllByTarget(labelNode);
-        this._moneyLabel.color = flashColor;
+        // this._moneyLabel.color = flashColor;
         labelNode.setScale(baseScale);
         tween(labelNode)
             .to(0.12, { scale: new Vec3(1.18, 1.18, 1) }, { easing: 'sineOut' })
             .to(0.16, { scale: baseScale }, { easing: 'sineIn' })
             .call(() => {
                 if (this._moneyLabel) {
-                    this._moneyLabel.color = baseColor;
+                    // this._moneyLabel.color = baseColor;
                 }
             })
             .start();
