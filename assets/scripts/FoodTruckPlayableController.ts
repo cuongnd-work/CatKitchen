@@ -568,12 +568,14 @@ export class FoodTruckPlayableController extends Component {
         const secondaryButtonWidth = Math.min(370, canvasWidth - 24);
         const primaryButtonHeight = canvasWidth < 500 ? 64 : 72;
         const secondaryButtonHeight = canvasWidth < 500 ? 58 : 66;
+        const bottomPrimaryY = -halfHeight + 160;
+        const bottomSecondaryY = -halfHeight + 88;
 
         this._removeBarrierButton = this.createButton(
             this._overlayRoot,
             'RemoveBarrierButton',
             `Remove Barrier ($${this.removeBarrierCost})`,
-            new Vec3(0, -halfHeight + 110, 0),
+            new Vec3(0, bottomPrimaryY, 0),
             new Vec3(primaryButtonWidth, primaryButtonHeight, 0),
             new Color(52, 173, 96, 255),
             () => this.onRemoveBarrierClicked(),
@@ -584,7 +586,7 @@ export class FoodTruckPlayableController extends Component {
             this._overlayRoot,
             'DispatchButton',
             `Send Cars ($${this.dispatchCarCost})`,
-            new Vec3(0, -halfHeight + 110, 0),
+            new Vec3(0, bottomPrimaryY, 0),
             new Vec3(primaryButtonWidth, primaryButtonHeight, 0),
             new Color(61, 123, 236, 255),
             () => this.onDispatchClicked(),
@@ -595,7 +597,7 @@ export class FoodTruckPlayableController extends Component {
             this._overlayRoot,
             'OpenLaneButton',
             `Open Car Route ($${this.openLaneCost})`,
-            new Vec3(0, -halfHeight + 38, 0),
+            new Vec3(0, bottomSecondaryY, 0),
             new Vec3(secondaryButtonWidth, secondaryButtonHeight, 0),
             new Color(241, 144, 57, 255),
             () => this.onOpenLaneClicked(),
