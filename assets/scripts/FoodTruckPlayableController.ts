@@ -66,6 +66,7 @@ export class FoodTruckPlayableController extends Component {
     private readonly scene2MaxConcurrentDispatches = 3;
     private readonly removeBarrierCost = 25;
     private readonly dispatchCarCost = 5;
+    private readonly repairableSloughCount = 4;
     private readonly openLaneCost = 120;
     private readonly manualDispatchesToAuto = 20;
     private readonly autoCarsToEnding = 6;
@@ -85,6 +86,8 @@ export class FoodTruckPlayableController extends Component {
     private _playClicked = false;
     private _manualDispatchCount = 0;
     private _autoCarsServed = 0;
+    private _repairedSloughCount = 0;
+    private _hasUnlockedScene1Controls = false;
 
     private _laneTemplateSpacing = 120;
     private _spawnSerial = 0;
@@ -120,6 +123,7 @@ export class FoodTruckPlayableController extends Component {
     private _serviceProgressWorldPosition: Vec3 | null = null;
     private _removeBarrierPulse: Tween<Node> | null = null;
     private _lanes: LaneData[] = [];
+    private _sloughNodes: Node[] = [];
     private _uiFont: Font | null = null;
     private _burgerIconFrame: SpriteFrame | null = null;
     private _handHintRoot: Node | null = null;
@@ -288,7 +292,7 @@ export class FoodTruckPlayableController extends Component {
         this.bindSceneButton(this._playButton, () => this.onPlayGameClicked());
         this.bindSceneButton(this._removeBarrierButton, () => this.onRemoveBarrierClicked());
         this.bindSceneButton(this._dispatchButton, () => this.onDispatchClicked());
-        this.bindSceneButton(this._openLaneButton, () => this.onOpenLaneClicked());
+        this.bindSceneButton(this._openLaneButton, () => this.onRepairSloughClicked());
         this.bindSceneButton(this.findNodeByName(canvasNode, 'RamenOption'), () => this.onEndingOptionClicked('Ramen'));
         this.bindSceneButton(this.findNodeByName(canvasNode, 'HotDogOption'), () => this.onEndingOptionClicked('Hot Dog'));
         this.bindSceneButton(this.findNodeByName(canvasNode, 'HamburgerOption'), () => this.onEndingOptionClicked('Hamburger'));
@@ -355,6 +359,12 @@ export class FoodTruckPlayableController extends Component {
         if (this._catNode) {
             this._catScale.set(this._catNode.scale.x, this._catNode.scale.y, this._catNode.scale.z);
         }
+
+        this._sloughNodes = Array.from({ length: this.repairableSloughCount }, (_, index) => {
+            let sloughName = `slough${index + 1}`;
+            return this._worldRoot?.getChildByName(sloughName)
+                ?? this.findNodeByName(scene, sloughName);
+        }).filter((node): node is Node => !!node);
     }
 
     private configureMainCamera (): void {
@@ -625,7 +635,7 @@ export class FoodTruckPlayableController extends Component {
 
     private onRemoveBarrierClicked (): void {
         this.trackFirstClick();
-        if (this._phase !== 'scene1' || this._openedLanes > 0 || !this.trySpendMoney(this.removeBarrierCost)) {
+        if (!this.canOpenNextRoute() || !this.trySpendMoney(this.removeBarrierCost)) {
             return;
         }
 
@@ -637,6 +647,10 @@ export class FoodTruckPlayableController extends Component {
 
     private onDispatchClicked (): void {
         this.trackFirstClick();
+        if (this._phase === 'scene1' && this._openedLanes === 0) {
+            this.refreshUiState();
+            return;
+        }
         if (this._phase === 'scene1') {
             this._manualDispatchCount++;
         }
@@ -660,12 +674,15 @@ export class FoodTruckPlayableController extends Component {
         this.tryEnterScene2();
     }
 
-    private onOpenLaneClicked (): void {
+    private onRepairSloughClicked (): void {
         this.trackFirstClick();
-        if (this._phase !== 'scene1' || !this.trySpendMoney(this.openLaneCost)) {
+        if (!this.canRepairNextSlough()) {
             return;
         }
-        this.openNextLane();
+
+        this._hasUnlockedScene1Controls = true;
+        this.repairNextSlough();
+        this.playRankupAudio();
         this.refreshUiState();
     }
 
@@ -790,6 +807,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
+        this.completeAllSloughRepairs();
         while (this._openedLanes < this.getLaneTotal()) {
             this.openNextLane();
         }
@@ -836,6 +854,36 @@ export class FoodTruckPlayableController extends Component {
         }
         this._openedLanes++;
         this.tryEnterScene2();
+    }
+
+    private canRepairNextSlough (): boolean {
+        return this._phase === 'scene1'
+            && this._repairedSloughCount < this.repairableSloughCount;
+    }
+
+    private canOpenNextRoute (): boolean {
+        return this._phase === 'scene1'
+            && this._hasUnlockedScene1Controls
+            && this._openedLanes < this.getLaneTotal();
+    }
+
+    private repairNextSlough (): void {
+        let sloughNode = this._sloughNodes[this._repairedSloughCount] ?? null;
+        if (sloughNode?.isValid) {
+            sloughNode.active = false;
+        }
+
+        this._repairedSloughCount = Math.min(this.repairableSloughCount, this._repairedSloughCount + 1);
+    }
+
+    private completeAllSloughRepairs (): void {
+        for (let sloughNode of this._sloughNodes) {
+            if (sloughNode?.isValid) {
+                sloughNode.active = false;
+            }
+        }
+
+        this._repairedSloughCount = Math.max(this._repairedSloughCount, this.repairableSloughCount);
     }
 
     private tryEnterScene2 (): void {
@@ -1064,8 +1112,8 @@ export class FoodTruckPlayableController extends Component {
 
     private getPreferredHandHintTarget (): Node | null {
         let candidates = [
-            this._removeBarrierButton,
             this._openLaneButton,
+            this._removeBarrierButton,
             this._dispatchButton,
         ];
 
@@ -1078,7 +1126,7 @@ export class FoodTruckPlayableController extends Component {
                 continue;
             }
 
-            if (button === this._openLaneButton && !this.canAfford(this.openLaneCost)) {
+            if (button === this._openLaneButton && !this.canRepairNextSlough()) {
                 continue;
             }
 
@@ -1133,40 +1181,57 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private refreshUiState (): void {
-        let waitingForBarrier = this._phase === 'scene1' && this._openedLanes === 0;
+        let repairVisible = this._phase === 'scene1';
+        let scene1ControlsVisible = this._phase === 'scene1' && this._hasUnlockedScene1Controls;
+        let canRepair = this.canRepairNextSlough();
+        let canOpenRoute = this.canOpenNextRoute() && this.canAfford(this.removeBarrierCost);
+        let canDispatch = this._phase !== 'ending'
+            && this._hasUnlockedScene1Controls
+            && this._openedLanes > 0
+            && this.canAfford(this.dispatchCarCost);
+
         if (this._removeBarrierButton) {
-            this._removeBarrierButton.active = waitingForBarrier;
+            this._removeBarrierButton.active = scene1ControlsVisible;
         }
         if (this._removeBarrierLabel) {
-            this._removeBarrierLabel.string = `Remove Barrier\n${this.removeBarrierCost}`;
+            let remainingRoutes = Math.max(0, this.getLaneTotal() - this._openedLanes);
+            this._removeBarrierLabel.string = `Open Car Route\n${remainingRoutes}/${this.getLaneTotal()}`;
         }
-        let canBuyBarrier = waitingForBarrier && this.canAfford(this.removeBarrierCost);
-        this.setButtonLockedVisual(this._removeBarrierButton, canBuyBarrier);
-        if (canBuyBarrier) {
+        if (this._removeBarrierCostIcon?.node) {
+            this._removeBarrierCostIcon.node.active = scene1ControlsVisible;
+        }
+        this.setButtonLockedVisual(this._removeBarrierButton, canOpenRoute);
+        if (canOpenRoute) {
             this.startRemoveBarrierPulse();
         } else {
             this.stopRemoveBarrierPulse();
         }
 
-        let dispatchVisible = this._phase !== 'ending' && this._openedLanes > 0;
+        let dispatchVisible = this._phase === 'scene2' || scene1ControlsVisible;
         if (this._dispatchButton) {
             this._dispatchButton.active = dispatchVisible;
         }
-        this.setButtonLockedVisual(this._dispatchButton, dispatchVisible && this.canAfford(this.dispatchCarCost));
+        this.setButtonLockedVisual(this._dispatchButton, canDispatch);
+        if (this._dispatchCostIcon?.node) {
+            this._dispatchCostIcon.node.active = dispatchVisible;
+        }
 
-        let openLaneVisible = this._phase === 'scene1' && this._openedLanes > 0 && this._openedLanes < this.getLaneTotal();
+        let openLaneVisible = repairVisible;
         if (this._openLaneButton) {
             this._openLaneButton.active = openLaneVisible;
         }
 
         if (this._openLaneLabel) {
-            if (this._phase === 'scene2') {
-                this._openLaneLabel.string = `All ${this.getLaneTotal()} Lanes Open`;
-            } else {
-                this._openLaneLabel.string = `Open Car Route\n${this.openLaneCost}`;
-            }
+            this._openLaneLabel.string = openLaneVisible
+                ? this._repairedSloughCount >= this.repairableSloughCount
+                    ? `Repair Complete\n${this.repairableSloughCount}/${this.repairableSloughCount}`
+                    : `Repair Slough\n${this._repairedSloughCount + 1}/${this.repairableSloughCount}`
+                : 'Repair Complete';
         }
-        this.setButtonLockedVisual(this._openLaneButton, openLaneVisible && this.canAfford(this.openLaneCost));
+        this.setButtonLockedVisual(this._openLaneButton, canRepair);
+        if (this._openLaneCostIcon?.node) {
+            this._openLaneCostIcon.node.active = false;
+        }
 
         this.refreshMoneyLabel();
         this.refreshDispatchButtonLabel();
