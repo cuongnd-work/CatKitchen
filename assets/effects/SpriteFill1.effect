@@ -1,40 +1,23 @@
 // SpriteFill.effect
 // Built on Cocos Creator builtin unlit template
-// Isometric-like fill (diagonal).
+// Horizontal sprite fill (left -> right)
 
 CCEffect %{
   techniques:
-  - name: transparent
+  - name: opaque
     passes:
     - vert: general-vs:vert
       frag: sprite-fill-fs:frag
-      rasterizerState:
-        cullMode: none
-      depthStencilState:
-        depthTest: true
-        depthWrite: false
-      blendState:
-        targets:
-        - blend: true
-          blendSrc: src_alpha
-          blendDst: one_minus_src_alpha
-          blendSrcAlpha: src_alpha
-          blendDstAlpha: one_minus_src_alpha
       properties: &props
         mainTexture:    { value: white }
         mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
         fillAmount:     { value: 1.0 }
         alphaThreshold: { value: 0.001 }
 
-  - name: transparent_alt
+  - name: transparent
     passes:
     - vert: general-vs:vert
       frag: sprite-fill-fs:frag
-      rasterizerState:
-        cullMode: none
-      depthStencilState:
-        depthTest: true
-        depthWrite: false
       blendState:
         targets:
         - blend: true
@@ -64,21 +47,9 @@ CCProgram sprite-fill-fs %{
     float alphaThreshold;
   };
 
-  float linearRatioToIsoThreshold (float ratio) {
-    // Keep gameplay ratio linear while matching diagonal/isometric fill area.
-    float p = clamp(ratio, 0.0, 1.0);
-    if (p <= 0.5) {
-      return sqrt(p * 0.5);
-    }
-    return 1.0 - sqrt((1.0 - p) * 0.5);
-  }
-
   vec4 frag () {
-    // Isometric-like diagonal fill:
-    // 0.0 starts near lower-left, 1.0 reaches upper-right.
-    float fillThreshold = linearRatioToIsoThreshold(fillAmount);
-    float isoProgress = clamp((v_uv.x + v_uv.y) * 0.5, 0.0, 1.0);
-    if (isoProgress > fillThreshold) {
+    // Horizontal fill
+    if (v_uv.x > fillAmount) {
       discard;
     }
 

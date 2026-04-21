@@ -17,6 +17,7 @@ import {
     Layers,
     Node,
     SkeletalAnimation,
+    SpriteRenderer,
     Sprite,
     SpriteFrame,
     Tween,
@@ -25,6 +26,7 @@ import {
     UIOpacity,
     UITransform,
     Vec3,
+    Material,
 } from 'cc';
 import super_html_script from 'db://assets/plugins/playable-foundation/super-html/super_html_script';
 import {CameraFollow} from './CameraFollow';
@@ -124,6 +126,12 @@ export class FoodTruckPlayableController extends Component {
     private _removeBarrierPulse: Tween<Node> | null = null;
     private _lanes: LaneData[] = [];
     private _sloughNodes: Node[] = [];
+    private _endingProgressRoot: Node | null = null;
+    private _endingProgressLabel: Label | null = null;
+    private _endingProgressSprite: SpriteRenderer | null = null;
+    private _endingProgressMaterial: Material | null = null;
+    private _endingGoalAmount = this.endingMoneyTarget;
+    private _endingProgressValue = 0;
     private _uiFont: Font | null = null;
     private _burgerIconFrame: SpriteFrame | null = null;
     private _handHintRoot: Node | null = null;
@@ -355,6 +363,9 @@ export class FoodTruckPlayableController extends Component {
             ?? this.findNodeByName(scene, 'F11')
             ?? this.findNodeByName(scene, 'shop_Optimized');
         this._catNode = this._worldRoot?.getChildByName('Rig_Cat_02') ?? this.findNodeByName(scene, 'Rig_Cat_02');
+        this._endingProgressRoot = this.findNodeByName(scene, 'P3');
+        this._endingProgressLabel = this._endingProgressRoot?.getChildByName('Label')?.getComponent(Label) ?? null;
+        this._endingProgressSprite = this._endingProgressRoot?.getChildByName('SpriteRenderer-001')?.getComponent(SpriteRenderer) ?? null;
 
         if (this._catNode) {
             this._catScale.set(this._catNode.scale.x, this._catNode.scale.y, this._catNode.scale.z);
@@ -365,6 +376,8 @@ export class FoodTruckPlayableController extends Component {
             return this._worldRoot?.getChildByName(sloughName)
                 ?? this.findNodeByName(scene, sloughName);
         }).filter((node): node is Node => !!node);
+
+        this.initializeEndingProgress();
     }
 
     private configureMainCamera (): void {
@@ -796,9 +809,6 @@ export class FoodTruckPlayableController extends Component {
         if (this._phase === 'scene2') {
             this._autoCarsServed++;
             this.fillOpenLaneQueues();
-            if (this._autoCarsServed >= this.autoCarsToEnding) {
-                this.enterEnding();
-            }
         }
     }
 
@@ -843,6 +853,10 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private openNextLane (): void {
+        if (this._phase === 'scene1' && this._openedLanes >= this.getMaxOpenableLanesFromRepairs()) {
+            return;
+        }
+
         let nextLane = this._lanes.find((lane) => !lane.open);
         if (!nextLane) {
             return;
@@ -864,7 +878,61 @@ export class FoodTruckPlayableController extends Component {
     private canOpenNextRoute (): boolean {
         return this._phase === 'scene1'
             && this._hasUnlockedScene1Controls
-            && this._openedLanes < this.getLaneTotal();
+            && this._openedLanes < this.getMaxOpenableLanesFromRepairs();
+    }
+
+    private getMaxOpenableLanesFromRepairs (): number {
+        return Math.min(this.getLaneTotal(), this._repairedSloughCount);
+    }
+
+    private initializeEndingProgress (): void {
+        let parsedGoal = this._endingProgressLabel ? Number.parseInt(this._endingProgressLabel.string, 10) : Number.NaN;
+        if (Number.isFinite(parsedGoal) && parsedGoal > 0) {
+            this._endingGoalAmount = parsedGoal;
+        }
+
+        this._endingProgressValue = 0;
+        this.updateEndingProgressUi();
+    }
+
+    private ensureEndingProgressMaterial (): Material | null {
+        if (!this._endingProgressSprite) {
+            return null;
+        }
+
+        if (!this._endingProgressMaterial) {
+            this._endingProgressMaterial = this._endingProgressSprite.getMaterialInstance(0);
+        }
+
+        return this._endingProgressMaterial;
+    }
+
+    private addEndingProgress (amount: number): void {
+        if (amount <= 0 || this._endingGoalAmount <= 0) {
+            return;
+        }
+
+        this._endingProgressValue = Math.min(this._endingGoalAmount, this._endingProgressValue + amount);
+        this.updateEndingProgressUi();
+
+        if (this._phase === 'scene2' && this._endingProgressValue >= this._endingGoalAmount) {
+            this.enterEnding();
+        }
+    }
+
+    private updateEndingProgressUi (): void {
+        let material = this.ensureEndingProgressMaterial();
+        if (material) {
+            let ratio = this._endingGoalAmount > 0
+                ? Math.max(0, Math.min(1, this._endingProgressValue / this._endingGoalAmount))
+                : 0;
+            material.setProperty('fillAmount', ratio);
+        }
+
+        if (this._endingProgressLabel) {
+            let remaining = Math.max(0, Math.ceil(this._endingGoalAmount - this._endingProgressValue));
+            this._endingProgressLabel.string = `${remaining}`;
+        }
     }
 
     private repairNextSlough (): void {
@@ -1194,8 +1262,8 @@ export class FoodTruckPlayableController extends Component {
             this._removeBarrierButton.active = scene1ControlsVisible;
         }
         if (this._removeBarrierLabel) {
-            let remainingRoutes = Math.max(0, this.getLaneTotal() - this._openedLanes);
-            this._removeBarrierLabel.string = `Open Car Route\n${remainingRoutes}/${this.getLaneTotal()}`;
+            let maxOpenableRoutes = this.getMaxOpenableLanesFromRepairs();
+            this._removeBarrierLabel.string = `Open Car Route\n${this._openedLanes}/${maxOpenableRoutes}`;
         }
         if (this._removeBarrierCostIcon?.node) {
             this._removeBarrierCostIcon.node.active = scene1ControlsVisible;
@@ -1279,7 +1347,9 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private addMoney (amount: number): void {
-        this._money += Math.max(0, Math.floor(amount));
+        let gained = Math.max(0, Math.floor(amount));
+        this._money += gained;
+        this.addEndingProgress(gained);
         this.refreshUiState();
     }
 
