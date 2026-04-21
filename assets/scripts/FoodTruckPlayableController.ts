@@ -386,7 +386,7 @@ export class FoodTruckPlayableController extends Component {
             camera.fov = 45;
             camera.near = 1;
             camera.far = 1000;
-            camera.visibility = Layers.Enum.DEFAULT | Layers.Enum.UI_2D | Layers.Enum.UI_3D;
+            camera.visibility = Layers.Enum.DEFAULT;
             camera.clearFlags = Camera.ClearFlag.SOLID_COLOR;
         }
 

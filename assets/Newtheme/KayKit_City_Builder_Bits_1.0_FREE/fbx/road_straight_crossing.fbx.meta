@@ -1,0 +1,126 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd",
+  "files": [],
+  "subMetas": {
+    "a4f70": {
+      "importer": "gltf-mesh",
+      "uuid": "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd@a4f70",
+      "displayName": "",
+      "id": "a4f70",
+      "name": "Cube.951.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 64
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "7d6ab": {
+      "importer": "texture",
+      "uuid": "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd@7d6ab",
+      "displayName": "",
+      "id": "7d6ab",
+      "name": "base_color_texture.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/Newtheme/KayKit_City_Builder_Bits_1.0_FREE/fbx/citybits_texture.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "319cb": {
+      "importer": "gltf-material",
+      "uuid": "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd@319cb",
+      "displayName": "",
+      "id": "319cb",
+      "name": "citybits_texture.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "d5775": {
+      "importer": "gltf-scene",
+      "uuid": "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd@d5775",
+      "displayName": "",
+      "id": "d5775",
+      "name": "road_straight_crossing.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/Newtheme/KayKit_City_Builder_Bits_1.0_FREE/fbx/citybits_texture.png"
+      }
+    ],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd@a4f70"
+      ],
+      "skeletons": [],
+      "textures": [
+        "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd@7d6ab"
+      ],
+      "materials": [
+        "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd@319cb"
+      ],
+      "scenes": [
+        "0efc3d5b-8bf9-486a-bcfc-bb6ff07ca3cd@d5775"
+      ]
+    }
+  }
+}
