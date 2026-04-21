@@ -2,18 +2,18 @@
   "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
-  "uuid": "801790af-96f1-4932-be5f-8dff1f8bb0d5",
+  "uuid": "4f960e19-9f82-4729-ac85-18a6fb47f0d7",
   "files": [],
   "subMetas": {
-    "a1a2a": {
+    "8477e": {
       "importer": "gltf-mesh",
-      "uuid": "801790af-96f1-4932-be5f-8dff1f8bb0d5@a1a2a",
+      "uuid": "4f960e19-9f82-4729-ac85-18a6fb47f0d7@8477e",
       "displayName": "",
-      "id": "a1a2a",
-      "name": "Cube.937.mesh",
+      "id": "8477e",
+      "name": "Cube.938.mesh",
       "userData": {
         "gltfIndex": 0,
-        "triangleCount": 1020
+        "triangleCount": 828
       },
       "ver": "1.1.1",
       "imported": true,
@@ -25,7 +25,7 @@
     },
     "7d6ab": {
       "importer": "texture",
-      "uuid": "801790af-96f1-4932-be5f-8dff1f8bb0d5@7d6ab",
+      "uuid": "4f960e19-9f82-4729-ac85-18a6fb47f0d7@7d6ab",
       "displayName": "",
       "id": "7d6ab",
       "name": "base_color_texture.texture",
@@ -37,7 +37,7 @@
         "mipfilter": "none",
         "anisotropy": 0,
         "isUuid": false,
-        "imageUuidOrDatabaseUri": "db://assets/Newtheme/KayKit_City_Builder_Bits_1.0_FREE/fbx/citybits_texture.png"
+        "imageUuidOrDatabaseUri": "db://assets/Newtheme/KayKit_City_Builder_Bits_1.0_FREE/Assets/fbx/citybits_texture.png"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -48,7 +48,7 @@
     },
     "319cb": {
       "importer": "gltf-material",
-      "uuid": "801790af-96f1-4932-be5f-8dff1f8bb0d5@319cb",
+      "uuid": "4f960e19-9f82-4729-ac85-18a6fb47f0d7@319cb",
       "displayName": "",
       "id": "319cb",
       "name": "citybits_texture.material",
@@ -62,12 +62,12 @@
       ],
       "subMetas": {}
     },
-    "aa5d8": {
+    "2e735": {
       "importer": "gltf-scene",
-      "uuid": "801790af-96f1-4932-be5f-8dff1f8bb0d5@aa5d8",
+      "uuid": "4f960e19-9f82-4729-ac85-18a6fb47f0d7@2e735",
       "displayName": "",
-      "id": "aa5d8",
-      "name": "building_C.prefab",
+      "id": "2e735",
+      "name": "building_A.prefab",
       "userData": {
         "gltfIndex": 0
       },
@@ -83,7 +83,7 @@
     "imageMetas": [
       {
         "name": "base_color_texture",
-        "uri": "db://assets/Newtheme/KayKit_City_Builder_Bits_1.0_FREE/fbx/citybits_texture.png"
+        "uri": "db://assets/Newtheme/KayKit_City_Builder_Bits_1.0_FREE/Assets/fbx/citybits_texture.png"
       }
     ],
     "fbx": {
@@ -109,17 +109,17 @@
     },
     "assetFinder": {
       "meshes": [
-        "801790af-96f1-4932-be5f-8dff1f8bb0d5@a1a2a"
+        "4f960e19-9f82-4729-ac85-18a6fb47f0d7@8477e"
       ],
       "skeletons": [],
       "textures": [
-        "801790af-96f1-4932-be5f-8dff1f8bb0d5@7d6ab"
+        "4f960e19-9f82-4729-ac85-18a6fb47f0d7@7d6ab"
       ],
       "materials": [
-        "801790af-96f1-4932-be5f-8dff1f8bb0d5@319cb"
+        "4f960e19-9f82-4729-ac85-18a6fb47f0d7@319cb"
       ],
       "scenes": [
-        "801790af-96f1-4932-be5f-8dff1f8bb0d5@aa5d8"
+        "4f960e19-9f82-4729-ac85-18a6fb47f0d7@2e735"
       ]
     }
   }
