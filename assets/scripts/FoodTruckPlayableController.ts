@@ -97,6 +97,8 @@ export class FoodTruckPlayableController extends Component {
     private _worldRoot: Node | null = null;
     private _overlayRoot: Node | null = null;
     private _foodTruckNode: Node | null = null;
+    private _buildingANode: Node | null = null;
+    private _buildingAScale = new Vec3(1, 1, 1);
     private _catNode: Node | null = null;
     private _catScale = new Vec3(1, 1, 1);
     private _mainCameraNode: Node | null = null;
@@ -132,6 +134,8 @@ export class FoodTruckPlayableController extends Component {
     private _endingProgressMaterial: Material | null = null;
     private _endingGoalAmount = this.endingMoneyTarget;
     private _endingProgressValue = 0;
+    private _endingProgressDisplayValue = 0;
+    private _endingProgressTweenState = { value: 0 };
     private _uiFont: Font | null = null;
     private _burgerIconFrame: SpriteFrame | null = null;
     private _handHintRoot: Node | null = null;
@@ -362,11 +366,15 @@ export class FoodTruckPlayableController extends Component {
         this._foodTruckNode = this._worldRoot?.getChildByName('F11')
             ?? this.findNodeByName(scene, 'F11')
             ?? this.findNodeByName(scene, 'shop_Optimized');
+        this._buildingANode = this.findNodeByName(scene, 'building_A');
         this._catNode = this._worldRoot?.getChildByName('Rig_Cat_02') ?? this.findNodeByName(scene, 'Rig_Cat_02');
         this._endingProgressRoot = this.findNodeByName(scene, 'P3');
         this._endingProgressLabel = this._endingProgressRoot?.getChildByName('Label')?.getComponent(Label) ?? null;
         this._endingProgressSprite = this._endingProgressRoot?.getChildByName('SpriteRenderer-001')?.getComponent(SpriteRenderer) ?? null;
 
+        if (this._buildingANode) {
+            this._buildingAScale.set(this._buildingANode.scale.x, this._buildingANode.scale.y, this._buildingANode.scale.z);
+        }
         if (this._catNode) {
             this._catScale.set(this._catNode.scale.x, this._catNode.scale.y, this._catNode.scale.z);
         }
@@ -800,7 +808,9 @@ export class FoodTruckPlayableController extends Component {
         lane.activeDispatches = Math.max(0, lane.activeDispatches - 1);
         this._activeDispatchCount = Math.max(0, this._activeDispatchCount - 1);
         this._carsServed++;
-        this.addMoney(this._phase === 'scene1' ? this.scene1Reward : this.scene2Reward);
+        let rewardAmount = this._phase === 'scene1' ? this.scene1Reward : this.scene2Reward;
+        this.addMoney(rewardAmount);
+        this.playBuildingRewardFeedback(rewardAmount);
 
         if (this._phase === 'scene1') {
             return;
@@ -892,7 +902,9 @@ export class FoodTruckPlayableController extends Component {
         }
 
         this._endingProgressValue = 0;
-        this.updateEndingProgressUi();
+        this._endingProgressDisplayValue = 0;
+        this._endingProgressTweenState.value = 0;
+        this.updateEndingProgressUi(true);
     }
 
     private ensureEndingProgressMaterial (): Material | null {
@@ -913,26 +925,135 @@ export class FoodTruckPlayableController extends Component {
         }
 
         this._endingProgressValue = Math.min(this._endingGoalAmount, this._endingProgressValue + amount);
-        this.updateEndingProgressUi();
+        this.animateEndingProgressUi();
 
         if (this._phase === 'scene2' && this._endingProgressValue >= this._endingGoalAmount) {
             this.enterEnding();
         }
     }
 
-    private updateEndingProgressUi (): void {
+    private animateEndingProgressUi (): void {
+        Tween.stopAllByTarget(this._endingProgressTweenState);
+        this._endingProgressTweenState.value = this._endingProgressDisplayValue;
+        tween(this._endingProgressTweenState)
+            .to(0.35, { value: this._endingProgressValue }, {
+                easing: 'sineOut',
+                onUpdate: () => {
+                    this._endingProgressDisplayValue = this._endingProgressTweenState.value;
+                    this.updateEndingProgressUi();
+                },
+            })
+            .start();
+    }
+
+    private updateEndingProgressUi (instant = false): void {
+        if (instant) {
+            this._endingProgressDisplayValue = this._endingProgressValue;
+        }
+
         let material = this.ensureEndingProgressMaterial();
         if (material) {
             let ratio = this._endingGoalAmount > 0
-                ? Math.max(0, Math.min(1, this._endingProgressValue / this._endingGoalAmount))
+                ? Math.max(0, Math.min(1, this._endingProgressDisplayValue / this._endingGoalAmount))
                 : 0;
             material.setProperty('fillAmount', ratio);
         }
 
         if (this._endingProgressLabel) {
-            let remaining = Math.max(0, Math.ceil(this._endingGoalAmount - this._endingProgressValue));
+            let remaining = Math.max(0, Math.ceil(this._endingGoalAmount - this._endingProgressDisplayValue));
             this._endingProgressLabel.string = `${remaining}`;
         }
+    }
+
+    private playBuildingRewardFeedback (amount: number): void {
+        this.playBuildingPunchScale();
+        this.showRewardToast(amount);
+    }
+
+    private playBuildingPunchScale (): void {
+        if (!this._buildingANode?.isValid) {
+            return;
+        }
+
+        Tween.stopAllByTarget(this._buildingANode);
+        this._buildingANode.setScale(this._buildingAScale.x, this._buildingAScale.y, this._buildingAScale.z);
+
+        let bigger = new Vec3(
+            this._buildingAScale.x * 1.08,
+            this._buildingAScale.y * 1.08,
+            this._buildingAScale.z * 1.08,
+        );
+        tween(this._buildingANode)
+            .to(0.14, { scale: bigger }, { easing: 'sineOut' })
+            .to(0.18, { scale: this._buildingAScale }, { easing: 'sineIn' })
+            .start();
+    }
+
+    private showRewardToast (amount: number): void {
+        if (!this._overlayRoot?.isValid || amount <= 0) {
+            return;
+        }
+
+        let toast = new Node(`MoneyToast_${Date.now()}`);
+        toast.layer = Layers.Enum.UI_2D;
+        this._overlayRoot.addChild(toast);
+        toast.addComponent(UITransform).setContentSize(320, 110);
+
+        let opacity = toast.addComponent(UIOpacity);
+        opacity.opacity = 0;
+
+        let label = toast.addComponent(Label);
+        label.string = `+${Math.floor(amount)}`;
+        label.fontSize = 62;
+        label.lineHeight = 62;
+        label.color = new Color(255, 219, 77, 255);
+        label.enableOutline = true;
+        label.outlineColor = new Color(92, 56, 8, 255);
+        label.outlineWidth = 4;
+        if (this._uiFont) {
+            label.font = this._uiFont;
+        }
+
+        let startPosition = this.getRewardToastUiPosition();
+        toast.setPosition(startPosition.x, startPosition.y, 0);
+        toast.setScale(1.08, 1.08, 1);
+
+        tween(opacity)
+            .to(0.08, { opacity: 255 })
+            .delay(0.28)
+            .to(0.2, { opacity: 0 })
+            .call(() => toast.destroy())
+            .start();
+
+        tween(toast)
+            .to(0.18, {
+                scale: new Vec3(1.2, 1.2, 1),
+                position: new Vec3(startPosition.x, startPosition.y + 32, 0),
+            }, { easing: 'sineOut' })
+            .to(0.3, {
+                scale: new Vec3(1.08, 1.08, 1),
+                position: new Vec3(startPosition.x, startPosition.y + 72, 0),
+            }, { easing: 'quadOut' })
+            .start();
+    }
+
+    private getRewardToastUiPosition (): Vec3 {
+        if (!this._overlayRoot?.isValid) {
+            return new Vec3();
+        }
+
+        let building = this._buildingANode;
+        let camera = this._mainCameraNode?.getComponent(Camera);
+        if (!building?.isValid || !camera) {
+            return new Vec3(0, 140, 0);
+        }
+
+        let worldPosition = building.getWorldPosition(new Vec3());
+        worldPosition.y += 2.6;
+
+        let uiPosition = new Vec3();
+        camera.convertToUINode(worldPosition, this._overlayRoot, uiPosition);
+        return new Vec3(uiPosition.x + 200, uiPosition.y - 100, 0);
     }
 
     private repairNextSlough (): void {
