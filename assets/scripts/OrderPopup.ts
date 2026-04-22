@@ -34,7 +34,6 @@ export class OrderPopup extends Component {
             this.initialCount = 1;
         }
         this.resetCount();
-        this.refreshSprite();
 
         if(this.alwaysUseFirst) return;
 
@@ -115,16 +114,6 @@ export class OrderPopup extends Component {
     /* ================= CORE ================= */
 
     public refreshSprite () {
-        if (!this.targetSprite || this.spriteFrames.length === 0) {
-            return;
-        }
-
-        let index = 0;
-
-        if (!this.alwaysUseFirst) {
-            index = Math.floor(Math.random() * this.spriteFrames.length);
-        }
-
-        this.targetSprite.spriteFrame = this.spriteFrames[index];
+        // Keep the sprite assigned in the scene/prefab.
     }
 }

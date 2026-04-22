@@ -29,6 +29,7 @@ import {
     Material,
 } from 'cc';
 import super_html_script from 'db://assets/plugins/playable-foundation/super-html/super_html_script';
+import {BillboardToCamera} from './BillboardToCamera';
 import {CameraFollow} from './CameraFollow';
 import {OrientationCameraOrthoAdjuster} from './OrientationCameraOrthoAdjuster';
 import {UIScreenResolution} from './UIScreenResolution';
@@ -76,6 +77,13 @@ export class FoodTruckPlayableController extends Component {
     private readonly handHintOffset = new Vec3(0, -86, 0);
     private readonly hornPromptIdleDelay = 4;
     private readonly hornPromptRepeatDelay = 3.2;
+    private readonly carPopupInterval = 3.2;
+    private readonly carPopupLifetime = 2.8;
+    private readonly carPopupOffset = new Vec3(0, 0, 0);
+    private readonly carPopupWaveFraction = 0.7;
+    private readonly carPopupWaveMin = 5;
+    private readonly carPopupWaveMax = 10;
+    private readonly carPopupStaggerDelay = 0.22;
 
     private _phase: ScenePhase = 'scene1';
     private _money = this.startingCash;
@@ -149,9 +157,13 @@ export class FoodTruckPlayableController extends Component {
     private _rankupAudio: AudioClip | null = null;
     private _carHornAudio: AudioClip | null = null;
     private _engineAudioSource: AudioSource | null = null;
+    private _activeCarPopups = new Map<Node, Node>();
 
     @property(Node)
     public endingSelectionNode: Node | null = null;
+
+    @property(Node)
+    public popupTemplateNode: Node | null = null;
 
     @property(Font)
     public uiFontAsset: Font | null = null;
@@ -197,6 +209,8 @@ export class FoodTruckPlayableController extends Component {
         this.initializeSceneAssetReferences();
         this.loadHandHint();
         this.refreshUiState();
+        this.initializePopupTemplate();
+        this.scheduleCarPopups();
         if (this.endingSelectionNode) {
             this.endingSelectionNode.active = false;
         }
@@ -216,6 +230,7 @@ export class FoodTruckPlayableController extends Component {
         }
         this.unschedule(this.showHandHintForCurrentTarget);
         this.unschedule(this.playHornPromptIfNeeded);
+        this.unschedule(this.showWaitingCarPopups);
         input.off(Input.EventType.TOUCH_START, this.onGlobalTouchStart, this);
     }
 
@@ -906,6 +921,161 @@ export class FoodTruckPlayableController extends Component {
         this._endingProgressTweenState.value = 0;
         this.updateEndingProgressUi(true);
     }
+
+    private initializePopupTemplate (): void {
+        if (this.popupTemplateNode?.isValid) {
+            this.popupTemplateNode.active = false;
+        }
+    }
+
+    private scheduleCarPopups (): void {
+        this.unschedule(this.showWaitingCarPopups);
+        this.schedule(this.showWaitingCarPopups, this.carPopupInterval);
+        this.showWaitingCarPopups();
+    }
+
+    private showWaitingCarPopups = (): void => {
+        if (!this.popupTemplateNode?.isValid || this._phase === 'ending') {
+            return;
+        }
+
+        let waitingCars = this._lanes
+            .flatMap((lane) => lane.queueCars)
+            .filter((car) => car && car.isValid);
+        if (waitingCars.length === 0) {
+            this.clearInactiveCarPopups();
+            return;
+        }
+
+        let shuffledCars = waitingCars.slice();
+        for (let i = shuffledCars.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            let temp = shuffledCars[i];
+            shuffledCars[i] = shuffledCars[j];
+            shuffledCars[j] = temp;
+        }
+
+        let targetCount = Math.ceil(waitingCars.length * this.carPopupWaveFraction);
+        targetCount = Math.max(this.carPopupWaveMin, targetCount);
+        targetCount = Math.min(targetCount, this.carPopupWaveMax, waitingCars.length);
+
+        let selectedCars = shuffledCars.slice(0, targetCount);
+        let activeCars = new Set<Node>(selectedCars);
+
+        for (let [car, popup] of this._activeCarPopups) {
+            if (!car?.isValid || !popup?.isValid || !activeCars.has(car)) {
+                this.clearActivePopupForCar(car, popup);
+                if (popup?.isValid) {
+                    popup.destroy();
+                }
+            }
+        }
+
+        for (let i = 0; i < selectedCars.length; i++) {
+            let car = selectedCars[i];
+            if (!car || this._activeCarPopups.has(car)) {
+                continue;
+            }
+            this.scheduleOnce(() => {
+                if (car?.isValid && !this._activeCarPopups.has(car)) {
+                    this.spawnPopupForCar(car);
+                }
+            }, i * this.carPopupStaggerDelay);
+        }
+    };
+
+    private clearInactiveCarPopups (): void {
+        for (let [car, popup] of this._activeCarPopups) {
+            this.clearActivePopupForCar(car, popup);
+            if (popup?.isValid) {
+                popup.destroy();
+            }
+        }
+    }
+
+    private clearActivePopupForCar (car: Node, popup: Node): void {
+        let activePopup = this._activeCarPopups.get(car);
+        if (activePopup === popup) {
+            this._activeCarPopups.delete(car);
+        }
+    }
+
+    private spawnPopupForCar (car: Node): void {
+        if (!this.popupTemplateNode?.isValid || !car?.isValid || !this._worldRoot?.isValid || this._activeCarPopups.has(car)) {
+            return;
+        }
+
+        let popup = new Node(`CarPopup_${Date.now()}`);
+        let popupVisual = this.createPopupVisualFromTemplate();
+        if (!popupVisual) {
+            popup.destroy();
+            return;
+        }
+
+        popup.active = true;
+        this._worldRoot.addChild(popup);
+        popup.addChild(popupVisual);
+        popupVisual.setPosition(0, 0, 0);
+        popupVisual.setRotationFromEuler(0, 0, 0);
+        popupVisual.setScale(1, 1, 1);
+        let worldPosition = car.getWorldPosition(new Vec3());
+        popup.setWorldPosition(
+            worldPosition.x + this.carPopupOffset.x,
+            worldPosition.y + this.carPopupOffset.y,
+            worldPosition.z + this.carPopupOffset.z,
+        );
+        popup.setRotationFromEuler(0, 0, 0);
+        popup.setScale(1, 1, 1);
+        this.attachBillboardsToPopup(popup);
+        this._activeCarPopups.set(car, popup);
+
+        this.scheduleOnce(() => {
+            this.clearActivePopupForCar(car, popup);
+            if (popup.isValid) {
+                popup.destroy();
+            }
+        }, this.carPopupLifetime);
+    }
+
+    private createPopupVisualFromTemplate (): Node | null {
+        let templateNode = this.popupTemplateNode?.getChildByName('SpriteRenderer')
+            ?? this.popupTemplateNode?.getComponentInChildren(SpriteRenderer)?.node
+            ?? null;
+        let templateRenderer = templateNode?.getComponent(SpriteRenderer) ?? null;
+        if (!templateNode || !templateRenderer) {
+            return null;
+        }
+
+        let visual = new Node('PopupVisual');
+        visual.layer = templateNode.layer;
+        visual.setPosition(templateNode.position);
+        visual.setRotation(templateNode.rotation);
+        visual.setScale(templateNode.scale);
+
+        let renderer = visual.addComponent(SpriteRenderer);
+        renderer.spriteFrame = templateRenderer.spriteFrame;
+        renderer.color = templateRenderer.color.clone();
+        renderer.flipX = templateRenderer.flipX;
+        renderer.flipY = templateRenderer.flipY;
+
+        let sharedMaterial = templateRenderer.getSharedMaterial(0);
+        if (sharedMaterial) {
+            renderer.setMaterial(sharedMaterial, 0);
+        }
+
+        return visual;
+    }
+
+    private attachBillboardsToPopup (popup: Node): void {
+        this.ensurePopupBillboard(popup, false);
+    }
+
+    private ensurePopupBillboard (node: Node, yawOnly: boolean): void {
+        let billboard = node.getComponent(BillboardToCamera) ?? node.addComponent(BillboardToCamera);
+        billboard.yawOnly = yawOnly;
+        billboard.targetCamera = this._mainCameraNode?.getComponent(Camera) ?? null;
+    }
+
 
     private ensureEndingProgressMaterial (): Material | null {
         if (!this._endingProgressSprite) {
