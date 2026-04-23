@@ -194,8 +194,8 @@
     "_lrot": {
       "__type__": "cc.Quat",
       "x": -0.34017715297404044,
-      "y": -0.40296767250335375,
-      "z": -0.1644480610347067,
+      "y": -0.4029676725033538,
+      "z": -0.16444806103470672,
       "w": 0.8335786673935649
     },
     "_lscale": {
@@ -209,7 +209,7 @@
     "_euler": {
       "__type__": "cc.Vec3",
       "x": -44.4,
-      "y": -51.599999999999994,
+      "y": -51.6,
       "z": -3.1805546814635168e-15
     },
     "_id": "c9DMICJLFO5IeO07EPon7U"
@@ -273,7 +273,7 @@
     "targetCamera": {
       "__id__": 6
     },
-    "orthoHeight": 5.6,
+    "orthoHeight": 4.6,
     "_id": "d0RflYUdJDIKeJs3E8VRK3"
   },
   {
@@ -23041,34 +23041,34 @@
     "__type__": "LaneUnlockCameraConfig",
     "position": {
       "__type__": "cc.Vec3",
-      "x": -5.9,
-      "y": 12.9,
-      "z": 10.8
+      "x": -6.5,
+      "y": 10.9,
+      "z": 8.7
     },
     "rotation": {
       "__type__": "cc.Vec3",
       "x": -44.4,
-      "y": -44,
+      "y": -51.6,
       "z": 0
     },
-    "orthoHeight": 8.2,
+    "orthoHeight": 5.8,
     "tweenDuration": 0.45
   },
   {
     "__type__": "LaneUnlockCameraConfig",
     "position": {
       "__type__": "cc.Vec3",
-      "x": -5.9,
-      "y": 12.9,
-      "z": 10.8
+      "x": -6.5,
+      "y": 10.9,
+      "z": 8.7
     },
     "rotation": {
       "__type__": "cc.Vec3",
       "x": -44.4,
-      "y": -44,
+      "y": -48,
       "z": 0
     },
-    "orthoHeight": 8.2,
+    "orthoHeight": 6.3,
     "tweenDuration": 0.45
   },
   {

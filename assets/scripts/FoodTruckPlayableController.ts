@@ -101,7 +101,7 @@ export class FoodTruckPlayableController extends Component {
     private readonly carPopupWaveMin = 5;
     private readonly carPopupWaveMax = 10;
     private readonly carPopupStaggerDelay = 0.22;
-    private readonly laneActionParticleLifetime = 1.5;
+    private readonly laneActionParticleLifetime = 0.2;
 
     private _phase: ScenePhase = 'scene1';
     private _money = this.startingCash;
@@ -1316,7 +1316,7 @@ export class FoodTruckPlayableController extends Component {
         }
 
         let particleNode = instantiate(this._laneActionParticleTemplate);
-        let parent = targetNode.parent ?? this._worldRoot ?? this._laneActionParticleTemplate.parent;
+        let parent = this._laneActionParticleTemplate.parent;
         if (!parent?.isValid) {
             particleNode.destroy();
             return;
@@ -1324,13 +1324,16 @@ export class FoodTruckPlayableController extends Component {
 
         parent.addChild(particleNode);
         particleNode.active = true;
-        if (targetNode.parent === parent) {
-            particleNode.setPosition(targetNode.position);
-            particleNode.setRotation(targetNode.rotation);
+        let worldPosition = targetNode.getWorldPosition(new Vec3());
+        let camera = this._mainCameraNode?.getComponent(Camera) ?? null;
+        if (camera) {
+            let uiPosition = new Vec3();
+            camera.convertToUINode(worldPosition, parent, uiPosition);
+            particleNode.setPosition(uiPosition);
         } else {
-            particleNode.setWorldPosition(targetNode.getWorldPosition(new Vec3()));
-            particleNode.setWorldRotation(targetNode.getWorldRotation());
+            particleNode.setWorldPosition(worldPosition);
         }
+        particleNode.setRotation(this._laneActionParticleTemplate.rotation);
         particleNode.setScale(this._laneActionParticleTemplate.scale);
 
         const particleSystems = particleNode.getComponentsInChildren(ParticleSystem2D);
