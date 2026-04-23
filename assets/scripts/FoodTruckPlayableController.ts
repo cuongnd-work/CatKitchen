@@ -807,6 +807,7 @@ export class FoodTruckPlayableController extends Component {
         lane.activeDispatches++;
         this._activeDispatchCount++;
         this._nextDispatchTime = this._elapsed + this.getDispatchCooldown();
+        this.destroyActivePopupForCar(car);
         this.shiftLaneQueue(lane);
         this.animateCarFlow(lane, car);
         this.refreshDispatchButtonLabel();
@@ -1077,7 +1078,7 @@ export class FoodTruckPlayableController extends Component {
         let activeCars = new Set<Node>(selectedCars);
 
         for (let [car, popup] of this._activeCarPopups) {
-            if (!car?.isValid || !popup?.isValid || !activeCars.has(car)) {
+            if (!car?.isValid || !popup?.isValid || !activeCars.has(car) || !this.isWaitingQueueCar(car)) {
                 this.clearActivePopupForCar(car, popup);
                 if (popup?.isValid) {
                     popup.destroy();
@@ -1131,7 +1132,7 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private spawnPopupForCar (car: Node): void {
-        if (!this.popupTemplateNode?.isValid || !car?.isValid || !this._worldRoot?.isValid || this._activeCarPopups.has(car)) {
+        if (!this.popupTemplateNode?.isValid || !car?.isValid || !this._worldRoot?.isValid || this._activeCarPopups.has(car) || !this.isWaitingQueueCar(car)) {
             return;
         }
 
@@ -1155,6 +1156,14 @@ export class FoodTruckPlayableController extends Component {
                 popup.destroy();
             }
         }, this.carPopupLifetime);
+    }
+
+    private isWaitingQueueCar (car: Node | null): boolean {
+        if (!car?.isValid) {
+            return false;
+        }
+
+        return this._lanes.some((lane) => lane.queueCars.includes(car));
     }
 
     private attachBillboardsToPopup (popup: Node): void {
