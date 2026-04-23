@@ -142,6 +142,7 @@ export class FoodTruckPlayableController extends Component {
     private _openLaneButton: Node | null = null;
 
     private _upgradePanel: Node | null = null;
+    private _fireworkNode: Node | null = null;
     private _storePopup: Node | null = null;
     private _storeTitleLabel: Label | null = null;
     private _serviceProgressNode: Node | null = null;
@@ -283,6 +284,7 @@ export class FoodTruckPlayableController extends Component {
         this._openLaneButton = this.findNodeByName(canvasNode, 'OpenLaneButton');
         this._serviceProgressNode = this.findNodeByName(canvasNode, 'ServiceProgressOverlay');
         this._upgradePanel = this.findNodeByName(canvasNode, 'UpgradePanel');
+        this._fireworkNode = this.findNodeByName(canvasNode, 'Firework');
         this._storePopup = this.findNodeByName(canvasNode, 'StorePopup');
         this._moneyLabel = this.findNodeByName(canvasNode, 'MoneyLabel')?.getComponent(Label) ?? null;
         this._moneyHolderIcon = this.findNodeByName(canvasNode, 'MoneyHolderIcon')?.getComponent(Sprite) ?? null;
@@ -300,6 +302,9 @@ export class FoodTruckPlayableController extends Component {
         }
         if (this._upgradePanel) {
             this._upgradePanel.active = false;
+        }
+        if (this._fireworkNode) {
+            this._fireworkNode.active = false;
         }
         if (this._storePopup) {
             this._storePopup.active = false;
@@ -883,15 +888,20 @@ export class FoodTruckPlayableController extends Component {
         if (this._phaseLabel) {
             this._phaseLabel.string = 'Ending - Choose a New Restaurant';
         }
-        if (this._upgradePanel) {
-            this._upgradePanel.active = true;
-        }
-        if (this.endingSelectionNode) {
-            this.endingSelectionNode.active = true;
+        if (this._fireworkNode) {
+            this._fireworkNode.active = true;
         }
         if (this._storePopup) {
             this._storePopup.active = false;
         }
+        this.scheduleOnce(() => {
+            if (this._upgradePanel) {
+                this._upgradePanel.active = true;
+            }
+            if (this.endingSelectionNode) {
+                this.endingSelectionNode.active = true;
+            }
+        }, 1);
         this.refreshUiState();
     }
 

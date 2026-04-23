@@ -1,0 +1,78 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "8a04caa1-83cd-49f6-a1e7-a14ae5562e9e",
+  "files": [],
+  "subMetas": {
+    "7cfe8": {
+      "importer": "gltf-mesh",
+      "uuid": "8a04caa1-83cd-49f6-a1e7-a14ae5562e9e@7cfe8",
+      "displayName": "",
+      "id": "7cfe8",
+      "name": "cfxr mesh leave.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 32
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "72b53": {
+      "importer": "gltf-scene",
+      "uuid": "8a04caa1-83cd-49f6-a1e7-a14ae5562e9e@72b53",
+      "displayName": "",
+      "id": "72b53",
+      "name": "mesh_leave.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "8a04caa1-83cd-49f6-a1e7-a14ae5562e9e@7cfe8"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [],
+      "scenes": [
+        "8a04caa1-83cd-49f6-a1e7-a14ae5562e9e@72b53"
+      ]
+    }
+  }
+}
