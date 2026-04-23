@@ -4,6 +4,7 @@ import { SpawnZone } from './SpawnZone';
 import { clearMoneyCarryShift, setMoneyCarryShift } from './MoneyCarryRegistry';
 import { CustomersQueueManager } from 'db://assets/scripts/customers/CustomersQueueManager';
 import { OrderPopup } from 'db://assets/scripts/OrderPopup';
+import { CatAnimationController } from 'db://assets/scripts/CatAnimationController';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 import { MoneyStackItem } from './MoneyStackItem';
 import { CurrencyView } from './CurrencyView';
@@ -810,7 +811,9 @@ export class ItemSellTrigger extends Component {
             return;
         }
 
-        const orderPopup = customerNode.getComponentInChildren(OrderPopup);
+        const orderPopup = customerNode.getComponent(CatAnimationController)?.getOrderPopup()
+            ?? customerNode.getComponentsInChildren(OrderPopup).find((candidate) => candidate?.isValid && candidate.belongsToCustomer(customerNode))
+            ?? null;
         if (orderPopup && orderPopup.isSoldOut()) {
             return;
         }

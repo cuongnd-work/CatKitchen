@@ -18,11 +18,17 @@ export class CatAnimationController extends Component {
     public sellTargetPopup: OrderPopup | null = null;
 
     private resolveOrderPopup (): OrderPopup | null {
-        if (!this.orderPopup) {
-            this.orderPopup = this.getComponentInChildren(OrderPopup);
+        if (this.orderPopup && this.orderPopup.isValid && this.orderPopup.belongsToCustomer(this.node)) {
+            return this.orderPopup;
         }
 
+        const popups = this.getComponentsInChildren(OrderPopup);
+        this.orderPopup = popups.find((popup) => popup?.isValid && popup.belongsToCustomer(this.node)) ?? null;
         return this.orderPopup;
+    }
+
+    public getOrderPopup (): OrderPopup | null {
+        return this.resolveOrderPopup();
     }
 
     public doIdle(){

@@ -48,7 +48,8 @@ export class CurrencyView extends Component {
         }
 
         if (this.currencyLabel) {
-            this._defaultColor = this.currencyLabel.color.clone();
+            const labelColor = this.currencyLabel.color;
+            this._defaultColor = labelColor ? new Color(labelColor) : new Color();
         }
 
         this._displayValue = CurrencyView._value;

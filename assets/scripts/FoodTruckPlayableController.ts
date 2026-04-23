@@ -231,6 +231,7 @@ export class FoodTruckPlayableController extends Component {
         this.unschedule(this.showHandHintForCurrentTarget);
         this.unschedule(this.playHornPromptIfNeeded);
         this.unschedule(this.showWaitingCarPopups);
+        this.clearInactiveCarPopups();
         input.off(Input.EventType.TOUCH_START, this.onGlobalTouchStart, this);
     }
 
@@ -1005,19 +1006,9 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        let popup = new Node(`CarPopup_${Date.now()}`);
-        let popupVisual = this.createPopupVisualFromTemplate();
-        if (!popupVisual) {
-            popup.destroy();
-            return;
-        }
-
+        let popup = instantiate(this.popupTemplateNode);
         popup.active = true;
         this._worldRoot.addChild(popup);
-        popup.addChild(popupVisual);
-        popupVisual.setPosition(0, 0, 0);
-        popupVisual.setRotationFromEuler(0, 0, 0);
-        popupVisual.setScale(1, 1, 1);
         let worldPosition = car.getWorldPosition(new Vec3());
         popup.setWorldPosition(
             worldPosition.x + this.carPopupOffset.x,
@@ -1035,35 +1026,6 @@ export class FoodTruckPlayableController extends Component {
                 popup.destroy();
             }
         }, this.carPopupLifetime);
-    }
-
-    private createPopupVisualFromTemplate (): Node | null {
-        let templateNode = this.popupTemplateNode?.getChildByName('SpriteRenderer')
-            ?? this.popupTemplateNode?.getComponentInChildren(SpriteRenderer)?.node
-            ?? null;
-        let templateRenderer = templateNode?.getComponent(SpriteRenderer) ?? null;
-        if (!templateNode || !templateRenderer) {
-            return null;
-        }
-
-        let visual = new Node('PopupVisual');
-        visual.layer = templateNode.layer;
-        visual.setPosition(templateNode.position);
-        visual.setRotation(templateNode.rotation);
-        visual.setScale(templateNode.scale);
-
-        let renderer = visual.addComponent(SpriteRenderer);
-        renderer.spriteFrame = templateRenderer.spriteFrame;
-        renderer.color = templateRenderer.color.clone();
-        renderer.flipX = templateRenderer.flipX;
-        renderer.flipY = templateRenderer.flipY;
-
-        let sharedMaterial = templateRenderer.getSharedMaterial(0);
-        if (sharedMaterial) {
-            renderer.setMaterial(sharedMaterial, 0);
-        }
-
-        return visual;
     }
 
     private attachBillboardsToPopup (popup: Node): void {

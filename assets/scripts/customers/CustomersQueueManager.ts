@@ -607,7 +607,9 @@ export class CustomersQueueManager extends Component {
     }
 
     private hideCustomerOrder (entry: QueueEntry): void {
-        const popup = entry.node.getComponentInChildren(OrderPopup);
+        const popup = entry.node.getComponent(CatAnimationController)?.getOrderPopup()
+            ?? entry.node.getComponentsInChildren(OrderPopup).find((candidate) => candidate?.isValid && candidate.belongsToCustomer(entry.node))
+            ?? null;
         if (!popup || !popup.parentss) {
             return;
         }
@@ -706,7 +708,9 @@ export class CustomersQueueManager extends Component {
     }
 
     private resetCustomerOrder (entry: QueueEntry): void {
-        const popup = entry.node.getComponentInChildren(OrderPopup);
+        const popup = entry.node.getComponent(CatAnimationController)?.getOrderPopup()
+            ?? entry.node.getComponentsInChildren(OrderPopup).find((candidate) => candidate?.isValid && candidate.belongsToCustomer(entry.node))
+            ?? null;
         if (!popup) {
             return;
         }

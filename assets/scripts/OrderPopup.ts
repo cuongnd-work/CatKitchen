@@ -28,8 +28,14 @@ export class OrderPopup extends Component {
     orderCompletedEvents: EventHandler[] = [];
 
     private _remainingCount = 0;
+    private _lockedSpriteFrame: SpriteFrame | null = null;
+
+    onLoad (): void {
+        this.captureLockedSpriteFrame();
+    }
 
     start () {
+        this.refreshSprite();
         if (this.initialCount <= 0) {
             this.initialCount = 1;
         }
@@ -79,6 +85,23 @@ export class OrderPopup extends Component {
         return this._remainingCount <= 0;
     }
 
+    public belongsToCustomer (customerNode: Node | null): boolean {
+        if (!customerNode || !customerNode.isValid) {
+            return false;
+        }
+
+        let current: Node | null = this.node;
+        while (current) {
+            if (current === customerNode) {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
     private refreshCountLabel (): void {
         if (!this.text) {
             return;
@@ -114,6 +137,29 @@ export class OrderPopup extends Component {
     /* ================= CORE ================= */
 
     public refreshSprite () {
-        // Keep the sprite assigned in the scene/prefab.
+        this.captureLockedSpriteFrame();
+        if (!this.targetSprite || !this.targetSprite.isValid) {
+            return;
+        }
+
+        if (this._lockedSpriteFrame) {
+            this.targetSprite.spriteFrame = this._lockedSpriteFrame;
+            return;
+        }
+
+        if (this.alwaysUseFirst && this.spriteFrames.length > 0 && this.spriteFrames[0]) {
+            this._lockedSpriteFrame = this.spriteFrames[0];
+            this.targetSprite.spriteFrame = this._lockedSpriteFrame;
+        }
+    }
+
+    private captureLockedSpriteFrame (): void {
+        if (this._lockedSpriteFrame || !this.targetSprite || !this.targetSprite.isValid) {
+            return;
+        }
+
+        if (this.targetSprite.spriteFrame) {
+            this._lockedSpriteFrame = this.targetSprite.spriteFrame;
+        }
     }
 }
