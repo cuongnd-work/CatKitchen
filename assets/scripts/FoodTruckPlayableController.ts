@@ -31,6 +31,7 @@ import {
 import super_html_script from 'db://assets/plugins/playable-foundation/super-html/super_html_script';
 import {BillboardToCamera} from './BillboardToCamera';
 import {CameraFollow} from './CameraFollow';
+import {DefaultOrthographicCamera} from './DefaultOrthographicCamera';
 import {OrientationCameraOrthoAdjuster} from './OrientationCameraOrthoAdjuster';
 import {UIScreenResolution} from './UIScreenResolution';
 
@@ -53,6 +54,18 @@ type LaneData = {
     rPoint: Vec3 | null;
     progressPoint: Vec3 | null;
 };
+
+@ccclass('LaneUnlockCameraConfig')
+class LaneUnlockCameraConfig {
+    @property({ type: Vec3, tooltip: 'Camera position to apply for this lane unlock step.' })
+    public position: Vec3 = new Vec3(-10.3644, 18.9254, -14.4767);
+
+    @property({ type: Vec3, tooltip: 'Camera rotation (Euler) to apply for this lane unlock step.' })
+    public rotation: Vec3 = new Vec3(-43.4321, -148.3135, 0);
+
+    @property({ tooltip: 'Orthographic height to apply for this lane unlock step.', min: 0 })
+    public orthoHeight = 10;
+}
 
 @ccclass('FoodTruckPlayableController')
 export class FoodTruckPlayableController extends Component {
@@ -179,6 +192,13 @@ export class FoodTruckPlayableController extends Component {
 
     @property(SpriteFrame)
     public handFrameBSpriteFrame: SpriteFrame | null = null;
+
+    @property({ type: [LaneUnlockCameraConfig], tooltip: 'Camera configs for lane unlock 2, 3, 4.' })
+    public laneUnlockCameraConfigs: LaneUnlockCameraConfig[] = [
+        new LaneUnlockCameraConfig(),
+        new LaneUnlockCameraConfig(),
+        new LaneUnlockCameraConfig(),
+    ];
 
     protected onLoad (): void {
         let scene = this.node.scene;
@@ -427,10 +447,16 @@ export class FoodTruckPlayableController extends Component {
             orthoAdjuster.enabled = false;
         }
 
+        let defaultOrthographicCamera = mainCameraNode.getComponent(DefaultOrthographicCamera);
         let camera = mainCameraNode.getComponent(Camera);
         if (camera) {
-            camera.projection = Camera.ProjectionType.PERSPECTIVE;
-            camera.fov = 45;
+            if (defaultOrthographicCamera) {
+                camera.projection = Camera.ProjectionType.ORTHO;
+                camera.orthoHeight = Math.max(0, defaultOrthographicCamera.orthoHeight);
+            } else {
+                camera.projection = Camera.ProjectionType.PERSPECTIVE;
+                camera.fov = 45;
+            }
             camera.near = 1;
             camera.far = 1000;
             camera.visibility = Layers.Enum.DEFAULT;
@@ -806,6 +832,7 @@ export class FoodTruckPlayableController extends Component {
             sequence = sequence.then(this.tweenCarAlongPoints(car, section.points, section.speed, section.minSegmentDuration));
             if (section.pauseAfter > 0) {
                 sequence = sequence.call(() => {
+                    this.destroyActivePopupForCar(car);
                     this.playCatCookingAnim();
                     this.playServiceProgress(lane, car, section.pauseAfter);
                 }).delay(section.pauseAfter);
@@ -893,7 +920,38 @@ export class FoodTruckPlayableController extends Component {
             nextLane.barrier.active = false;
         }
         this._openedLanes++;
+        this.applyLaneUnlockCameraConfig();
         this.tryEnterScene2();
+    }
+
+    private applyLaneUnlockCameraConfig (): void {
+        if (this._openedLanes < 2 || !this._mainCameraNode?.isValid) {
+            return;
+        }
+
+        let configIndex = Math.min(this._openedLanes - 2, this.laneUnlockCameraConfigs.length - 1);
+        let config = this.laneUnlockCameraConfigs[configIndex];
+        if (!config) {
+            return;
+        }
+
+        this._mainCameraNode.setPosition(
+            config.position.x,
+            config.position.y,
+            config.position.z,
+        );
+        this._mainCameraNode.setRotationFromEuler(
+            config.rotation.x,
+            config.rotation.y,
+            config.rotation.z,
+        );
+
+        let camera = this._mainCameraNode.getComponent(Camera);
+        if (!camera) {
+            return;
+        }
+
+        camera.orthoHeight = Math.max(0, config.orthoHeight);
     }
 
     private canRepairNextSlough (): boolean {
@@ -998,6 +1056,22 @@ export class FoodTruckPlayableController extends Component {
         let activePopup = this._activeCarPopups.get(car);
         if (activePopup === popup) {
             this._activeCarPopups.delete(car);
+        }
+    }
+
+    private destroyActivePopupForCar (car: Node | null): void {
+        if (!car?.isValid) {
+            return;
+        }
+
+        let popup = this._activeCarPopups.get(car);
+        if (!popup) {
+            return;
+        }
+
+        this.clearActivePopupForCar(car, popup);
+        if (popup.isValid) {
+            popup.destroy();
         }
     }
 
