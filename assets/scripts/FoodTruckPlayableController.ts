@@ -1709,8 +1709,8 @@ export class FoodTruckPlayableController extends Component {
         }
         if (this._removeBarrierLabel) {
             this._removeBarrierLabel.string = this._openedLanes >= this.getLaneTotal()
-                ? 'Open Car Route\nFull'
-                : `Open Car Route\n${removeBarrierCost}`;
+                ? 'Full'
+                : `${removeBarrierCost}`;
         }
         if (this._removeBarrierCostIcon?.node) {
             this._removeBarrierCostIcon.node.active = removeBarrierVisible && this._openedLanes < this.getLaneTotal();
@@ -1737,9 +1737,9 @@ export class FoodTruckPlayableController extends Component {
         if (this._openLaneLabel) {
             this._openLaneLabel.string = openLaneVisible
                 ? this._repairedSloughCount >= this.repairableSloughCount
-                    ? 'Repair Slough\nFull'
-                    : `Repair Slough\n${openLaneCost}`
-                : 'Repair Complete';
+                    ? 'Full'
+                    : `${openLaneCost}`
+                : 'Full';
         }
         this.setButtonLockedVisual(this._openLaneButton, canRepair);
         if (this._openLaneCostIcon?.node) {
