@@ -79,8 +79,8 @@ export class FoodTruckPlayableController extends Component {
     private readonly cooldownReductionPerOpenedLane = 0.5;
     private readonly minimumDispatchCooldown = 0.5;
     private readonly startingCash = 30;
-    private readonly scene1Reward = 20;
-    private readonly scene2Reward = 20;
+    private readonly scene1Reward = 80;
+    private readonly scene2Reward = 80;
     private readonly scene2StartMoney = 220;
     private readonly endingMoneyTarget = 720;
     private readonly scene2MaxConcurrentDispatches = 3;
