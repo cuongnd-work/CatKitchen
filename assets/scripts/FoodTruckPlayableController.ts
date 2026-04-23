@@ -1586,15 +1586,7 @@ export class FoodTruckPlayableController extends Component {
                 continue;
             }
 
-            if (button === this._removeBarrierButton && !this.canOpenNextRoute()) {
-                continue;
-            }
-
-            if (button === this._dispatchButton && !this.canDispatchMoreCars(true)) {
-                continue;
-            }
-
-            if (button === this._openLaneButton && !this.canRepairNextSlough()) {
+            if (!this.canPressButtonForHandHint(button)) {
                 continue;
             }
 
@@ -1602,6 +1594,25 @@ export class FoodTruckPlayableController extends Component {
         }
 
         return null;
+    }
+
+    private canPressButtonForHandHint (button: Node): boolean {
+        if (button === this._removeBarrierButton) {
+            return this.canOpenNextRoute() && this.canAfford(this.getRemoveBarrierCost());
+        }
+
+        if (button === this._dispatchButton) {
+            return this._phase !== 'ending'
+                && this._openedLanes > 0
+                && this.canDispatchMoreCars(true)
+                && this.canAfford(this.dispatchCarCost);
+        }
+
+        if (button === this._openLaneButton) {
+            return this.canRepairNextSlough() && this.canAfford(this.getOpenLaneCost());
+        }
+
+        return false;
     }
 
     private getDispatchCooldown (): number {
