@@ -109,7 +109,7 @@
       "b": 255,
       "a": 255
     },
-    "duration": -1,
+    "duration": 0.5,
     "emissionRate": 1019.799985098839,
     "life": 5,
     "lifeVar": 0.5,
@@ -210,6 +210,7 @@
       "__id__": 0
     },
     "fileId": "d4FQP3gX5OSIc1hzZgAKvS",
+    "instance": null,
     "targetOverrides": null
   }
 ]

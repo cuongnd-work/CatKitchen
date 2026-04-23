@@ -16,6 +16,7 @@ import {
     Label,
     Layers,
     Node,
+    ParticleSystem2D,
     SkeletalAnimation,
     SpriteRenderer,
     Sprite,
@@ -65,6 +66,9 @@ class LaneUnlockCameraConfig {
 
     @property({ tooltip: 'Orthographic height to apply for this lane unlock step.', min: 0 })
     public orthoHeight = 10;
+
+    @property({ tooltip: 'Tween duration in seconds for this lane unlock camera step.', min: 0 })
+    public tweenDuration = 0.45;
 }
 
 @ccclass('FoodTruckPlayableController')
@@ -97,6 +101,7 @@ export class FoodTruckPlayableController extends Component {
     private readonly carPopupWaveMin = 5;
     private readonly carPopupWaveMax = 10;
     private readonly carPopupStaggerDelay = 0.22;
+    private readonly laneActionParticleLifetime = 1.5;
 
     private _phase: ScenePhase = 'scene1';
     private _money = this.startingCash;
@@ -171,6 +176,7 @@ export class FoodTruckPlayableController extends Component {
     private _carHornAudio: AudioClip | null = null;
     private _engineAudioSource: AudioSource | null = null;
     private _activeCarPopups = new Map<Node, Node>();
+    private _laneActionParticleTemplate: Node | null = null;
 
     @property(Node)
     public endingSelectionNode: Node | null = null;
@@ -420,6 +426,10 @@ export class FoodTruckPlayableController extends Component {
             return this._worldRoot?.getChildByName(sloughName)
                 ?? this.findNodeByName(scene, sloughName);
         }).filter((node): node is Node => !!node);
+        this._laneActionParticleTemplate = this.findNodeByName(scene, 'Particle2D');
+        if (this._laneActionParticleTemplate?.isValid) {
+            this._laneActionParticleTemplate.active = false;
+        }
 
         this.initializeEndingProgress();
     }
@@ -917,6 +927,7 @@ export class FoodTruckPlayableController extends Component {
 
         nextLane.open = true;
         if (nextLane.barrier) {
+            this.spawnLaneActionParticle(nextLane.barrier);
             nextLane.barrier.active = false;
         }
         this._openedLanes++;
@@ -935,23 +946,50 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        this._mainCameraNode.setPosition(
-            config.position.x,
-            config.position.y,
-            config.position.z,
-        );
-        this._mainCameraNode.setRotationFromEuler(
-            config.rotation.x,
-            config.rotation.y,
-            config.rotation.z,
-        );
+        const duration = Math.max(0, config.tweenDuration);
+        Tween.stopAllByTarget(this._mainCameraNode);
+        if (duration <= 0) {
+            this._mainCameraNode.setPosition(
+                config.position.x,
+                config.position.y,
+                config.position.z,
+            );
+            this._mainCameraNode.setRotationFromEuler(
+                config.rotation.x,
+                config.rotation.y,
+                config.rotation.z,
+            );
+        } else {
+            tween(this._mainCameraNode)
+                .to(duration, {
+                    position: new Vec3(config.position.x, config.position.y, config.position.z),
+                    eulerAngles: new Vec3(config.rotation.x, config.rotation.y, config.rotation.z),
+                }, { easing: 'sineInOut' })
+                .start();
+        }
 
         let camera = this._mainCameraNode.getComponent(Camera);
         if (!camera) {
             return;
         }
 
-        camera.orthoHeight = Math.max(0, config.orthoHeight);
+        const targetOrthoHeight = Math.max(0, config.orthoHeight);
+        if (duration <= 0) {
+            camera.orthoHeight = targetOrthoHeight;
+            return;
+        }
+
+        const orthoTweenState = { value: camera.orthoHeight };
+        tween(orthoTweenState)
+            .to(duration, { value: targetOrthoHeight }, {
+                easing: 'sineInOut',
+                onUpdate: () => {
+                    if (camera.node?.isValid) {
+                        camera.orthoHeight = orthoTweenState.value;
+                    }
+                },
+            })
+            .start();
     }
 
     private canRepairNextSlough (): boolean {
@@ -1265,10 +1303,47 @@ export class FoodTruckPlayableController extends Component {
     private repairNextSlough (): void {
         let sloughNode = this._sloughNodes[this._repairedSloughCount] ?? null;
         if (sloughNode?.isValid) {
+            this.spawnLaneActionParticle(sloughNode);
             sloughNode.active = false;
         }
 
         this._repairedSloughCount = Math.min(this.repairableSloughCount, this._repairedSloughCount + 1);
+    }
+
+    private spawnLaneActionParticle (targetNode: Node | null): void {
+        if (!targetNode?.isValid || !this._laneActionParticleTemplate?.isValid) {
+            return;
+        }
+
+        let particleNode = instantiate(this._laneActionParticleTemplate);
+        let parent = targetNode.parent ?? this._worldRoot ?? this._laneActionParticleTemplate.parent;
+        if (!parent?.isValid) {
+            particleNode.destroy();
+            return;
+        }
+
+        parent.addChild(particleNode);
+        particleNode.active = true;
+        if (targetNode.parent === parent) {
+            particleNode.setPosition(targetNode.position);
+            particleNode.setRotation(targetNode.rotation);
+        } else {
+            particleNode.setWorldPosition(targetNode.getWorldPosition(new Vec3()));
+            particleNode.setWorldRotation(targetNode.getWorldRotation());
+        }
+        particleNode.setScale(this._laneActionParticleTemplate.scale);
+
+        const particleSystems = particleNode.getComponentsInChildren(ParticleSystem2D);
+        for (const particleSystem of particleSystems) {
+            particleSystem.stopSystem();
+            particleSystem.resetSystem();
+        }
+
+        this.scheduleOnce(() => {
+            if (particleNode.isValid) {
+                particleNode.destroy();
+            }
+        }, this.laneActionParticleLifetime);
     }
 
     private completeAllSloughRepairs (): void {
