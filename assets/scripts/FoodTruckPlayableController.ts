@@ -90,7 +90,7 @@ export class FoodTruckPlayableController extends Component {
     private readonly manualDispatchesToAuto = 20;
     private readonly autoCarsToEnding = 6;
     private readonly handHintIdleDelay = 4;
-    private readonly handHintOffset = new Vec3(0, -86, 0);
+    private readonly handHintOffset = new Vec3(-70, -86, 0);
     private readonly hornPromptIdleDelay = 4;
     private readonly hornPromptRepeatDelay = 3.2;
     private readonly carPopupInterval = 3.2;
@@ -1695,10 +1695,12 @@ export class FoodTruckPlayableController extends Component {
     private refreshUiState (): void {
         const removeBarrierCost = this.getRemoveBarrierCost();
         const openLaneCost = this.getOpenLaneCost();
+        let removeBarrierFull = this._openedLanes >= this.getLaneTotal();
+        let openLaneFull = this._repairedSloughCount >= this.repairableSloughCount;
         let repairVisible = this._phase === 'scene1';
-        let removeBarrierVisible = this._phase === 'scene1';
+        let removeBarrierVisible = this._phase !== 'ending' && (this._phase === 'scene1' || removeBarrierFull);
         let dispatchVisible = this._phase === 'scene2' || (this._phase === 'scene1' && this._openedLanes > 0);
-        let openLaneVisible = this.hasUnlockedOpenLaneButton();
+        let openLaneVisible = this._phase !== 'ending' && (this.hasUnlockedOpenLaneButton() || openLaneFull);
         let canRepair = this.canRepairNextSlough() && this.canAfford(openLaneCost);
         let canOpenRoute = this.canOpenNextRoute() && this.canAfford(removeBarrierCost);
         let canDispatch = this._phase !== 'ending'
@@ -1708,14 +1710,14 @@ export class FoodTruckPlayableController extends Component {
             this._removeBarrierButton.active = removeBarrierVisible;
         }
         if (this._removeBarrierLabel) {
-            this._removeBarrierLabel.string = this._openedLanes >= this.getLaneTotal()
+            this._removeBarrierLabel.string = removeBarrierFull
                 ? 'Full'
                 : `${removeBarrierCost}`;
         }
         if (this._removeBarrierCostIcon?.node) {
-            this._removeBarrierCostIcon.node.active = removeBarrierVisible && this._openedLanes < this.getLaneTotal();
+            this._removeBarrierCostIcon.node.active = removeBarrierVisible && !removeBarrierFull;
         }
-        this.setButtonLockedVisual(this._removeBarrierButton, canOpenRoute);
+        this.setButtonLockedVisual(this._removeBarrierButton, canOpenRoute || removeBarrierFull);
         if (canOpenRoute) {
             this.startRemoveBarrierPulse();
         } else {
@@ -1736,14 +1738,14 @@ export class FoodTruckPlayableController extends Component {
 
         if (this._openLaneLabel) {
             this._openLaneLabel.string = openLaneVisible
-                ? this._repairedSloughCount >= this.repairableSloughCount
+                ? openLaneFull
                     ? 'Full'
                     : `${openLaneCost}`
                 : 'Full';
         }
-        this.setButtonLockedVisual(this._openLaneButton, canRepair);
+        this.setButtonLockedVisual(this._openLaneButton, canRepair || openLaneFull);
         if (this._openLaneCostIcon?.node) {
-            this._openLaneCostIcon.node.active = openLaneVisible && this._repairedSloughCount < this.repairableSloughCount;
+            this._openLaneCostIcon.node.active = openLaneVisible && !openLaneFull;
         }
 
         this.refreshMoneyLabel();
@@ -2371,12 +2373,12 @@ export class FoodTruckPlayableController extends Component {
         if (!this._removeBarrierButton || this._removeBarrierPulse) {
             return;
         }
-        this._removeBarrierButton.setScale(1, 1, 1);
+        this._removeBarrierButton.setScale(1.2, 1.2, 1.2);
         this._removeBarrierPulse = tween(this._removeBarrierButton)
             .repeatForever(
                 tween()
-                    .to(0.35, { scale: new Vec3(1.08, 1.08, 1) })
-                    .to(0.35, { scale: new Vec3(1, 1, 1) }),
+                    .to(0.35, { scale: new Vec3(1.3, 1.3, 1) })
+                    .to(0.35, { scale: new Vec3(1.2, 1.2, 1) }),
             )
             .start();
     }
@@ -2389,7 +2391,7 @@ export class FoodTruckPlayableController extends Component {
             this._removeBarrierPulse.stop();
             this._removeBarrierPulse = null;
         }
-        this._removeBarrierButton.setScale(1, 1, 1);
+        this._removeBarrierButton.setScale(1.2, 1.2,1);
     }
 
     private findNodeByName (root: Node, name: string): Node | null {
