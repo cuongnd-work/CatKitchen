@@ -1682,7 +1682,7 @@ export class FoodTruckPlayableController extends Component {
         if (this._removeBarrierCostIcon?.node) {
             this._removeBarrierCostIcon.node.active = removeBarrierVisible && !removeBarrierFull;
         }
-        this.setButtonLockedVisual(this._removeBarrierButton, canOpenRoute || removeBarrierFull);
+        this.setButtonLockedVisual(this._removeBarrierButton, canOpenRoute || removeBarrierFull, removeBarrierFull);
         if (canOpenRoute) {
             this.startRemoveBarrierPulse();
         } else {
@@ -1692,7 +1692,7 @@ export class FoodTruckPlayableController extends Component {
         if (this._dispatchButton) {
             this._dispatchButton.active = dispatchVisible;
         }
-        this.setButtonLockedVisual(this._dispatchButton, canDispatch);
+        this.setButtonLockedVisual(this._dispatchButton, canDispatch, false);
         if (this._dispatchCostIcon?.node) {
             this._dispatchCostIcon.node.active = dispatchVisible;
         }
@@ -1708,7 +1708,7 @@ export class FoodTruckPlayableController extends Component {
                     : `${openLaneCost}`
                 : 'Full';
         }
-        this.setButtonLockedVisual(this._openLaneButton, canRepair || openLaneFull);
+        this.setButtonLockedVisual(this._openLaneButton, canRepair || openLaneFull, openLaneFull);
         if (this._openLaneCostIcon?.node) {
             this._openLaneCostIcon.node.active = openLaneVisible && !openLaneFull;
         }
@@ -2304,13 +2304,17 @@ export class FoodTruckPlayableController extends Component {
         buttonNode.on(Node.EventType.TOUCH_CANCEL, restoreState, this);
     }
 
-    private setButtonLockedVisual (button: Node | null, enabled: boolean): void {
+    private setButtonLockedVisual (button: Node | null, enabled: boolean, isFull: boolean = false): void {
         if (!button || !button.isValid) {
             return;
         }
 
         let opacity = button.getComponent(UIOpacity) ?? button.addComponent(UIOpacity);
-        opacity.opacity = enabled ? 255 : 120;
+        opacity.opacity = isFull
+            ? 128
+            : enabled
+                ? 255
+                : 120;
     }
 
     private applyUiFont (): void {
