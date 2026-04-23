@@ -1,62 +1,74 @@
-import { _decorator, Component, Widget, view, UITransform, Node, screen, Size } from 'cc';
-const { ccclass, property, executeInEditMode, menu, requireComponent } = _decorator;
+import { _decorator, Component, Widget, view, UITransform, screen, Node } from 'cc';
+
+const { ccclass, executeInEditMode, menu, requireComponent } = _decorator;
 
 @ccclass('UIScreenResolution')
 @executeInEditMode(true)
 @requireComponent(Widget)
-@requireComponent(UITransform)
 @menu('UI/UIScreenResolution')
 export class UIScreenResolution extends Component {
-    @property(Node) Doc: Node = null!;
-    @property(Node) Ngang: Node = null!;
-
     private widget: Widget = null!;
     private uiTransform: UITransform = null!;
+    private designAspectRatio = 0;
 
     onLoad() {
         this.assignField();
-        // Chạy kiểm tra ngay lần đầu tiên
+        this.assignWidget();
+        this.getAspectRatio();
+    }
+
+    private getAspectRatio() {
+        const designSize = view.getDesignResolutionSize();
+        this.designAspectRatio = designSize.width / designSize.height;
         this.resizeToFullScreen();
+    }
+
+    private assignWidget() {
+        Object.assign(this.widget, {
+            isAlignLeft: true,
+            isAlignRight: true,
+            isAlignTop: true,
+            isAlignBottom: true,
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+        });
     }
 
     private assignField() {
         this.widget = this.getComponent(Widget)!;
         this.uiTransform = this.getComponent(UITransform)!;
-
-        this.widget.isAlignLeft = true;
-        this.widget.isAlignRight = true;
-        this.widget.isAlignTop = true;
-        this.widget.isAlignBottom = true;
-        this.widget.left = 0;
-        this.widget.right = 0;
-        this.widget.top = 0;
-        this.widget.bottom = 0;
     }
 
     onEnable() {
-        view.on('canvas-resize', this.resizeToFullScreen, this);
         this.node.on(Node.EventType.SIZE_CHANGED, this.resizeToFullScreen, this);
     }
 
     onDisable() {
-        view.off('canvas-resize', this.resizeToFullScreen, this);
         this.node.off(Node.EventType.SIZE_CHANGED, this.resizeToFullScreen, this);
     }
 
     public resizeToFullScreen() {
-        let w = view.getFrameSize().width;
-        let h = view.getFrameSize().height;
 
+        if (!this.widget || !this.uiTransform) return;
+        const frameSize = screen.windowSize;
+        const frameAspectRatio = frameSize.width / frameSize.height;
+        const heightCamDefaut = 540;
+        const heiCamSet = 1000;
+        let ratioCam = heightCamDefaut / heiCamSet;
+        // console.log(frameSize)
 
-        if (w > h) {
-            if (this.Ngang) this.Ngang.active = true;
-            if (this.Doc) this.Doc.active = false;
+        this.widget.left = this.widget.right = this.widget.top = this.widget.bottom = null;
+
+        if (frameAspectRatio > this.designAspectRatio) {
+            this.uiTransform.height = view.getDesignResolutionSize().height;
+            this.uiTransform.width = this.uiTransform.height * frameAspectRatio;
         } else {
-            if (this.Doc) this.Doc.active = true;
-            if (this.Ngang) this.Ngang.active = false;
+            this.uiTransform.width = view.getDesignResolutionSize().width;
+            this.uiTransform.height = this.uiTransform.width / frameAspectRatio;
         }
 
-        // Cập nhật lại Widget để UI không bị lệch
-        if (this.widget) this.widget.updateAlignment();
+        this.widget.left = this.widget.right = this.widget.top = this.widget.bottom = 0;
     }
 }

@@ -34,7 +34,6 @@ import {BillboardToCamera} from './BillboardToCamera';
 import {CameraFollow} from './CameraFollow';
 import {DefaultOrthographicCamera} from './DefaultOrthographicCamera';
 import {OrientationCameraOrthoAdjuster} from './OrientationCameraOrthoAdjuster';
-import {UIScreenResolution} from './UIScreenResolution';
 
 let { ccclass, property } = _decorator;
 
@@ -221,7 +220,6 @@ export class FoodTruckPlayableController extends Component {
             FoodTruckPlayableController._activeInstance.enabled = false;
         }
         FoodTruckPlayableController._activeInstance = this;
-        this.prepareLegacyUiNodes();
         this.loadEngineStartAudio();
         this.loadRankupAudio();
         this.loadCarHornAudio();
@@ -264,39 +262,6 @@ export class FoodTruckPlayableController extends Component {
         this.updateServiceProgressPosition();
         if (this._phase === 'scene2' && this.canDispatchMoreCars() && this._elapsed >= this._nextDispatchTime) {
             this.tryDispatchCar();
-        }
-    }
-
-    private prepareLegacyUiNodes (): void {
-        let canvasNode = this.resolveCanvasNode();
-        let screenResolution = this.node.getComponentInChildren(UIScreenResolution);
-        if (screenResolution) {
-            screenResolution.enabled = false;
-            if (screenResolution.Doc) {
-                screenResolution.Doc.active = false;
-            }
-            if (screenResolution.Ngang) {
-                screenResolution.Ngang.active = false;
-            }
-        }
-
-        if (!canvasNode) {
-            return;
-        }
-
-        let level = canvasNode.getChildByName('Level');
-        if (level) {
-            level.active = false;
-        }
-
-        let legacyPortraitWidget = canvasNode.getChildByName('Wiget-portait');
-        if (legacyPortraitWidget) {
-            legacyPortraitWidget.active = false;
-        }
-
-        let legacyLandscapeWidget = canvasNode.getChildByName('Wiget-portait-001');
-        if (legacyLandscapeWidget) {
-            legacyLandscapeWidget.active = false;
         }
     }
 
