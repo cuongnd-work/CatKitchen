@@ -836,6 +836,7 @@ export class FoodTruckPlayableController extends Component {
         let frontSlot = lane.queueSlots[0] ?? car.position.clone();
         let route = this.getLaneRouteTargets(lane, frontSlot);
         let drivePath = this.buildDrivePath(lane, car.position.clone(), route.sPoint, route.rPoint);
+        let serviceCompleted = false;
 
         Tween.stopAllByTarget(car);
         this.playEngineStartAudio();
@@ -848,14 +849,24 @@ export class FoodTruckPlayableController extends Component {
                     this.destroyActivePopupForCar(car);
                     this.playCatCookingAnim();
                     this.playServiceProgress(lane, car, section.pauseAfter);
-                }).delay(section.pauseAfter);
+                }).delay(section.pauseAfter)
+                    .call(() => {
+                        if (serviceCompleted) {
+                            return;
+                        }
+
+                        serviceCompleted = true;
+                        this.onCarServed(lane);
+                    });
             }
         }
 
         sequence
             .call(() => {
                 this.recycleCarToLane(lane, car);
-                this.onCarServed(lane);
+                if (!serviceCompleted) {
+                    this.onCarServed(lane);
+                }
             })
             .start();
     }
