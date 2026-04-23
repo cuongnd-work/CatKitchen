@@ -1006,9 +1006,9 @@ export class FoodTruckPlayableController extends Component {
             this._endingGoalAmount = parsedGoal;
         }
 
-        this._endingProgressValue = 0;
-        this._endingProgressDisplayValue = 0;
-        this._endingProgressTweenState.value = 0;
+        this._endingProgressValue = Math.max(0, Math.min(this._money, this._endingGoalAmount));
+        this._endingProgressDisplayValue = this._endingProgressValue;
+        this._endingProgressTweenState.value = this._endingProgressValue;
         this.updateEndingProgressUi(true);
     }
 
@@ -1164,12 +1164,12 @@ export class FoodTruckPlayableController extends Component {
         return this._endingProgressMaterial;
     }
 
-    private addEndingProgress (amount: number): void {
-        if (amount <= 0 || this._endingGoalAmount <= 0) {
+    private syncEndingProgressToMoney (): void {
+        if (this._endingGoalAmount <= 0) {
             return;
         }
 
-        this._endingProgressValue = Math.min(this._endingGoalAmount, this._endingProgressValue + amount);
+        this._endingProgressValue = Math.max(0, Math.min(this._money, this._endingGoalAmount));
         this.animateEndingProgressUi();
 
         if (this._phase === 'scene2' && this._endingProgressValue >= this._endingGoalAmount) {
@@ -1205,8 +1205,7 @@ export class FoodTruckPlayableController extends Component {
         }
 
         if (this._endingProgressLabel) {
-            let remaining = Math.max(0, Math.ceil(this._endingGoalAmount - this._endingProgressDisplayValue));
-            this._endingProgressLabel.string = `${remaining}`;
+            this._endingProgressLabel.string = `${this._endingGoalAmount}`;
         }
     }
 
@@ -1673,6 +1672,7 @@ export class FoodTruckPlayableController extends Component {
         }
 
         this._money -= cost;
+        this.syncEndingProgressToMoney();
         this.refreshUiState();
         this.animateMoneyLabel(true);
         return true;
@@ -1784,7 +1784,7 @@ export class FoodTruckPlayableController extends Component {
     private addMoney (amount: number): void {
         let gained = Math.max(0, Math.floor(amount));
         this._money += gained;
-        this.addEndingProgress(gained);
+        this.syncEndingProgressToMoney();
         this.refreshUiState();
     }
 
