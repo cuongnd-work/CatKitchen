@@ -1679,8 +1679,8 @@ export class FoodTruckPlayableController extends Component {
             && this._removeBarrierButton.activeInHierarchy
             && this._openLaneButton?.isValid
             && this._openLaneButton.activeInHierarchy
-            && this._openLaneButtonBasePosition) {
-            this._removeBarrierButton.setPosition(this._openLaneButtonBasePosition);
+            && this._removeBarrierButtonBasePosition) {
+            this._removeBarrierButton.setPosition(this._removeBarrierButtonBasePosition);
         }
 
         if (activeButtons.length === 1
