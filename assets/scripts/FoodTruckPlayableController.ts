@@ -83,7 +83,7 @@ export class FoodTruckPlayableController extends Component {
     private readonly dispatchCarCost = 0;
     private readonly repairableSloughCount = 4;
     private readonly handHintIdleDelay = 4;
-    private readonly handHintOffset = new Vec3(-70, -86, 0);
+    private readonly handHintOffset = new Vec3(100, -86, 0);
     private readonly hornPromptIdleDelay = 4;
     private readonly hornPromptRepeatDelay = 3.2;
     private readonly carPopupInterval = 3.2;
@@ -1496,7 +1496,10 @@ export class FoodTruckPlayableController extends Component {
         this._handHintRoot = root;
         this._handHintAnimation = animation;
         this._handHintReady = true;
-        this.showHandHintForCurrentTarget();
+        this.scheduleOnce(() => {
+            this.showHandHintForCurrentTarget();
+            this.scheduleOnce(this.showHandHintForCurrentTarget, 0);
+        }, 0);
     }
 
     private createHandFrameNode (parent: Node, name: string, frame: SpriteFrame): Node {
@@ -1542,17 +1545,27 @@ export class FoodTruckPlayableController extends Component {
 
         this._handHintTarget = target;
         let handScale = this._handHintRoot.getScale();
-        let targetPosition = target.position.clone().add(new Vec3(
+        let targetPosition = this.resolveHandHintTargetPosition(target);
+        targetPosition.add(new Vec3(
             this.handHintOffset.x * handScale.x,
             this.handHintOffset.y * handScale.y,
             this.handHintOffset.z,
         ));
-        this._handHintRoot.setPosition(targetPosition.x + 145.9, targetPosition.y, targetPosition.z);
+        this._handHintRoot.setPosition(targetPosition);
         this._handHintRoot.active = true;
         if (this._handHintAnimation && this._handHintClip) {
             this._handHintAnimation.play(this._handHintClip.name);
         }
     };
+
+    private resolveHandHintTargetPosition (target: Node): Vec3 {
+        if (!this._overlayRoot?.isValid) {
+            return target.position.clone();
+        }
+
+        let worldPosition = target.getWorldPosition(new Vec3());
+        return this._overlayRoot.inverseTransformPoint(new Vec3(), worldPosition);
+    }
 
     private hideHandHint (): void {
         if (!this._handHintRoot?.isValid) {
