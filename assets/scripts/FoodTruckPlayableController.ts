@@ -141,6 +141,7 @@ export class FoodTruckPlayableController extends Component {
     private _removeBarrierButton: Node | null = null;
     private _dispatchButton: Node | null = null;
     private _openLaneButton: Node | null = null;
+    private _primaryButtonCenterPosition: Vec3 | null = null;
     private _removeBarrierButtonBasePosition: Vec3 | null = null;
     private _dispatchButtonBasePosition: Vec3 | null = null;
     private _openLaneButtonBasePosition: Vec3 | null = null;
@@ -288,6 +289,7 @@ export class FoodTruckPlayableController extends Component {
         this._removeBarrierButton = this.findNodeByName(canvasNode, 'RemoveBarrierButton');
         this._dispatchButton = this.findNodeByName(canvasNode, 'DispatchButton');
         this._openLaneButton = this.findNodeByName(canvasNode, 'OpenLaneButton');
+        this._primaryButtonCenterPosition = this._openLaneButton?.position.clone() ?? null;
         this._removeBarrierButtonBasePosition = this._removeBarrierButton?.position.clone() ?? null;
         this._dispatchButtonBasePosition = this._dispatchButton?.position.clone() ?? null;
         this._openLaneButtonBasePosition = this._openLaneButton?.position.clone() ?? null;
@@ -1660,11 +1662,32 @@ export class FoodTruckPlayableController extends Component {
             this._openLaneButton,
         ].filter((button) => !!button?.isValid && button.activeInHierarchy) as Node[];
 
+        if (this._openLaneButton?.isValid
+            && this._openLaneButton.activeInHierarchy
+            && this._primaryButtonCenterPosition) {
+            this._openLaneButton.setPosition(this._primaryButtonCenterPosition);
+        }
+
+        if (this._removeBarrierButton?.isValid
+            && this._removeBarrierButton.activeInHierarchy
+            && !this._openLaneButton?.activeInHierarchy
+            && this._primaryButtonCenterPosition) {
+            this._removeBarrierButton.setPosition(this._primaryButtonCenterPosition);
+        }
+
+        if (this._removeBarrierButton?.isValid
+            && this._removeBarrierButton.activeInHierarchy
+            && this._openLaneButton?.isValid
+            && this._openLaneButton.activeInHierarchy
+            && this._openLaneButtonBasePosition) {
+            this._removeBarrierButton.setPosition(this._openLaneButtonBasePosition);
+        }
+
         if (activeButtons.length === 1
             && activeButtons[0] === this._dispatchButton
             && this._dispatchButton?.isValid
-            && this._removeBarrierButtonBasePosition) {
-            this._dispatchButton.setPosition(this._removeBarrierButtonBasePosition);
+            && this._primaryButtonCenterPosition) {
+            this._dispatchButton.setPosition(this._primaryButtonCenterPosition);
         }
     }
 
