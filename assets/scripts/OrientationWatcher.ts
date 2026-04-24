@@ -1,4 +1,4 @@
-import { _decorator, Component, view } from 'cc';
+import { _decorator, Component, screen, view } from 'cc';
 
 const { ccclass } = _decorator;
 
@@ -16,6 +16,11 @@ export class OrientationWatcher extends Component {
     public static get instance(): OrientationWatcher | null {
         return this._instance;
     }
+
+    public static resolveOrientation (): OrientationState {
+        return this._instance?.orientation ?? this.detectOrientation() ?? 'portrait';
+    }
+
     private currentState: OrientationState | null = null;
     private mediaQuery: MediaQueryList | null = null;
 
@@ -82,6 +87,19 @@ export class OrientationWatcher extends Component {
     }
 
     private calculateOrientation(): OrientationState | null {
+        return OrientationWatcher.detectOrientation();
+    }
+
+    private static detectOrientation (): OrientationState | null {
+        try {
+            const windowSize = screen.windowSize;
+            if (windowSize.width > 0 && windowSize.height > 0) {
+                return windowSize.width >= windowSize.height ? 'landscape' : 'portrait';
+            }
+        } catch {
+            // ignore and fall back to canvas sizing
+        }
+
         try {
             const size = view.getCanvasSize();
             if (size.width > 0 && size.height > 0) {

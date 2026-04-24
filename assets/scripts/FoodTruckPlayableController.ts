@@ -983,7 +983,7 @@ export class FoodTruckPlayableController extends Component {
     }
 
     private getCurrentOrientation (): OrientationState {
-        return OrientationWatcher.instance?.orientation ?? 'landscape';
+        return OrientationWatcher.resolveOrientation();
     }
 
     private canRepairNextSlough (): boolean {

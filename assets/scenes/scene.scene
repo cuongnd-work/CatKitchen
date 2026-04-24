@@ -18567,10 +18567,7 @@
       "__uuid__": "e26e9387-4e91-437d-83e6-c772efc4e980",
       "__expectedType__": "cc.AnimationClip"
     },
-    "clip": {
-      "__uuid__": "58263f6c-43e3-4c65-bf76-36fb080c0f8f",
-      "__expectedType__": "cc.AudioClip"
-    },
+    "clip": null,
     "rankUpclip": {
       "__uuid__": "b0e8e49d-a030-4b35-bc18-e02f19d9330d",
       "__expectedType__": "cc.AudioClip"
@@ -18580,7 +18577,7 @@
       "__expectedType__": "cc.AudioClip"
     },
     "buttonSuccessClip": {
-      "__uuid__": "adb055f1-73ea-4760-aaf2-8772ad976544",
+      "__uuid__": "d6d87666-70d6-4ff0-9469-bc94e63a4056",
       "__expectedType__": "cc.AudioClip"
     },
     "_id": "baBf4e3TBEcr+hySCfhcga"
@@ -27257,7 +27254,7 @@
       "z": 0
     },
     "landscapeOrthoHeight": 4,
-    "portraitOrthoHeight": 6.3,
+    "portraitOrthoHeight": 7,
     "tweenDuration": 0.45
   },
   {
@@ -27275,7 +27272,7 @@
       "z": 0
     },
     "landscapeOrthoHeight": 4.5,
-    "portraitOrthoHeight": 8.2,
+    "portraitOrthoHeight": 8.6,
     "tweenDuration": 0.45
   },
   {
