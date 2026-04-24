@@ -273,7 +273,8 @@
     "targetCamera": {
       "__id__": 6
     },
-    "orthoHeight": 4.6,
+    "landscapeOrthoHeight": 2.5,
+    "portraitOrthoHeight": 4.6,
     "_id": "d0RflYUdJDIKeJs3E8VRK3"
   },
   {
@@ -26914,7 +26915,8 @@
       "y": -148.3135,
       "z": 0
     },
-    "orthoHeight": 10,
+    "landscapeOrthoHeight": 10,
+    "portraitOrthoHeight": 10,
     "tweenDuration": 0.45
   },
   {
@@ -26931,7 +26933,8 @@
       "y": -148.3135,
       "z": 0
     },
-    "orthoHeight": 10,
+    "landscapeOrthoHeight": 10,
+    "portraitOrthoHeight": 10,
     "tweenDuration": 0.45
   },
   {
@@ -26948,7 +26951,8 @@
       "y": -148.3135,
       "z": 0
     },
-    "orthoHeight": 10,
+    "landscapeOrthoHeight": 10,
+    "portraitOrthoHeight": 10,
     "tweenDuration": 0.45
   },
   {
@@ -27264,7 +27268,8 @@
       "y": -51.6,
       "z": 0
     },
-    "orthoHeight": 5.8,
+    "landscapeOrthoHeight": 3.5,
+    "portraitOrthoHeight": 5.8,
     "tweenDuration": 0.45
   },
   {
@@ -27281,7 +27286,8 @@
       "y": -48,
       "z": 0
     },
-    "orthoHeight": 6.3,
+    "landscapeOrthoHeight": 4,
+    "portraitOrthoHeight": 6.3,
     "tweenDuration": 0.45
   },
   {
@@ -27298,7 +27304,8 @@
       "y": -44,
       "z": 0
     },
-    "orthoHeight": 8.2,
+    "landscapeOrthoHeight": 4.5,
+    "portraitOrthoHeight": 8.2,
     "tweenDuration": 0.45
   },
   {

@@ -34,6 +34,7 @@ import {BillboardToCamera} from './BillboardToCamera';
 import {CameraFollow} from './CameraFollow';
 import {DefaultOrthographicCamera} from './DefaultOrthographicCamera';
 import {OrientationCameraOrthoAdjuster} from './OrientationCameraOrthoAdjuster';
+import {OrientationWatcher, OrientationState} from './OrientationWatcher';
 
 let { ccclass, property } = _decorator;
 
@@ -64,8 +65,11 @@ class LaneUnlockCameraConfig {
     @property({ type: Vec3, tooltip: 'Camera rotation (Euler) to apply for this lane unlock step.' })
     public rotation: Vec3 = new Vec3(-43.4321, -148.3135, 0);
 
-    @property({ tooltip: 'Orthographic height to apply for this lane unlock step.', min: 0 })
-    public orthoHeight = 10;
+    @property({ tooltip: 'Orthographic height to apply for this lane unlock step in landscape.', min: 0 })
+    public landscapeOrthoHeight = 10;
+
+    @property({ tooltip: 'Orthographic height to apply for this lane unlock step in portrait.', min: 0 })
+    public portraitOrthoHeight = 10;
 
     @property({ tooltip: 'Tween duration in seconds for this lane unlock camera step.', min: 0 })
     public tweenDuration = 0.45;
@@ -434,7 +438,7 @@ export class FoodTruckPlayableController extends Component {
         if (camera) {
             if (defaultOrthographicCamera) {
                 camera.projection = Camera.ProjectionType.ORTHO;
-                camera.orthoHeight = Math.max(0, defaultOrthographicCamera.orthoHeight);
+                camera.orthoHeight = Math.max(0, defaultOrthographicCamera.getCurrentOrthoHeight());
             } else {
                 camera.projection = Camera.ProjectionType.PERSPECTIVE;
                 camera.fov = 45;
@@ -942,7 +946,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        const targetOrthoHeight = Math.max(0, config.orthoHeight);
+        const targetOrthoHeight = Math.max(0, this.getLaneUnlockOrthoHeight(config));
         if (duration <= 0) {
             camera.orthoHeight = targetOrthoHeight;
             return;
@@ -959,6 +963,17 @@ export class FoodTruckPlayableController extends Component {
                 },
             })
             .start();
+    }
+
+    private getLaneUnlockOrthoHeight (config: LaneUnlockCameraConfig): number {
+        const orientation = this.getCurrentOrientation();
+        return orientation === 'portrait'
+            ? config.portraitOrthoHeight
+            : config.landscapeOrthoHeight;
+    }
+
+    private getCurrentOrientation (): OrientationState {
+        return OrientationWatcher.instance?.orientation ?? 'landscape';
     }
 
     private canRepairNextSlough (): boolean {
