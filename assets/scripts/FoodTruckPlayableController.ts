@@ -141,6 +141,9 @@ export class FoodTruckPlayableController extends Component {
     private _removeBarrierButton: Node | null = null;
     private _dispatchButton: Node | null = null;
     private _openLaneButton: Node | null = null;
+    private _removeBarrierButtonBasePosition: Vec3 | null = null;
+    private _dispatchButtonBasePosition: Vec3 | null = null;
+    private _openLaneButtonBasePosition: Vec3 | null = null;
 
     private _upgradePanel: Node | null = null;
     private _fireworkNode: Node | null = null;
@@ -285,6 +288,9 @@ export class FoodTruckPlayableController extends Component {
         this._removeBarrierButton = this.findNodeByName(canvasNode, 'RemoveBarrierButton');
         this._dispatchButton = this.findNodeByName(canvasNode, 'DispatchButton');
         this._openLaneButton = this.findNodeByName(canvasNode, 'OpenLaneButton');
+        this._removeBarrierButtonBasePosition = this._removeBarrierButton?.position.clone() ?? null;
+        this._dispatchButtonBasePosition = this._dispatchButton?.position.clone() ?? null;
+        this._openLaneButtonBasePosition = this._openLaneButton?.position.clone() ?? null;
         this._serviceProgressNode = this.findNodeByName(canvasNode, 'ServiceProgressOverlay');
         this._upgradePanel = this.findNodeByName(canvasNode, 'UpgradePanel');
         this._fireworkNode = this.findNodeByName(canvasNode, 'Firework');
@@ -1595,7 +1601,6 @@ export class FoodTruckPlayableController extends Component {
     private getPreferredHandHintTarget (): Node | null {
         let candidates = [
             this._removeBarrierButton,
-            this._dispatchButton,
             this._openLaneButton,
         ];
 
@@ -1619,13 +1624,6 @@ export class FoodTruckPlayableController extends Component {
             return this.canOpenNextRoute() && this.canAfford(this.getRemoveBarrierCost());
         }
 
-        if (button === this._dispatchButton) {
-            return this._phase !== 'ending'
-                && this._openedLanes > 0
-                && this.canDispatchMoreCars(true)
-                && this.canAfford(this.dispatchCarCost);
-        }
-
         if (button === this._openLaneButton) {
             return this.canRepairNextSlough() && this.canAfford(this.getOpenLaneCost());
         }
@@ -1641,6 +1639,33 @@ export class FoodTruckPlayableController extends Component {
         ].filter((button) => !!button?.isValid && button.activeInHierarchy);
 
         return visiblePrimaryButtons.length >= 3;
+    }
+
+    private refreshPrimaryButtonLayout (): void {
+        if (this._removeBarrierButton?.isValid && this._removeBarrierButtonBasePosition) {
+            this._removeBarrierButton.setPosition(this._removeBarrierButtonBasePosition);
+        }
+
+        if (this._dispatchButton?.isValid && this._dispatchButtonBasePosition) {
+            this._dispatchButton.setPosition(this._dispatchButtonBasePosition);
+        }
+
+        if (this._openLaneButton?.isValid && this._openLaneButtonBasePosition) {
+            this._openLaneButton.setPosition(this._openLaneButtonBasePosition);
+        }
+
+        let activeButtons = [
+            this._removeBarrierButton,
+            this._dispatchButton,
+            this._openLaneButton,
+        ].filter((button) => !!button?.isValid && button.activeInHierarchy) as Node[];
+
+        if (activeButtons.length === 1
+            && activeButtons[0] === this._dispatchButton
+            && this._dispatchButton?.isValid
+            && this._removeBarrierButtonBasePosition) {
+            this._dispatchButton.setPosition(this._removeBarrierButtonBasePosition);
+        }
     }
 
     private hasAvailableDispatchLane (): boolean {
@@ -1749,17 +1774,19 @@ export class FoodTruckPlayableController extends Component {
         if (this._openLaneFullNode?.isValid) {
             this._openLaneFullNode.active = openLaneVisible && openLaneFull;
         }
+        this.refreshPrimaryButtonLayout();
 
         let pulseTarget = this._dispatchButton
             && this._dispatchButton.isValid
             && this._dispatchButton.activeInHierarchy
-            && this.canPressButtonForHandHint(this._dispatchButton)
+            && this._phase !== 'ending'
+            && this._openedLanes > 0
+            && this.hasAvailableDispatchLane()
             ? this._dispatchButton
             : null;
         if (!pulseTarget) {
             let activeButtons = [
                 this._removeBarrierButton,
-                this._dispatchButton,
                 this._openLaneButton,
             ].filter((button) => !!button?.isValid && button.activeInHierarchy) as Node[];
             let singleVisibleButton = activeButtons.length === 1 ? activeButtons[0] : null;
