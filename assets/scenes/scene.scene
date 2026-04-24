@@ -18579,6 +18579,10 @@
       "__uuid__": "e61f7d9c-d841-44ee-8d0c-68b1f6dbd74c",
       "__expectedType__": "cc.AudioClip"
     },
+    "buttonSuccessClip": {
+      "__uuid__": "adb055f1-73ea-4760-aaf2-8772ad976544",
+      "__expectedType__": "cc.AudioClip"
+    },
     "_id": "baBf4e3TBEcr+hySCfhcga"
   },
   {
@@ -26864,6 +26868,7 @@
     "clip": null,
     "rankUpclip": null,
     "r1ankUpclip": null,
+    "buttonSuccessClip": null,
     "_id": "86JY3vpohNQKSz7e7jjXEA"
   },
   {

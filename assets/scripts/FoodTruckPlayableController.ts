@@ -177,6 +177,7 @@ export class FoodTruckPlayableController extends Component {
     private _engineStartAudio: AudioClip | null = null;
     private _rankupAudio: AudioClip | null = null;
     private _carHornAudio: AudioClip | null = null;
+    private _buttonSuccessAudio: AudioClip | null = null;
     private _engineAudioSource: AudioSource | null = null;
     private _activeCarPopups = new Map<Node, Node>();
     private _laneActionParticleTemplate: Node | null = null;
@@ -230,6 +231,7 @@ export class FoodTruckPlayableController extends Component {
         this.loadEngineStartAudio();
         this.loadRankupAudio();
         this.loadCarHornAudio();
+        this.loadButtonSuccessAudio();
         this.bindWorldNodes();
         this.configureMainCamera();
         this.prepareLanesFromWorld();
@@ -697,7 +699,7 @@ export class FoodTruckPlayableController extends Component {
             return;
         }
 
-        this.playRankupAudio();
+        this.playButtonSuccessAudio();
         this.openNextLane();
         if (this._phase === 'scene1' && this._scene1ButtonFlow === 'removeBarrierOnly') {
             this._scene1ButtonFlow = 'dispatchOnly';
@@ -738,7 +740,7 @@ export class FoodTruckPlayableController extends Component {
 
         this.repairNextSlough();
         this.applyLaneUnlockCameraConfig(this._repairedSloughCount);
-        this.playRankupAudio();
+        this.playButtonSuccessAudio();
         if (this._phase === 'scene1' && this._scene1ButtonFlow === 'dispatchAndOpenLane') {
             this._hasPressedOpenLaneAfterUnlock = true;
             this.updateScene1ButtonFlow();
@@ -1417,6 +1419,9 @@ export class FoodTruckPlayableController extends Component {
     @property(AudioClip)
     public r1ankUpclip:AudioClip  = null;
 
+    @property(AudioClip)
+    public buttonSuccessClip: AudioClip | null = null;
+
     private loadCarHornAudio (): void {
         // assetManager.loadAny(FoodTruckPlayableController.CAR_HORN_AUDIO_UUID, (error: Error | null, clip: AudioClip) => {
         //     if (error || !clip || !this.node?.isValid) {
@@ -1429,6 +1434,10 @@ export class FoodTruckPlayableController extends Component {
 
             this._carHornAudio = this.r1ankUpclip;
             this.refreshHornPrompt();
+    }
+
+    private loadButtonSuccessAudio (): void {
+        this._buttonSuccessAudio = this.buttonSuccessClip;
     }
 
     private playEngineStartAudio (): void {
@@ -1449,6 +1458,16 @@ export class FoodTruckPlayableController extends Component {
         let source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
         this._engineAudioSource = source;
         source.playOneShot(this._rankupAudio, 0.9);
+    }
+
+    private playButtonSuccessAudio (): void {
+        if (!this._buttonSuccessAudio || !this.node?.isValid) {
+            return;
+        }
+
+        let source = this._engineAudioSource ?? this.node.getComponent(AudioSource) ?? this.node.addComponent(AudioSource);
+        this._engineAudioSource = source;
+        source.playOneShot(this._buttonSuccessAudio, 0.9);
     }
 
     private playHornPromptIfNeeded = (): void => {
