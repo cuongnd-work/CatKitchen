@@ -9994,7 +9994,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 107.42495727539062,
+      "width": 88.02496337890625,
       "height": 67
     },
     "_anchorPoint": {
@@ -10027,7 +10027,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "1600",
+    "_string": "550",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 50,
@@ -12603,8 +12603,8 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 43.049,
-      "y": 59.644,
+      "x": 42.216,
+      "y": 56.311,
       "z": 0
     },
     "_lrot": {
@@ -12642,7 +12642,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 35.7,
+      "width": 41.28000183105469,
       "height": 79.8
     },
     "_anchorPoint": {
@@ -12668,11 +12668,11 @@
     "_color": {
       "__type__": "cc.Color",
       "r": 255,
-      "g": 255,
-      "b": 255,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
-    "_string": "+",
+    "_string": "X",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 60,
@@ -14801,7 +14801,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 188,
+      "y": 168.64,
       "z": 0
     },
     "_lrot": {
@@ -14839,7 +14839,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 432.02734375,
+      "width": 464.21728515625,
       "height": 87.16
     },
     "_anchorPoint": {
@@ -14869,11 +14869,11 @@
       "b": 255,
       "a": 255
     },
-    "_string": "Upgrade Unlocked!",
+    "_string": "Select New Restaurant",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 50,
-    "_fontSize": 50,
+    "_actualFontSize": 45,
+    "_fontSize": 40,
     "_fontFamily": "Arial",
     "_lineHeight": 66,
     "_overflow": 0,
@@ -14920,7 +14920,7 @@
       "__id__": 854
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 859
