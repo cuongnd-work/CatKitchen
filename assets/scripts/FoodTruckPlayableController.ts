@@ -1238,7 +1238,7 @@ export class FoodTruckPlayableController extends Component {
         opacity.opacity = 0;
 
         let label = toast.addComponent(Label);
-        label.string = `+${Math.floor(amount)}`;
+        label.string = `+${Math.floor(amount)}$`;
         label.fontSize = 62;
         label.lineHeight = 62;
         label.color = new Color(255, 219, 77, 255);
@@ -1288,7 +1288,7 @@ export class FoodTruckPlayableController extends Component {
 
         let uiPosition = new Vec3();
         camera.convertToUINode(worldPosition, this._overlayRoot, uiPosition);
-        return new Vec3(uiPosition.x + 200, uiPosition.y - 100, 0);
+        return new Vec3(uiPosition.x + 200, uiPosition.y - 200, 0);
     }
 
     private repairNextSlough (): void {
