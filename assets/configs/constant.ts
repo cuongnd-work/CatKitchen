@@ -1,7 +1,7 @@
 ﻿export class constant {
     static STORE_LINK = {
-        ANDROID_LINK: 'https://tpc.googlesyndication.com/sadbundle/$csp%3Der-p$/13741130503365623761/index.html',
-        IOS_LINK: 'https://tpc.googlesyndication.com/sadbundle/$csp%3Der-p$/13741130503365623761/index.html',
+        ANDROID_LINK: 'https://play.google.com/store/apps/details?id=com.archer.cat.kitchen',
+        IOS_LINK: 'https://play.google.com/store/apps/details?id=com.archer.cat.kitchen',
     }
 
     static AUDIO_NAME = {

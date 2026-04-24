@@ -130,6 +130,8 @@ export class FoodTruckPlayableController extends Component {
     private _removeBarrierLabel: Label | null = null;
     private _dispatchLabel: Label | null = null;
     private _openLaneLabel: Label | null = null;
+    private _removeBarrierFullNode: Node | null = null;
+    private _openLaneFullNode: Node | null = null;
 
     private _playButton: Node | null = null;
     private _removeBarrierButton: Node | null = null;
@@ -291,6 +293,8 @@ export class FoodTruckPlayableController extends Component {
         this._removeBarrierCostIcon = this.findNodeByName(canvasNode, 'RemoveBarrierCostIcon')?.getComponent(Sprite) ?? null;
         this._dispatchCostIcon = this.findNodeByName(canvasNode, 'DispatchCostIcon')?.getComponent(Sprite) ?? null;
         this._openLaneCostIcon = this.findNodeByName(canvasNode, 'OpenLaneCostIcon')?.getComponent(Sprite) ?? null;
+        this._removeBarrierFullNode = this.findFirstChildByNames(this._removeBarrierButton, ['Full', 'Fulll']);
+        this._openLaneFullNode = this.findFirstChildByNames(this._openLaneButton, ['Full', 'Fulll']);
         this._storeTitleLabel = this.findNodeByName(canvasNode, 'StoreTitleLabel')?.getComponent(Label) ?? null;
         this._serviceProgressGraphics = this._serviceProgressNode?.getComponent(Graphics) ?? null;
 
@@ -1692,12 +1696,16 @@ export class FoodTruckPlayableController extends Component {
             this._removeBarrierButton.active = removeBarrierVisible;
         }
         if (this._removeBarrierLabel) {
-            this._removeBarrierLabel.string = removeBarrierFull
-                ? 'Full'
-                : `${removeBarrierCost}`;
+            this._removeBarrierLabel.string = `${removeBarrierCost}`;
         }
         if (this._removeBarrierCostIcon?.node) {
             this._removeBarrierCostIcon.node.active = removeBarrierVisible && !removeBarrierFull;
+        }
+        if (this._removeBarrierLabel?.node) {
+            this._removeBarrierLabel.node.active = removeBarrierVisible && !removeBarrierFull;
+        }
+        if (this._removeBarrierFullNode?.isValid) {
+            this._removeBarrierFullNode.active = removeBarrierVisible && removeBarrierFull;
         }
         this.setButtonLockedVisual(this._removeBarrierButton, canOpenRoute || removeBarrierFull, removeBarrierFull);
 
@@ -1714,26 +1722,39 @@ export class FoodTruckPlayableController extends Component {
         }
 
         if (this._openLaneLabel) {
-            this._openLaneLabel.string = openLaneVisible
-                ? openLaneFull
-                    ? 'Full'
-                    : `${openLaneCost}`
-                : 'Full';
+            this._openLaneLabel.string = `${openLaneCost}`;
         }
         this.setButtonLockedVisual(this._openLaneButton, canRepair || openLaneFull, openLaneFull);
         if (this._openLaneCostIcon?.node) {
             this._openLaneCostIcon.node.active = openLaneVisible && !openLaneFull;
         }
+        if (this._openLaneLabel?.node) {
+            this._openLaneLabel.node.active = openLaneVisible && !openLaneFull;
+        }
+        if (this._openLaneFullNode?.isValid) {
+            this._openLaneFullNode.active = openLaneVisible && openLaneFull;
+        }
 
-        let activeButtons = [
-            this._removeBarrierButton,
-            this._dispatchButton,
-            this._openLaneButton,
-        ].filter((button) => !!button?.isValid && button.activeInHierarchy) as Node[];
-        let singleVisibleButton = activeButtons.length === 1 ? activeButtons[0] : null;
-        let shouldPulseSingleButton = !!singleVisibleButton && this.canPressButtonForHandHint(singleVisibleButton);
-        if (shouldPulseSingleButton) {
-            this.startSingleButtonPulse(singleVisibleButton!);
+        let pulseTarget = this._dispatchButton
+            && this._dispatchButton.isValid
+            && this._dispatchButton.activeInHierarchy
+            && this.canPressButtonForHandHint(this._dispatchButton)
+            ? this._dispatchButton
+            : null;
+        if (!pulseTarget) {
+            let activeButtons = [
+                this._removeBarrierButton,
+                this._dispatchButton,
+                this._openLaneButton,
+            ].filter((button) => !!button?.isValid && button.activeInHierarchy) as Node[];
+            let singleVisibleButton = activeButtons.length === 1 ? activeButtons[0] : null;
+            pulseTarget = singleVisibleButton && this.canPressButtonForHandHint(singleVisibleButton)
+                ? singleVisibleButton
+                : null;
+        }
+
+        if (pulseTarget) {
+            this.startSingleButtonPulse(pulseTarget);
         } else {
             this.stopSingleButtonPulse();
         }
@@ -2391,6 +2412,21 @@ export class FoodTruckPlayableController extends Component {
             let found = this.findNodeByName(child, name);
             if (found) {
                 return found;
+            }
+        }
+
+        return null;
+    }
+
+    private findFirstChildByNames (root: Node | null, names: string[]): Node | null {
+        if (!root?.isValid) {
+            return null;
+        }
+
+        for (const name of names) {
+            const child = this.findNodeByName(root, name);
+            if (child) {
+                return child;
             }
         }
 
