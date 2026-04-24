@@ -1325,16 +1325,10 @@ export class FoodTruckPlayableController extends Component {
             particleNode.setWorldPosition(worldPosition);
         }
         particleNode.setRotation(this._laneActionParticleTemplate.rotation);
-        particleNode.setScale(
-            this._laneActionParticleTemplate.scale.x * 2,
-            this._laneActionParticleTemplate.scale.y * 2,
-            this._laneActionParticleTemplate.scale.z,
-        );
+        particleNode.setScale(this._laneActionParticleTemplate.scale);
 
         const particleSystems = particleNode.getComponentsInChildren(ParticleSystem2D);
         for (const particleSystem of particleSystems) {
-            particleSystem.totalParticles = 1;
-            particleSystem.emissionRate = 1;
             particleSystem.stopSystem();
             particleSystem.resetSystem();
         }
