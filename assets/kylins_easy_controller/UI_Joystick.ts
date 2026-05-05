@@ -50,6 +50,7 @@ export class UI_Joystick extends Component {
 
     private _key2buttonMap = {};
     private _interactionLockCount = 0;
+    private _startupUsageGraceActive = false;
 
     public static beginExternalInteraction(): void {
         this._inst?._addInteractionLock();
@@ -89,7 +90,7 @@ export class UI_Joystick extends Component {
 
         this._buttons = this.node.getChildByName('buttons');
         this._joystickUsageNode = this.joystickUsageNode ?? this.node.getChildByName('joystick_usage');
-        this.showUsageNodeIfIdle();
+        this.startUsageGracePeriod();
 
         this._key2buttonMap[KeyCode.KEY_J] = 'btn_slot_0';
         this._key2buttonMap[KeyCode.KEY_K] = 'btn_slot_1';
@@ -455,6 +456,7 @@ export class UI_Joystick extends Component {
     }
 
     private handleJoystickEngaged(): void {
+        this.cancelUsageGracePeriod();
         if (!this._joystickActive) {
             this._joystickActive = true;
             this.toggleUsageNode(false);
@@ -463,8 +465,7 @@ export class UI_Joystick extends Component {
     }
 
     private scheduleJoystickUsageReset(): void {
-        if (this._interactionLockCount > 0) {
-            this.toggleUsageNode(false);
+        if (this._startupUsageGraceActive) {
             return;
         }
         if (!this._joystickActive) {
@@ -480,10 +481,6 @@ export class UI_Joystick extends Component {
 
     private enableUsageNode(): void {
         this._joystickActive = false;
-        if (this._interactionLockCount > 0) {
-            this.toggleUsageNode(false);
-            return;
-        }
         this.toggleUsageNode(true);
     }
 
@@ -499,10 +496,6 @@ export class UI_Joystick extends Component {
 
     private _addInteractionLock(): void {
         this._interactionLockCount++;
-        if (this._interactionLockCount === 1) {
-            this.toggleUsageNode(false);
-            this.unschedule(this.enableUsageNode);
-        }
     }
 
     private _removeInteractionLock(): void {
@@ -517,10 +510,33 @@ export class UI_Joystick extends Component {
 
     private showUsageNodeIfIdle(): void {
         this._joystickActive = false;
-        if (this._interactionLockCount > 0 || this.isUsingMovementInput()) {
+        if (this.isUsingMovementInput()) {
             this.toggleUsageNode(false);
             return;
         }
         this.toggleUsageNode(true);
+    }
+
+    private startUsageGracePeriod(): void {
+        this.cancelUsageGracePeriod(false);
+        this._startupUsageGraceActive = true;
+        this.toggleUsageNode(true);
+        this.scheduleOnce(this.finishUsageGracePeriod, 3);
+    }
+
+    private finishUsageGracePeriod = (): void => {
+        this._startupUsageGraceActive = false;
+        this.showUsageNodeIfIdle();
+    };
+
+    private cancelUsageGracePeriod(hideImmediately = true): void {
+        if (!this._startupUsageGraceActive) {
+            return;
+        }
+        this.unschedule(this.finishUsageGracePeriod);
+        this._startupUsageGraceActive = false;
+        if (hideImmediately) {
+            this.toggleUsageNode(false);
+        }
     }
 }
