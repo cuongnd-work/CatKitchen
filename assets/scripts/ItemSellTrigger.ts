@@ -99,13 +99,13 @@ export class ItemSellTrigger extends Component {
     public queueColumnIndex = -1;
 
     @property({ tooltip: 'Seconds between attempts to deliver staged items to customers.' })
-    public customerRescanInterval = 0.1;
+    public customerRescanInterval = 0;
 
     @property({
         tooltip: 'Duration (seconds) for items moving from the sell zone to the customer.',
         displayName: 'Sell → Customer Duration',
     })
-    public deliverDuration = 0.6;
+    public deliverDuration = 0.35;
 
     @property({ tooltip: 'Tween easing applied while delivering staged items to the customer.' })
     public deliverEasing: TweenEasing = 'quadOut';
@@ -117,7 +117,7 @@ export class ItemSellTrigger extends Component {
     public customerOffset: Vec3 = new Vec3(0, 0.35, 0);
 
     @property({ tooltip: 'Complete/advance the customer as soon as delivery starts instead of waiting for the throw to finish.' })
-    public completeCustomerOnDeliveryStart = false;
+    public completeCustomerOnDeliveryStart = true;
 
     @property({ tooltip: 'Always target the absolute front-most customer determined by the queue manager.' })
     public serveAbsoluteFrontCustomer = true;

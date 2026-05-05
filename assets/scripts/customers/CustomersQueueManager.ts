@@ -99,7 +99,7 @@ export class CustomersQueueManager extends Component {
     shiftDuration = 0.25;
 
     @property({ tooltip: 'Delay (seconds) before the next customer advances after a sale completes', min: 0 })
-    frontAdvanceDelay = 0.3;
+    frontAdvanceDelay = 0;
 
     @property({ type: AnimationClip, tooltip: 'Kéo clip Walk_Angry vào đây để ép customer dùng đúng clip khi di chuyển.' })
     walkAngryClip: AnimationClip | null = null;
@@ -253,11 +253,14 @@ export class CustomersQueueManager extends Component {
         this.setColumnAdvancing(column, true);
 
         const freedSlot = cloneVec3(entry.targetPosition);
+        this.animateDeparture(entry, null);
         const performAdvance = () => {
             const rejoinSlot = this.shiftColumnForward(column, freedSlot);
             const advanceDuration = column.entries.length > 0 ? this.getColumnAdvanceDuration(column) : 0;
 
-            this.animateDeparture(entry, this.requeueAfterExit ? rejoinSlot : null);
+            if (this.requeueAfterExit) {
+                this.animateDeparture(entry, rejoinSlot);
+            }
 
             if (advanceDuration > 0) {
                 this.scheduleOnce(() => {
@@ -295,11 +298,14 @@ export class CustomersQueueManager extends Component {
         this._singleLineAdvancing = true;
 
         const freedSlot = cloneVec3(entry.targetPosition);
+        this.animateDeparture(entry, null);
         const performAdvance = () => {
             const rejoinSlot = this.shiftEntriesForward(this._singleLineEntries, freedSlot, null);
             const advanceDuration = this._singleLineEntries.length > 0 ? this.shiftDuration : 0;
 
-            this.animateDeparture(entry, this.requeueAfterExit ? rejoinSlot : null);
+            if (this.requeueAfterExit) {
+                this.animateDeparture(entry, rejoinSlot);
+            }
 
             if (advanceDuration > 0) {
                 this.scheduleOnce(() => {
