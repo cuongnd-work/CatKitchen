@@ -54,6 +54,9 @@ export class WorkerWaypointPatrol extends Component {
     @property({ type: Node, tooltip: 'Carry anchor assigned to spawn/sell systems (defaults to this node).' })
     public carryAnchor: Node | null = null;
 
+    @property({ tooltip: 'Seconds to wait after this worker becomes enabled before it starts moving.', min: 0 })
+    public startupDelay = 1;
+
     private _waypoints: Node[] = [];
     private _currentIndex = 0;
     private _isWaiting = false;
@@ -61,6 +64,8 @@ export class WorkerWaypointPatrol extends Component {
     private _rigidBody: RigidBody | null = null;
     private _anim: SkeletalAnimation | null = null;
     private _isMoving = false;
+    private _startupTimer = 0;
+    private _startupComplete = false;
 
     protected start (): void {
         this._rigidBody = this.getComponent(RigidBody);
@@ -90,11 +95,25 @@ export class WorkerWaypointPatrol extends Component {
         }
 
         this.configureLinkedSystems();
+        this.resetStartupDelay(false);
+    }
+
+    protected onEnable (): void {
+        this.resetStartupDelay(true);
     }
 
     protected update (deltaTime: number): void {
         if (this._waypoints.length < 2) {
             return;
+        }
+
+        if (!this._startupComplete) {
+            this._startupTimer -= deltaTime;
+            if (this._startupTimer > 0) {
+                this.stopMovement();
+                return;
+            }
+            this._startupComplete = true;
         }
 
         if (this._isWaiting) {
@@ -193,6 +212,16 @@ export class WorkerWaypointPatrol extends Component {
 
     protected onDestroy (): void {
         this.unregisterLinkedSystems();
+    }
+
+    private resetStartupDelay (stopMovement: boolean): void {
+        this._startupTimer = Math.max(0, this.startupDelay);
+        this._startupComplete = this._startupTimer <= 0;
+        this._isWaiting = false;
+        this._waitTimer = 0;
+        if (stopMovement) {
+            this.stopMovement();
+        }
     }
 
     private configureLinkedSystems (): void {
