@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, Quat, tween, TweenEasing, Tween, Prefab, AudioSource } from 'cc';
+import { _decorator, Component, Node, Collider, ITriggerEvent, Vec3, Quat, tween, TweenEasing, Tween, Prefab, AudioSource, SpriteRenderer, Material, resources } from 'cc';
 import { UI_Joystick } from 'db://assets/kylins_easy_controller/UI_Joystick';
 import { CollectibleItem } from './CollectibleItem';
 import { SpawnZone } from './SpawnZone';
@@ -197,6 +197,15 @@ export class ItemSellTrigger extends Component {
     @property({ type: AudioSource, tooltip: 'Sound played when an item moves from the character to the sell area.' })
     public sellAudio: AudioSource | null = null;
 
+    @property({ type: SpriteRenderer, tooltip: 'Optional highlight sprite for Sell. Auto-finds child named SpriteRenderer-001 when empty.' })
+    public highlightSprite: SpriteRenderer | null = null;
+
+    @property({ type: Material, tooltip: 'Highlight material swapped in while the player stands in Sell.' })
+    public highlightMaterial: Material | null = null;
+
+    @property({ tooltip: 'Resources path used when highlightMaterial is empty.' })
+    public highlightMaterialResource = 'materials/SpriteTintGreen';
+
     private _sellQueue: Node[] = [];
     private _queuedItems: Set<Node> = new Set();
     private _characterOverlaps: Set<Collider> = new Set();
@@ -246,10 +255,12 @@ export class ItemSellTrigger extends Component {
     private _customerItem: Node | null = null;
     private _currentCustomerNode: Node | null = null;
     private _currentCustomerManager: CustomersQueueManager | null = null;
-
+    private _defaultMaterial: Material | null = null;
     protected onLoad (): void {
         this.rebuildSellerAnchors();
         this.registerCurrencySource();
+        this.captureDefaultMaterial();
+        this.preloadHighlightMaterial();
     }
 
     protected onDestroy (): void {
@@ -384,6 +395,7 @@ export class ItemSellTrigger extends Component {
         this.teardownMoneyStackTrigger();
         this.resetMoneyCollections();
         clearMoneyCarryShift(this.characterCarryAnchor ?? this.character);
+        this.restoreHighlightColor();
     }
 
     private registerColliderEvents (): void {
@@ -451,6 +463,7 @@ export class ItemSellTrigger extends Component {
                 this._characterInside = true;
                 this._rescanTimer = 0;
                 this.beginJoystickInteraction();
+                this.applyHighlightColor();
             }
             return;
         }
@@ -462,7 +475,62 @@ export class ItemSellTrigger extends Component {
             this._activeSellerAnchor = null;
             this.stopAllSelling(true);
             this.endJoystickInteraction();
+            this.restoreHighlightColor();
         }
+    }
+
+    private resolveHighlightSprite (): SpriteRenderer | null {
+        if (this.highlightSprite && this.highlightSprite.isValid) {
+            return this.highlightSprite;
+        }
+
+        const child = this.node.getChildByName('SpriteRenderer-001');
+        if (child) {
+            this.highlightSprite = child.getComponent(SpriteRenderer);
+        }
+
+        return this.highlightSprite;
+    }
+
+    private applyHighlightColor (): void {
+        const sprite = this.resolveHighlightSprite();
+        const material = this.highlightMaterial;
+        if (!sprite || !material) {
+            return;
+        }
+        sprite.setMaterial(material, 0);
+    }
+
+    private restoreHighlightColor (): void {
+        const sprite = this.resolveHighlightSprite();
+        if (!sprite || !this._defaultMaterial) {
+            return;
+        }
+        sprite.setMaterial(this._defaultMaterial, 0);
+    }
+
+    private captureDefaultMaterial (): void {
+        const sprite = this.resolveHighlightSprite();
+        if (!sprite) {
+            return;
+        }
+        this._defaultMaterial = sprite.getSharedMaterial(0);
+    }
+
+    private preloadHighlightMaterial (): void {
+        if (this.highlightMaterial || !this.highlightMaterialResource.trim()) {
+            return;
+        }
+
+        resources.load(this.highlightMaterialResource.trim(), Material, (error, material) => {
+            if (error || !material || !this.isValid) {
+                if (error) {
+                    console.warn(`[ItemSellTrigger] Failed to load highlight material "${this.highlightMaterialResource}" for ${this.node.name}.`, error);
+                }
+                return;
+            }
+            this.highlightMaterial = material;
+        });
     }
 
     private isCharacterNode (candidate: Node | null): boolean {

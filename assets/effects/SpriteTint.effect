@@ -1,0 +1,51 @@
+CCEffect %{
+  techniques:
+  - name: transparent
+    passes:
+    - vert: general-vs:vert
+      frag: sprite-tint-fs:frag
+      rasterizerState:
+        cullMode: none
+      depthStencilState:
+        depthTest: true
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      properties:
+        mainTexture:    { value: white }
+        tintColor:      { value: [1, 1, 1, 1], editor: { type: color } }
+        alphaThreshold: { value: 0.001 }
+}%
+
+CCProgram sprite-tint-fs %{
+  precision highp float;
+  precision highp int;
+
+  #include <legacy/output>
+  #include <legacy/fog-fs>
+
+  in vec2 v_uv;
+  in vec3 v_position;
+
+  uniform sampler2D mainTexture;
+
+  uniform Constant {
+    vec4 tintColor;
+    float alphaThreshold;
+  };
+
+  vec4 frag () {
+    vec4 col = texture(mainTexture, v_uv) * tintColor;
+    if (col.a <= alphaThreshold) {
+      discard;
+    }
+
+    CC_APPLY_FOG(col, v_position);
+    return CCFragOutput(col);
+  }
+}%

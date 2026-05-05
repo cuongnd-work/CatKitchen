@@ -1163,9 +1163,9 @@
     "_layer": 1073741824,
     "_euler": {
       "__type__": "cc.Vec3",
-      "x": -86.2,
-      "y": 44.9,
-      "z": 0
+      "x": -86.20000000000002,
+      "y": 44.900000000000006,
+      "z": -3.1805546814635168e-15
     },
     "_id": "9fO5yBVPlOHphavuJxIzFg"
   },
@@ -1342,6 +1342,11 @@
       "__id__": 2587
     },
     "collectAudio": null,
+    "highlightSprite": {
+      "__id__": 27
+    },
+    "highlightMaterial": null,
+    "highlightMaterialResource": "materials/SpriteTintGreen",
     "isActiveAutoSpawn": false,
     "maxSpawnedItems": 500,
     "_id": "71EMx1zHlHJpXhmY5CMa/F"
@@ -6927,6 +6932,11 @@
     "sellAudio": {
       "__id__": 202
     },
+    "highlightSprite": {
+      "__id__": 157
+    },
+    "highlightMaterial": null,
+    "highlightMaterialResource": "materials/SpriteTintGreen",
     "_id": "41Hgz+QbNAf6qG1nI/QxHj"
   },
   {
@@ -11242,6 +11252,9 @@
     "scaleEasing": "quadOut",
     "spawnAudio": null,
     "collectAudio": null,
+    "highlightSprite": null,
+    "highlightMaterial": null,
+    "highlightMaterialResource": "materials/SpriteTintGreen",
     "isActiveAutoSpawn": true,
     "maxSpawnedItems": 50,
     "_id": "d33VXKDBdK9q88aH9DHoME"
@@ -11738,6 +11751,9 @@
     },
     "moneyValuePerBundle": 20,
     "sellAudio": null,
+    "highlightSprite": null,
+    "highlightMaterial": null,
+    "highlightMaterialResource": "materials/SpriteTintGreen",
     "_id": "2cWp0Vlg1GHII32ar9vujS"
   },
   {

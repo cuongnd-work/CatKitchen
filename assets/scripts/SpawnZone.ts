@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, Quat, macro, tween, Tween, TweenEasing, AudioSource } from 'cc';
+import { _decorator, Component, Node, Prefab, Collider, ITriggerEvent, Vec3, Quat, macro, tween, Tween, TweenEasing, AudioSource, SpriteRenderer, Material, resources } from 'cc';
 import { object_pool_manager } from 'db://assets/plugins/playable-foundation/game-foundation/object_pool';
 import { CollectibleItem } from './CollectibleItem';
 import { getMoneyCarryShift } from './MoneyCarryRegistry';
@@ -154,6 +154,15 @@ export class SpawnZone extends Component {
     @property({ type: AudioSource, tooltip: 'Sound played when an item begins moving toward the character.' })
     public collectAudio: AudioSource | null = null;
 
+    @property({ type: SpriteRenderer, tooltip: 'Optional highlight sprite for Cook. Auto-finds child named SpriteRenderer-001 when empty.' })
+    public highlightSprite: SpriteRenderer | null = null;
+
+    @property({ type: Material, tooltip: 'Highlight material swapped in while the player stands in Cook.' })
+    public highlightMaterial: Material | null = null;
+
+    @property({ tooltip: 'Resources path used when highlightMaterial is empty.' })
+    public highlightMaterialResource = 'materials/SpriteTintGreen';
+
     private _isCharacterInside = false;
     private _isSpawning = false;
     private _spawnPosition: Vec3 = new Vec3();
@@ -198,7 +207,7 @@ export class SpawnZone extends Component {
     private _activeCollectorNode: Node | null = null;
     private _activeCollectorAnchor: Node | null = null;
     private _joystickInteractionRefs = 0;
-
+    private _defaultMaterial: Material | null = null;
     private getCarryState(anchor: Node | null, autoCreate = false): AnchorCarryState | null {
         if (!anchor) {
             return null;
@@ -219,6 +228,8 @@ export class SpawnZone extends Component {
 
     protected onLoad (): void {
         this.rebuildCollectorAnchors();
+        this.captureDefaultMaterial();
+        this.preloadHighlightMaterial();
     }
 
     start() {
@@ -252,6 +263,7 @@ export class SpawnZone extends Component {
         this.unregisterCollectTriggerCollider();
         this.stopCollecting();
         this.clearJoystickInteractions();
+        this.restoreHighlightColor();
     }
 
     private onTriggerEnter(event: ITriggerEvent): void {
@@ -268,6 +280,7 @@ export class SpawnZone extends Component {
         if (!this._isCharacterInside) {
             this._isCharacterInside = true;
             this.startSpawning();
+            this.applyHighlightColor();
         }
     }
 
@@ -284,10 +297,65 @@ export class SpawnZone extends Component {
         if (!this._autoCollectEnabled && this._spawnActiveCollectors.size === 0) {
             this._isCharacterInside = false;
             this.stopSpawning();
+            this.restoreHighlightColor();
             if (this.resetStackOnExit) {
                 this.resetStackLayout();
             }
         }
+    }
+
+    private resolveHighlightSprite (): SpriteRenderer | null {
+        if (this.highlightSprite && this.highlightSprite.isValid) {
+            return this.highlightSprite;
+        }
+
+        const child = this.node.getChildByName('SpriteRenderer-001');
+        if (child) {
+            this.highlightSprite = child.getComponent(SpriteRenderer);
+        }
+
+        return this.highlightSprite;
+    }
+
+    private applyHighlightColor (): void {
+        const sprite = this.resolveHighlightSprite();
+        const material = this.highlightMaterial;
+        if (!sprite || !material) {
+            return;
+        }
+        sprite.setMaterial(material, 0);
+    }
+
+    private restoreHighlightColor (): void {
+        const sprite = this.resolveHighlightSprite();
+        if (!sprite || !this._defaultMaterial) {
+            return;
+        }
+        sprite.setMaterial(this._defaultMaterial, 0);
+    }
+
+    private captureDefaultMaterial (): void {
+        const sprite = this.resolveHighlightSprite();
+        if (!sprite) {
+            return;
+        }
+        this._defaultMaterial = sprite.getSharedMaterial(0);
+    }
+
+    private preloadHighlightMaterial (): void {
+        if (this.highlightMaterial || !this.highlightMaterialResource.trim()) {
+            return;
+        }
+
+        resources.load(this.highlightMaterialResource.trim(), Material, (error, material) => {
+            if (error || !material || !this.isValid) {
+                if (error) {
+                    console.warn(`[SpawnZone] Failed to load highlight material "${this.highlightMaterialResource}" for ${this.node.name}.`, error);
+                }
+                return;
+            }
+            this.highlightMaterial = material;
+        });
     }
 
     private registerCollectTriggerCollider(): void {
