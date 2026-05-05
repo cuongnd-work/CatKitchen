@@ -1,0 +1,96 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "13be2435-b928-4926-83ec-233f9a96f6cc",
+  "files": [],
+  "subMetas": {
+    "9bfb5": {
+      "importer": "gltf-mesh",
+      "uuid": "13be2435-b928-4926-83ec-233f9a96f6cc@9bfb5",
+      "displayName": "",
+      "id": "9bfb5",
+      "name": "huan01.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 180
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "d90a4": {
+      "importer": "gltf-material",
+      "uuid": "13be2435-b928-4926-83ec-233f9a96f6cc@d90a4",
+      "displayName": "",
+      "id": "d90a4",
+      "name": "01 - Default.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "65b09": {
+      "importer": "gltf-scene",
+      "uuid": "13be2435-b928-4926-83ec-233f9a96f6cc@65b09",
+      "displayName": "",
+      "id": "65b09",
+      "name": "yuanhuan_08.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "13be2435-b928-4926-83ec-233f9a96f6cc@9bfb5"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "13be2435-b928-4926-83ec-233f9a96f6cc@d90a4"
+      ],
+      "scenes": [
+        "13be2435-b928-4926-83ec-233f9a96f6cc@65b09"
+      ]
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "e206c94c-aebf-478c-bbf0-ac33ba0c889e",
+  "files": [],
+  "subMetas": {
+    "598a5": {
+      "importer": "gltf-mesh",
+      "uuid": "e206c94c-aebf-478c-bbf0-ac33ba0c889e@598a5",
+      "displayName": "",
+      "id": "598a5",
+      "name": "m_longjuanfeng2.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 384
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "db4d2": {
+      "importer": "gltf-material",
+      "uuid": "e206c94c-aebf-478c-bbf0-ac33ba0c889e@db4d2",
+      "displayName": "",
+      "id": "db4d2",
+      "name": "02 - Default.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "b7353": {
+      "importer": "gltf-scene",
+      "uuid": "e206c94c-aebf-478c-bbf0-ac33ba0c889e@b7353",
+      "displayName": "",
+      "id": "b7353",
+      "name": "m_longjuanfeng2.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "e206c94c-aebf-478c-bbf0-ac33ba0c889e@598a5"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "e206c94c-aebf-478c-bbf0-ac33ba0c889e@db4d2"
+      ],
+      "scenes": [
+        "e206c94c-aebf-478c-bbf0-ac33ba0c889e@b7353"
+      ]
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "312eea91-c888-45e6-b449-418d316018c0",
+  "files": [],
+  "subMetas": {
+    "017d6": {
+      "importer": "gltf-mesh",
+      "uuid": "312eea91-c888-45e6-b449-418d316018c0@017d6",
+      "displayName": "",
+      "id": "017d6",
+      "name": "M_Helix001.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 200
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "5d16f": {
+      "importer": "gltf-scene",
+      "uuid": "312eea91-c888-45e6-b449-418d316018c0@5d16f",
+      "displayName": "",
+      "id": "5d16f",
+      "name": "Helix001.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "312eea91-c888-45e6-b449-418d316018c0@017d6"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [],
+      "scenes": [
+        "312eea91-c888-45e6-b449-418d316018c0@5d16f"
+      ]
+    }
+  }
+}
