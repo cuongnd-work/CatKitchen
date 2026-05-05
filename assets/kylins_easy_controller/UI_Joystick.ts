@@ -31,6 +31,10 @@ export class UI_Joystick extends Component {
     private _checkerCamera: UITransform = null;
     private _checkerMovement: UITransform = null;
     private _buttons: Node = null;
+
+    @property(Node)
+    public joystickUsageNode: Node | null = null;
+
     private _joystickUsageNode: Node | null = null;
 
     private _cameraSensitivity: number = 0.1;
@@ -62,6 +66,7 @@ export class UI_Joystick extends Component {
     protected onEnable(): void {
         if (this._initialized) {
             this.bindInputEvents();
+            this.showUsageNodeIfIdle();
         }
     }
 
@@ -83,8 +88,8 @@ export class UI_Joystick extends Component {
         this._ctrlPointer = this._ctrlRoot.node.getChildByName('pointer');
 
         this._buttons = this.node.getChildByName('buttons');
-        this._joystickUsageNode = this.node.getChildByName('joystick_usage');
-        this.enableUsageNode();
+        this._joystickUsageNode = this.joystickUsageNode ?? this.node.getChildByName('joystick_usage');
+        this.showUsageNodeIfIdle();
 
         this._key2buttonMap[KeyCode.KEY_J] = 'btn_slot_0';
         this._key2buttonMap[KeyCode.KEY_K] = 'btn_slot_1';
@@ -103,7 +108,7 @@ export class UI_Joystick extends Component {
     onDestroy() {
         this.unbindInputEvents();
         this.unschedule(this.enableUsageNode);
-        this.enableUsageNode();
+        this.showUsageNodeIfIdle();
         UI_Joystick._inst = null;
     }
 
@@ -286,6 +291,7 @@ export class UI_Joystick extends Component {
     }
     
     private onTouchStart_CameraCtrl(event: EventTouch) {
+        this.handleJoystickEngaged();
         let touches = event.getAllTouches();
         this._cameraTouchA = null;
         this._cameraTouchB = null;
@@ -306,6 +312,7 @@ export class UI_Joystick extends Component {
     }
 
     private onTouchMove_CameraCtrl(event: EventTouch) {
+        this.handleJoystickEngaged();
         let touches = event.getTouches();
         for (let i = 0; i < touches.length; ++i) {
             let touch = touches[i];
@@ -361,6 +368,8 @@ export class UI_Joystick extends Component {
         if (!hasTouchB) {
             this._cameraTouchB = null;
         }
+
+        this.scheduleJoystickUsageReset();
     }
 
     private _keys = [];
@@ -396,14 +405,18 @@ export class UI_Joystick extends Component {
     }
 
     onMouseWheel(event:EventMouse){
+        this.handleJoystickEngaged();
         let delta = event.getScrollY() * 0.1;
         console.log(delta);
         this._scene.emit(EasyControllerEvent.CAMERA_ZOOM, delta);
+        this.scheduleJoystickUsageReset();
     }
 
     onButtonSlot(event){
+        this.handleJoystickEngaged();
         let btnName = event.target.name;
         this._scene.emit(EasyControllerEvent.BUTTON,btnName);
+        this.scheduleJoystickUsageReset();
     }
 
     private _key2dirMap = null;
@@ -462,7 +475,7 @@ export class UI_Joystick extends Component {
             return;
         }
         this.unschedule(this.enableUsageNode);
-        this.scheduleOnce(this.enableUsageNode, 2);
+        this.scheduleOnce(this.enableUsageNode, 3);
     }
 
     private enableUsageNode(): void {
@@ -481,7 +494,7 @@ export class UI_Joystick extends Component {
     }
 
     private isUsingMovementInput(): boolean {
-        return !!this._movementTouch || this._keys.length > 0;
+        return !!this._movementTouch || !!this._cameraTouchA || !!this._cameraTouchB || this._keys.length > 0;
     }
 
     private _addInteractionLock(): void {
@@ -500,5 +513,14 @@ export class UI_Joystick extends Component {
         if (this._interactionLockCount === 0 && !this._joystickActive) {
             this.scheduleJoystickUsageReset();
         }
+    }
+
+    private showUsageNodeIfIdle(): void {
+        this._joystickActive = false;
+        if (this._interactionLockCount > 0 || this.isUsingMovementInput()) {
+            this.toggleUsageNode(false);
+            return;
+        }
+        this.toggleUsageNode(true);
     }
 }
