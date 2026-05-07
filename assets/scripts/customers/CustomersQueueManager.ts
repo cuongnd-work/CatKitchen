@@ -17,6 +17,7 @@ type QueueEntry = {
     node: Node;
     targetPosition: Vec3;
     column: ColumnData;
+    controller: CatAnimationController | null;
 };
 
 function cloneVec3 (source: Vec3): Vec3 {
@@ -145,6 +146,7 @@ export class CustomersQueueManager extends Component {
                 node: ctrl.node,
                 targetPosition,
                 column,
+                controller: ctrl,
             };
 
             column.entries.push(entry);
@@ -331,7 +333,7 @@ export class CustomersQueueManager extends Component {
     }
 
     private animateDeparture (entry: QueueEntry, rejoinSlot: Vec3 | null): void {
-        const controller = entry.node.getComponent(CatAnimationController);
+        const controller = entry.controller;
         const startTarget = cloneVec3(entry.node.getPosition());
         const finalTarget = this.resolveExitPosition(entry, startTarget);
         const exitSpeedScale = Math.max(0.01, this.exitMoveSpeedScale);
@@ -342,7 +344,7 @@ export class CustomersQueueManager extends Component {
         const exitOutDuration = Math.max(0.01, this.exitDuration * Math.max(0.01, this.exitDurationScale) / exitSpeedScale);
 
         sequence
-            .to(exitOutDuration, { position: finalTarget }, { easing: 'sineIn' })
+            .to(exitOutDuration, { position: finalTarget }, { easing: 'linear' })
             .call(() => {
                 entry.targetPosition = cloneVec3(finalTarget);
                 controller?.setModelVisible(false);
@@ -363,7 +365,7 @@ export class CustomersQueueManager extends Component {
         const returnDuration = Math.max(this.rejoinDuration > 0 ? this.rejoinDuration : this.shiftDuration, 0.01);
 
         sequence
-            .to(returnDuration, { position: rejoinSlot }, { easing: 'sineOut' })
+            .to(returnDuration, { position: rejoinSlot }, { easing: 'linear' })
             .call(() => {
                 this.reinsertEntry(entry, rejoinSlot);
             })
@@ -404,13 +406,15 @@ export class CustomersQueueManager extends Component {
         entries.forEach((queueEntry) => {
             const previousSlot = cloneVec3(queueEntry.targetPosition);
             queueEntry.targetPosition = cloneVec3(nextSlot);
-            const controller = queueEntry.node.getComponent(CatAnimationController);
-            this.applyMovingAnimation(controller, 1);
+            const controller = queueEntry.controller;
+            const travelDistance = Vec3.distance(previousSlot, queueEntry.targetPosition);
+            const moveSpeed = Math.max(1, travelDistance / Math.max(0.01, advanceDuration));
+            this.applyMovingAnimation(controller, moveSpeed);
 
             Tween.stopAllByTarget(queueEntry.node);
 
             tween(queueEntry.node)
-                .to(advanceDuration, { position: queueEntry.targetPosition }, { easing: 'sineOut' })
+                .to(advanceDuration, { position: queueEntry.targetPosition }, { easing: 'linear' })
                 .call(() => {
                     this.applyIdleOrRandomAnimation(controller);
                 })
@@ -622,7 +626,7 @@ export class CustomersQueueManager extends Component {
     }
 
     private reinsertEntry (entry: QueueEntry, slot: Vec3): void {
-        const controller = entry.node.getComponent(CatAnimationController);
+        const controller = entry.controller;
         entry.targetPosition = cloneVec3(slot);
         entry.node.active = false;
         entry.node.setPosition(slot);

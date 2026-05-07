@@ -10,6 +10,8 @@ export class CatAnimationController extends Component {
     @property(OrderPopup)
     public orderPopup: OrderPopup = null;
 
+    private _currentAnimationName = '';
+
     protected onLoad (): void {
         this.resolveAnimation();
         this.resolveOrderPopup();
@@ -71,8 +73,14 @@ export class CatAnimationController extends Component {
             anim.addClip(clip);
         }
 
-        anim.play(clip.name);
+        if (this._currentAnimationName === clip.name && this.isStateCurrentlyPlaying(anim, clip.name)) {
+            const currentState = anim.getState(clip.name);
+            return this.applyStateOptions(currentState, speed, loop);
+        }
+
+        anim.crossFade(clip.name, 0.12);
         const state = anim.getState(clip.name);
+        this._currentAnimationName = clip.name;
         return this.applyStateOptions(state, speed, loop);
     }
 
@@ -96,8 +104,15 @@ export class CatAnimationController extends Component {
         }
 
         const resolvedClipName = this.resolveClipName(clipName, fallbackKeywords);
-        anim.play(resolvedClipName);
+        if (this._currentAnimationName === resolvedClipName && this.isStateCurrentlyPlaying(anim, resolvedClipName)) {
+            const currentState = anim.getState(resolvedClipName);
+            this.applyStateOptions(currentState, speed, loop);
+            return;
+        }
+
+        anim.crossFade(resolvedClipName, 0.12);
         const state = anim.getState(resolvedClipName);
+        this._currentAnimationName = resolvedClipName;
         this.applyStateOptions(state, speed, loop);
     }
 
@@ -111,8 +126,14 @@ export class CatAnimationController extends Component {
             return false;
         }
 
-        anim.play(stateName);
+        if (this._currentAnimationName === stateName && this.isStateCurrentlyPlaying(anim, stateName)) {
+            const currentState = anim.getState(stateName);
+            return this.applyStateOptions(currentState, speed, loop);
+        }
+
+        anim.crossFade(stateName, 0.12);
         const state = anim.getState(stateName);
+        this._currentAnimationName = stateName;
         return this.applyStateOptions(state, speed, loop);
     }
 
@@ -147,6 +168,11 @@ export class CatAnimationController extends Component {
         }
 
         return this.animation ?? null;
+    }
+
+    private isStateCurrentlyPlaying (anim: SkeletalAnimation, stateName: string): boolean {
+        const state = anim.getState(stateName) as (AnimationState & { isPlaying?: boolean }) | null;
+        return !!state?.isPlaying;
     }
 
     private resolveClipName (preferred: string, fallbackKeywords: string[]): string {

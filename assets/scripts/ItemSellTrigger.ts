@@ -105,7 +105,7 @@ export class ItemSellTrigger extends Component {
         tooltip: 'Duration (seconds) for items moving from the sell zone to the customer.',
         displayName: 'Sell → Customer Duration',
     })
-    public deliverDuration = 0.35;
+    public deliverDuration = 0.14;
 
     @property({ tooltip: 'Tween easing applied while delivering staged items to the customer.' })
     public deliverEasing: TweenEasing = 'quadOut';
