@@ -102,6 +102,9 @@ export class CustomersQueueManager extends Component {
     @property({ tooltip: 'Delay (seconds) before the next customer advances after a sale completes', min: 0 })
     frontAdvanceDelay = 0;
 
+    @property({ tooltip: 'Cho phép phục vụ khách đầu hàng tiếp theo ngay khi họ đang tiến lên, thay vì chờ tween dịch hàng kết thúc.' })
+    serveWhileAdvancing = true;
+
     @property({ type: AnimationClip, tooltip: 'Kéo clip Walk_Angry vào đây để ép customer dùng đúng clip khi di chuyển.' })
     walkAngryClip: AnimationClip | null = null;
 
@@ -192,7 +195,7 @@ export class CustomersQueueManager extends Component {
         }
 
         if (this.useSingleLineQueue) {
-            if (this._singleLineAdvancing || this._singleLineEntries.length === 0) {
+            if (this._singleLineEntries.length === 0) {
                 return false;
             }
 
@@ -206,7 +209,7 @@ export class CustomersQueueManager extends Component {
         }
 
         const column = entry.column;
-        if (!column || column.entries.length === 0 || this.isColumnAdvancing(column)) {
+        if (!column || column.entries.length === 0) {
             return false;
         }
 
@@ -284,7 +287,7 @@ export class CustomersQueueManager extends Component {
     }
 
     private completeSingleLineServingCustomer (entry: QueueEntry): boolean {
-        if (this._singleLineAdvancing || this._singleLineEntries.length === 0) {
+        if (this._singleLineEntries.length === 0) {
             return false;
         }
 
@@ -447,7 +450,7 @@ export class CustomersQueueManager extends Component {
 
     public getFrontCustomerNode (columnIndex: number): Node | null {
         if (this.useSingleLineQueue) {
-            if (this._singleLineAdvancing || this._singleLineEntries.length === 0) {
+            if (this._singleLineEntries.length === 0) {
                 return null;
             }
 
@@ -465,7 +468,7 @@ export class CustomersQueueManager extends Component {
         }
 
         const column = this.getColumnByIndex(columnIndex);
-        if (!column || column.entries.length === 0 || this.isColumnAdvancing(column)) {
+        if (!column || column.entries.length === 0) {
             return null;
         }
 
@@ -479,7 +482,7 @@ export class CustomersQueueManager extends Component {
 
     public getFrontMostCustomerNode (): Node | null {
         if (this.useSingleLineQueue) {
-            if (this._singleLineAdvancing || this._singleLineEntries.length === 0) {
+            if (this._singleLineEntries.length === 0) {
                 return null;
             }
 
@@ -502,7 +505,7 @@ export class CustomersQueueManager extends Component {
                 return;
             }
 
-            if (this._activeCustomers.has(node.uuid) || this.isColumnAdvancing(entry.column)) {
+            if (this._activeCustomers.has(node.uuid)) {
                 return;
             }
 
@@ -596,6 +599,10 @@ export class CustomersQueueManager extends Component {
     }
 
     private isColumnAdvancing (column: ColumnData | null): boolean {
+        if (this.serveWhileAdvancing) {
+            return false;
+        }
+
         if (!column) {
             return false;
         }
