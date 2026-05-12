@@ -197,6 +197,12 @@ export class ItemSellTrigger extends Component {
     @property({ type: AudioSource, tooltip: 'Sound played when an item moves from the character to the sell area.' })
     public sellAudio: AudioSource | null = null;
 
+    @property({ type: AudioSource, tooltip: 'Sound played when one customer order is fully completed.' })
+    public customerSoldAudio: AudioSource | null = null;
+
+    @property({ tooltip: 'Minimum seconds between customer-complete sound plays.', min: 0 })
+    public customerSoldAudioInterval = 0.2;
+
     @property({ type: SpriteRenderer, tooltip: 'Optional highlight sprite for Sell. Auto-finds child named SpriteRenderer-001 when empty.' })
     public highlightSprite: SpriteRenderer | null = null;
 
@@ -255,6 +261,7 @@ export class ItemSellTrigger extends Component {
     private _customerItem: Node | null = null;
     private _currentCustomerNode: Node | null = null;
     private _currentCustomerManager: CustomersQueueManager | null = null;
+    private _customerSoldAudioCooldown = 0;
     private _defaultMaterial: Material | null = null;
     protected onLoad (): void {
         this.rebuildSellerAnchors();
@@ -268,6 +275,7 @@ export class ItemSellTrigger extends Component {
     }
 
     update (deltaTime: number): void {
+        this._customerSoldAudioCooldown = Math.max(0, this._customerSoldAudioCooldown - deltaTime);
         this.updateSellingLoop(deltaTime);
         this.updateCustomerServing(deltaTime);
         this.collectMoneyBundles();
@@ -1020,6 +1028,7 @@ export class ItemSellTrigger extends Component {
         }
 
         if (soldOut && customerNode && customerNode.isValid) {
+            this.playCustomerSoldSound();
             manager.completeServingCustomer(customerNode);
         }
 
@@ -1600,6 +1609,18 @@ export class ItemSellTrigger extends Component {
         }
         this.sellAudio.stop();
         this.sellAudio.play();
+    }
+
+    private playCustomerSoldSound (): void {
+        if (!this.customerSoldAudio) {
+            return;
+        }
+        if (this._customerSoldAudioCooldown > 0) {
+            return;
+        }
+        this._customerSoldAudioCooldown = Math.max(0, this.customerSoldAudioInterval);
+        this.customerSoldAudio.stop();
+        this.customerSoldAudio.play();
     }
 
     private beginJoystickInteraction (): void {
