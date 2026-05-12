@@ -157,7 +157,7 @@ export class CustomersQueueManager extends Component {
 
         this._columns.forEach((column, index) => {
             column.sortIndex = index;
-            column.entries.sort((a, b) => b.targetPosition.z - a.targetPosition.z);
+            column.entries.sort((a, b) => a.targetPosition.z - b.targetPosition.z);
         });
 
         this.rebuildSingleLineEntries();
@@ -555,7 +555,7 @@ export class CustomersQueueManager extends Component {
                 return this.singleLineFrontUsesMaxAxis ? -projectionDelta : projectionDelta;
             }
 
-            return b.targetPosition.z - a.targetPosition.z;
+            return a.targetPosition.z - b.targetPosition.z;
         });
     }
 
