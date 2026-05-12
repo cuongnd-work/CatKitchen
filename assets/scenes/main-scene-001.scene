@@ -7126,7 +7126,7 @@
     "customerSoldAudio": {
       "__id__": 4460
     },
-    "customerSoldAudioInterval": 0.2,
+    "customerSoldAudioInterval": 0,
     "highlightSprite": {
       "__id__": 170
     },
@@ -168849,7 +168849,7 @@
         "__id__": 4055
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 4070
@@ -169992,7 +169992,7 @@
         "__id__": 4084
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 4099
